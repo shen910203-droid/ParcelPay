@@ -132,6 +132,7 @@ body.running nav{display:none}body.running{padding-bottom:calc(24px + env(safe-a
 .stp .n{width:24px;height:24px;border-radius:50%;background:var(--card2);color:var(--mut);display:flex;align-items:center;justify-content:center;font-size:12px}
 .stp.ok .n{background:var(--ok);color:#fff}.stp input{min-height:38px;padding:6px 10px}
 .lk[disabled] .evr .del{display:none}
+.evtot{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}.evtot span{font-size:13px;font-weight:600;border-radius:8px;padding:4px 10px}
 small.hint{display:block;color:var(--mut);font-size:12px;margin-top:6px;line-height:1.5}
 </style>
 </head>
@@ -144,7 +145,7 @@ small.hint{display:block;color:var(--mut);font-size:12px;margin-top:6px;line-hei
 
 <script>
 /* ================= 資料 ================= */
-const APP_VERSION='v4.1';
+const APP_VERSION='v4.2';
 const LS='songhuoben_v1';
 const DEF_SETTINGS={id:'main',rate:2.5,payOffset:13,weeklyFixed:0,fuelPerKm:0,me:'Aiden',partner:'Frankie',
   reasons:['地址錯誤','無人簽收','拒收','包裹損壞','找不到地址','其他'],updatedAt:0};
@@ -185,7 +186,11 @@ function calc(d){
   const has=!offType&&s!=null&&e!=null&&e>=s;
   const inR=no=>has&&no>=s&&no<=e;
   const numbers=has?e-s+1:0;
-  const extra=sum(d.multi.filter(m=>inR(m.no)),m=>Math.max(0,m.qty-1));
+  // 每個編號的件數 = max(標記的多件數, 該號缺件+退件數)；例如 150 直接退 2 件，就代表 150 有 2 件
+  const perNo={};const bump=(no,k,q)=>{if(!inR(no))return;(perNo[no]=perNo[no]||{multi:0,used:0});perNo[no][k]+=q};
+  d.multi.forEach(m=>{if(inR(m.no))(perNo[m.no]=perNo[m.no]||{multi:0,used:0}).multi=Math.max(perNo[m.no]?perNo[m.no].multi:0,m.qty)});
+  if(!offType){d.missing.forEach(m=>bump(m.no,'used',m.qty));d.returns.forEach(r=>bump(r.no,'used',r.qty))}
+  const extra=sum(Object.values(perNo),v=>Math.max(0,Math.max(v.multi,v.used)-1));
   const assigned=numbers+extra;
   const myMissing=sum(d.missing.filter(m=>inR(m.no)),m=>m.qty);
   const otherMissing=meOff?(num(d.offMiss)||0):sum(d.missing.filter(m=>!inR(m.no)),m=>m.qty);
@@ -356,7 +361,8 @@ function eventsOf(d){const ev=[];
 function listsHTML(d){
   const c=calc(d),s=num(d.start),e=num(d.end),P=esc(S.settings.partner),ev=eventsOf(d);
   if(!ev.length)return '<div class="mut">還沒有紀錄</div>';
-  return `<div class="evlist">${ev.map(v=>`<div class="evr"><span class="tm">${tmStr(v.x.at)}</span><span class="tag tg-${v.cls}">${v.label}</span><b>${v.x.no}</b><span class="sub">${esc(v.sub)}${v.k==='missing'&&c.has&&(v.x.no<s||v.x.no>e)?` <span class="mut">${P}</span>`:''}</span><button class="del" onclick="rmEv('${v.k}','${v.x.id}')" aria-label="刪除">✕</button></div>`).join('')}</div>`;
+  const tot=`<div class="evtot"><span class="tg-r">退件 ${sum(d.returns,x=>x.qty)} 件</span><span class="tg-m">缺件 ${sum(d.missing,x=>x.qty)} 件</span><span class="tg-x">多件 +${c.extra}</span></div>`;
+  return tot+`<div class="evlist">${ev.map(v=>`<div class="evr"><span class="tm">${tmStr(v.x.at)}</span><span class="tag tg-${v.cls}">${v.label}</span><b>${v.x.no}</b><span class="sub">${esc(v.sub)}${v.k==='missing'&&c.has&&(v.x.no<s||v.x.no>e)?` <span class="mut">${P}</span>`:''}</span><button class="del" onclick="rmEv('${v.k}','${v.x.id}')" aria-label="刪除">✕</button></div>`).join('')}</div>`;
 }
 function fListHTML(d){return d.fReturns.length?`<div class="evlist">${d.fReturns.slice().sort((a,b)=>(b.at||0)-(a.at||0)).map(x=>`<div class="evr"><span class="tm">${tmStr(x.at)}</span><span class="tag tg-r">退件</span><b>${x.qty} 件</b><span class="sub">${esc(x.reason)}</span><button class="del" onclick="rmEv('fReturns','${x.id}')" aria-label="刪除">✕</button></div>`).join('')}</div>`:''}
 function runHeadHTML(d){const c=calc(d);
