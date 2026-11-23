@@ -114,7 +114,7 @@ small.hint{display:block;color:var(--mut);font-size:12px;margin-top:6px;line-hei
 
 <script>
 /* ================= 資料 ================= */
-const APP_VERSION='v3.5';
+const APP_VERSION='v3.6';
 const LS='songhuoben_v1';
 const DEF_SETTINGS={id:'main',rate:2.5,payOffset:13,weeklyFixed:0,fuelPerKm:0,me:'Aiden',partner:'Frankie',
   reasons:['地址錯誤','無人簽收','拒收','包裹損壞','找不到地址','其他'],updatedAt:0};
@@ -405,9 +405,10 @@ function vDay(){
     ${S.days[curDate]&&!S.days[curDate].deleted?`<button class="sm" style="margin-top:10px;color:var(--bad)" onclick="delDay()">刪除這天紀錄</button>`:''}
   </div>
   </fieldset>
-  ${d.locked||!(S.days[curDate]&&!S.days[curDate].deleted)?'':`<button class="pri done" onclick="lockDay()">✅ 當日結算完成</button>`}`;
+  ${d.locked?'':`<button class="pri done" onclick="lockDay()">✅ 當日結算完成</button>`}`;
 }
 function lockDay(){const d=getDay(curDate),c=calc(d);
+  if(!c.has){toast('先填我的編號範圍（從、到）');return}
   if(c.warn.length&&!confirm(`這天還有 ${c.warn.length} 個提醒：\n・${c.warn.join('\n・')}\n\n確定要結算鎖定嗎？`))return;
   d.locked=true;touch('days',d);hideUndo();render();window.scrollTo(0,0);toast(`${md(curDate)} 已結算鎖定`)}
 function unlockDay(){if(!confirm(`確定要解鎖 ${md(curDate)} 嗎？\n\n這天已經結算過，解鎖後可以修改件數，薪資和結算表也會跟著改變。\n改完記得再按一次「當日結算完成」。`))return;
