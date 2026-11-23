@@ -144,6 +144,11 @@ body.running nav{display:none}body.running{padding-bottom:calc(24px + env(safe-a
 .htab td:first-child,.htab th:first-child{text-align:left;font-size:12px;color:var(--mut);font-weight:500;width:40px}
 .htab td:last-child{color:var(--mut)}
 .tline{font-size:13px;color:var(--mut);margin-top:6px}.tline b{color:var(--tx)}
+.dedr{display:grid;grid-template-columns:auto minmax(0,1fr) auto 34px;align-items:center;gap:8px;background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:6px 4px 6px 10px}
+.dedr .sub{font-size:14px;word-break:break-all}.dedr .del,.rsn .del{background:none;border:0;color:var(--mut);font-size:18px;min-height:36px}
+.dedadd{display:grid;grid-template-columns:90px minmax(0,1fr) auto;gap:8px}
+.rsn{display:grid;grid-template-columns:minmax(0,1fr) 40px 34px;align-items:center;gap:6px;background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:4px 4px 4px 12px}
+.rsn button[disabled]{opacity:.3}
 small.hint{display:block;color:var(--mut);font-size:12px;margin-top:6px;line-height:1.5}
 </style>
 </head>
@@ -156,7 +161,7 @@ small.hint{display:block;color:var(--mut);font-size:12px;margin-top:6px;line-hei
 
 <script>
 /* ================= 資料 ================= */
-const APP_VERSION='v4.3';
+const APP_VERSION='v4.4';
 const LS='songhuoben_v1';
 const DEF_SETTINGS={id:'main',rate:2.5,payOffset:13,weeklyFixed:0,fuelPerKm:0,me:'Aiden',partner:'Frankie',
   reasons:['地址錯誤','無人簽收','拒收','包裹損壞','找不到地址','其他'],updatedAt:0};
@@ -189,7 +194,7 @@ function toast(t){const e=document.getElementById('toast');e.textContent=t;e.cla
 
 /* ================= 計算 ================= */
 function newDay(date){return{id:date,date,total:'',start:'',end:'',missing:[],multi:[],returns:[],fReturns:[],sup:{on:false,name:'',fDel:'',sRet:''},
-  t:{leave:'',arrive:'',start:'',end:'',home:''},kmB:'',offType:'',offMiss:'',note:'',updatedAt:0,deleted:false}}
+  t:{leave:'',arrive:'',start:'',end:'',home:''},kmB:'',offType:'',offMiss:'',ded:[],note:'',updatedAt:0,deleted:false}}
 function getDay(date){const d=S.days[date];return d&&!d.deleted?d:newDay(date)}
 function calc(d){
   const s=num(d.start),e=num(d.end),T=num(d.total),rate=Number(S.settings.rate)||0;
@@ -225,7 +230,8 @@ function calc(d){
   if(supOn&&fDelivered==null)warn.push(`今天有支援：要填 ${S.settings.partner} 說他送了幾件，才能算出 ${supName}`);
   if(T!=null&&has&&assigned>T)warn.push('你的範圍件數已超過帳號總件數');
   if(meOff&&T==null)warn.push('我休假：填帳號總件數，才能算出同事的件數');
-  return{has,meOff,allOff,offType,counts,numbers,extra,assigned,myMissing,otherMissing,myRet,fRet,delivered,fDelivered,supOn,sDelivered,sRet,supName,
+  const ded=sum((d.ded||[]).filter(x=>x.confirmed),x=>Number(x.amount)||0),dedPend=sum((d.ded||[]).filter(x=>!x.confirmed),x=>Number(x.amount)||0);
+  return{ded,dedPend,netPay:delivered*rate-ded,has,meOff,allOff,offType,counts,numbers,extra,assigned,myMissing,otherMissing,myRet,fRet,delivered,fDelivered,supOn,sDelivered,sRet,supName,
     pay:delivered*rate,fPay:fDelivered==null?null:fDelivered*rate,km,
     commute:(()=>{const a=mins(d.t.leave,d.t.arrive),b=mins(d.t.end,d.t.home);return a==null&&b==null?null:(a||0)+(b||0)})(),sort:mins(d.t.arrive,d.t.start),deliver:mins(d.t.start,d.t.end),warn,T};
 }
@@ -365,8 +371,9 @@ function heroHTML(d){
   const ws=weekStart(d.date),w=weeksAgg().find(x=>x.ws===ws);
   return `<div class="hrow"><div><div class="mut">${c.meOff?md(d.date):'我送達'}（${wd(d.date)}）</div>${c.meOff?'<div class="big warnc">我休假</div>':`<div class="big">${c.delivered}<small> 件</small></div>`}</div>
     <div class="hr"><div class="mid ${c.meOff?'':'acc'}">${money(c.pay)}</div><div class="mut">今日</div></div></div>
-  <div class="wline">本週 ${md(ws)}–${md(addDays(ws,6))} 累計 <b>${w?w.me:0} 件 · ${money(w?w.pay:0)}</b> → ${md(payday(ws))}（日）一起發</div>
+  <div class="wline">本週 ${md(ws)}–${md(addDays(ws,6))} 累計 <b>${w?w.me:0} 件 · ${money(w?w.payNet:0)}</b> → ${md(payday(ws))}（日）一起發</div>
   ${c.has?`<div class="mut">${c.numbers} 號 + 多件 ${c.extra} − 缺件 ${c.myMissing} − 退件 ${c.myRet}</div>`:''}
+  ${c.ded||c.dedPend?`<div class="warnbox" style="color:var(--bad);border-color:rgba(255,93,93,.4);background:rgba(255,93,93,.08)">${c.ded?`扣款 −${money(c.ded)} → 今日實領 ${money(c.netPay)}`:''}${c.ded&&c.dedPend?'　':''}${c.dedPend?`<span class="warnc">待確認扣款 ${money(c.dedPend)}</span>`:''}</div>`:''}
   ${sumTable(c)}
   ${formulaHTML(c)}
   ${c.warn.map(w=>`<div class="warnbox">⚠️ ${esc(w)}</div>`).join('')}`;
@@ -518,7 +525,7 @@ function vDay(){
       ${partnerHTML(d,c)}
       <label class="f" style="margin-top:12px">備註</label><textarea rows="2" oninput="setF('note',this.value)">${esc(d.note)}</textarea>
       <div class="row" style="margin-top:10px"><button class="sm" onclick="setOff('')">取消休假</button>${delBtn.replace('margin-top:10px;','')}</div>
-    </div></fieldset>${lockBtn}`;
+    </div></fieldset>${lockBtn}${dedHTML(d)}`;
 
   const nothing=!c.has&&!d.missing.length&&!d.multi.length&&!d.returns.length&&st===0;
   let next='';
@@ -548,8 +555,18 @@ function vDay(){
     ${delBtn}
   </div>
   </fieldset>
-  ${lockBtn}`;
+  ${lockBtn}
+  ${dedHTML(d)}`;
 }
+function dedHTML(d){const L=(d.ded||[]).slice().sort((a,b)=>(b.at||0)-(a.at||0));
+  return `<div class="card"><h3>扣款 / 賠償</h3>
+    ${L.length?`<div class="evlist" style="margin-bottom:10px">${L.map(x=>`<div class="dedr"><b class="badc">−${money(Number(x.amount)||0)}</b><span class="sub">${esc(x.note)||'（沒寫原因）'}</span><button class="chip pick ${x.confirmed?'sel':''}" onclick="dedToggle('${x.id}')">${x.confirmed?'已扣':'待確認'}</button><button class="del" onclick="dedDel('${x.id}')" aria-label="刪除">✕</button></div>`).join('')}</div>`:''}
+    <div class="dedadd"><input id="dedAmt" inputmode="decimal" placeholder="金額 $"><input id="dedNote" placeholder="原因（例：包裹損壞賠償）"><button onclick="dedAdd()">新增</button></div>
+    <small class="hint">「待確認」不會從薪資扣掉；確定被扣了點一下改成「已扣」，就會算進當週發薪。結算鎖定的日子也可以加。</small></div>`}
+function dedAdd(){const a=num(document.getElementById('dedAmt').value);if(!(a>0)){toast('請輸入金額');return}
+  const d=getDay(curDate);d.ded=[...(d.ded||[]),{id:rid(),amount:a,note:document.getElementById('dedNote').value.trim(),confirmed:false,at:Date.now()}];touch('days',d);render();toast('已記錄（待確認）')}
+function dedToggle(id){const d=getDay(curDate);d.ded=(d.ded||[]).map(x=>x.id===id?{...x,confirmed:!x.confirmed}:x);touch('days',d);render()}
+function dedDel(id){if(!confirm('刪除這筆扣款？'))return;const d=getDay(curDate);d.ded=(d.ded||[]).filter(x=>x.id!==id);touch('days',d);render()}
 function setOff(v){const d=getDay(curDate);
   if(!v&&!confirm(`取消 ${md(curDate)} 的${d.offType==='me'?'休假':'休息'}？`))return;
   d.offType=v;d.off=false;touch('days',d);render();toast(v==='me'?`${md(curDate)} 我休假，記得填同區件數`:v==='all'?`${md(curDate)} 全員休息`:'已取消')}
@@ -564,11 +581,12 @@ function delDay(){if(!confirm(`刪除 ${curDate} 的所有紀錄？\n（包含�
 /* ================= 每週 ================= */
 function weeksAgg(){
   const fixed=Number(S.settings.weeklyFixed)||0,W={};
-  liveDays().forEach(d=>{const c=calc(d);if(!c.counts)return;const ws=weekStart(d.date);
-    const w=W[ws]||(W[ws]={ws,days:0,me:0,pay:0,f:0,fKnown:true,myRet:0,fRet:0,km:0,fuel:0,sup:0});
+  liveDays().forEach(d=>{const c=calc(d);if(!c.counts&&!c.ded&&!c.dedPend)return;const ws=weekStart(d.date);
+    const w=W[ws]||(W[ws]={ws,days:0,me:0,pay:0,f:0,fKnown:true,myRet:0,fRet:0,km:0,fuel:0,sup:0,ded:0,dedPend:0});
+    w.ded+=c.ded;w.dedPend+=c.dedPend;if(!c.counts)return;
     if(c.has)w.days++;w.fuel+=dayFuel(d,c);w.me+=c.delivered;w.pay+=c.pay;w.myRet+=c.myRet;w.fRet+=c.fRet;w.km+=c.km||0;
     if(c.fDelivered==null)w.fKnown=false;else w.f+=c.fDelivered;w.sup+=c.sDelivered||0;});
-  return Object.values(W).map(w=>({...w,fixed,net:w.pay-w.fuel-fixed,pd:payday(w.ws),rec:S.weeks[w.ws]})).sort((a,b)=>b.ws<a.ws?-1:1);
+  return Object.values(W).map(w=>({...w,fixed,payNet:w.pay-w.ded,net:w.pay-w.ded-w.fuel-fixed,pd:payday(w.ws),rec:S.weeks[w.ws]})).sort((a,b)=>b.ws<a.ws?-1:1);
 }
 /* ---- 結算表 ---- */
 function settleRange(){const f=S.ui.sFrom||weekStart(today());return[f,S.ui.sTo&&S.ui.sTo>=f?S.ui.sTo:addDays(f,6)]}
@@ -581,21 +599,22 @@ function settleData(){const[from,to]=settleRange();
   const rows=all.filter(x=>x.st==='work'||x.st==='meoff');
   const T={total:sum(rows,x=>x.c.T||0),me:sum(rows,x=>x.c.delivered),pay:sum(rows,x=>x.c.pay),f:sum(rows,x=>x.c.fDelivered||0),fMissing:rows.some(x=>x.c.fDelivered==null),off:all.filter(x=>x.st==='off').length,none:all.filter(x=>x.st==='none').length,
     sup:sum(rows,x=>x.c.sDelivered||0),supDays:rows.filter(x=>x.c.supOn).length,work:all.filter(x=>x.st==='work').length,meoff:all.filter(x=>x.st==='meoff').length,myRet:sum(rows,x=>x.c.myRet),fRet:sum(rows,x=>x.c.fRet),sRet:sum(rows,x=>x.c.sRet),
-    miss:sum(rows,x=>x.c.myMissing+x.c.otherMissing)};
+    miss:sum(rows,x=>x.c.myMissing+x.c.otherMissing),ded:sum(all,x=>x.c.ded),dedPend:sum(all,x=>x.c.dedPend)};
   return{from,to,rows,all,T}}
 function settleText(){const{from,to,rows,all,T}=settleData(),P=S.settings.partner,M=S.settings.me,rate=Number(S.settings.rate)||0;
   const L=[`${md(from)}–${md(to)} 送貨件數`];
   all.forEach(({d,c,st})=>L.push(st==='off'?`${md(d.date)}(${wd(d.date)}) 全員休息`:st==='none'?`${md(d.date)}(${wd(d.date)}) 未記錄`:`${md(d.date)}(${wd(d.date)}) 總${c.T??'-'}｜${M} ${st==='meoff'?'休假':c.delivered}｜${P} ${c.fDelivered??'-'}${c.supOn?`｜${c.supName} ${c.sDelivered??'-'}`:''}`));
   L.push(`合計：${M} ${T.me} 件 ${money(T.me*rate)}｜${P} ${T.f} 件${T.supDays?`｜支援 ${T.sup} 件`:''}`);
-  L.push(`退件：${M} ${T.myRet}｜${P} ${T.fRet}${T.supDays?`｜支援 ${T.sRet}`:''}　缺件 ${T.miss}`);
+  if(T.ded)L.push(`扣款：−${money(T.ded)}　${M} 實領 ${money(T.me*rate-T.ded)}`);
+  L.push(`退件 ${T.myRet+T.fRet+T.sRet} 件　缺件 ${T.miss} 件`);
   return L.join('\n')}
 async function copySettle(){const t=settleText();try{await navigator.clipboard.writeText(t);toast('已複製，可直接貼給會計')}
   catch(e){const a=document.createElement('textarea');a.value=t;document.body.appendChild(a);a.select();try{document.execCommand('copy');toast('已複製')}catch(_){toast('複製失敗')}a.remove()}}
 function csvSettle(){const{from,to,rows,all,T}=settleData(),P=S.settings.partner,M=S.settings.me;
-  const out=[['日期','星期','帳號總件數',M,P,'支援',M+'退件',P+'退件','支援退件','缺件']];
-  all.forEach(({d,c,st})=>out.push((st==='off'||st==='none')?[d.date,wd(d.date),st==='off'?'全員休息':'未記錄']:[d.date,wd(d.date),c.T??'',st==='meoff'?'休假':c.delivered,c.fDelivered??'',c.supOn?(c.sDelivered??''):'',c.myRet,c.fRet,c.supOn?c.sRet:'',c.myMissing+c.otherMissing]));
-  out.push(['合計','',T.total,T.me,T.f,T.sup,T.myRet,T.fRet,T.sRet,T.miss]);
-  out.push([M+' 薪資','',(T.pay).toFixed(2)]);
+  const out=[['日期','星期','帳號總件數',M,P,'支援','退件','缺件',M+'扣款']];
+  all.forEach(({d,c,st})=>out.push((st==='off'||st==='none')?[d.date,wd(d.date),st==='off'?'全員休息':'未記錄']:[d.date,wd(d.date),c.T??'',st==='meoff'?'休假':c.delivered,c.fDelivered??'',c.supOn?(c.sDelivered??''):'',c.myRet+c.fRet+c.sRet,c.myMissing+c.otherMissing,c.ded||'']));
+  out.push(['合計','',T.total,T.me,T.f,T.sup,T.myRet+T.fRet+T.sRet,T.miss,T.ded||'']);
+  out.push([M+' 薪資','',(T.pay).toFixed(2)]);if(T.ded)out.push([M+' 實領（扣款後）','',(T.pay-T.ded).toFixed(2)]);
   dl(`ParcelPay結算_${from}_${to}.csv`,csv(out),'text/csv;charset=utf-8')}
 function vSettle(){
   const{from,to,rows,all,T}=settleData(),P=esc(S.settings.partner),M=esc(S.settings.me),hasSup=T.supDays>0,rate=Number(S.settings.rate)||0;
@@ -620,7 +639,9 @@ function vSettle(){
     <div class="kv"><span>${M}</span><b>${T.me} 件 · ${money(T.me*rate)}</b></div>
     <div class="kv"><span>${P}</span><b>${T.f} 件 · ${money(T.f*rate)}</b></div>
     ${hasSup?`<div class="kv"><span>支援（${T.supDays} 天）</span><b>${T.sup} 件</b></div>`:''}
-    <div class="kv"><span>退件 ${M}/${P}${hasSup?'/支援':''}</span><b>${T.myRet}/${T.fRet}${hasSup?'/'+T.sRet:''}</b></div>
+    ${T.ded?`<div class="kv"><span>${M} 扣款</span><b class="badc">−${money(T.ded)}</b></div><div class="kv"><span>${M} 實領</span><b class="okc">${money(T.me*rate-T.ded)}</b></div>`:''}
+    ${T.dedPend?`<div class="kv"><span>待確認扣款（未計入）</span><b class="warnc">${money(T.dedPend)}</b></div>`:''}
+    <div class="kv"><span>退件</span><b>${T.myRet+T.fRet+T.sRet}</b></div>
     <div class="kv"><span>缺件</span><b>${T.miss}</b></div>
     ${T.none?`<div class="warnbox">還有 ${T.none} 天未記錄，合計可能不完整</div>`:''}
     <div class="g2" style="margin-top:12px"><button class="pri" onclick="copySettle()">複製給會計</button><button onclick="csvSettle()">匯出 Excel</button></div>
@@ -638,20 +659,21 @@ function vPay(){
   const owed=W.filter(w=>w.pd<=t&&!(w.rec&&num(w.rec.received)!=null));
   return `
   <div class="card"><div class="g2">
-    <div><div class="mut">下一個發薪日</div><div class="mid">${next?md(next.pd)+'（'+wd(next.pd)+'）':'—'}</div><div class="acc">${next?money(next.pay):''}</div></div>
-    <div><div class="mut">已過發薪日未入帳</div><div class="mid ${owed.length?'badc':'okc'}">${money(sum(owed,w=>w.pay))}</div><div class="mut">${owed.length} 週</div></div>
+    <div><div class="mut">下一個發薪日</div><div class="mid">${next?md(next.pd)+'（'+wd(next.pd)+'）':'—'}</div><div class="acc">${next?money(next.payNet):''}</div></div>
+    <div><div class="mut">已過發薪日未入帳</div><div class="mid ${owed.length?'badc':'okc'}">${money(sum(owed,w=>w.payNet))}</div><div class="mut">${owed.length} 週</div></div>
   </div>
   <div class="g2" style="margin-top:12px"><button onclick="csvDays()">匯出每日 Excel</button><button onclick="csvWeeks()">匯出每週 Excel</button></div></div>
-  ${W.length?W.map(w=>{const r=w.rec||{};const rv=num(r.received);const diff=rv==null?null:rv-w.pay;
+  ${W.length?W.map(w=>{const r=w.rec||{};const rv=num(r.received);const diff=rv==null?null:rv-w.payNet;
   return `<div class="card wk">
     <div class="wkh"><b>${md(w.ws)} – ${md(addDays(w.ws,6))}</b><span class="mut">發薪 ${md(w.pd)}（${wd(w.pd)}）</span></div>
     <div class="g3" style="margin-top:10px">
-      <div><div class="mut">我送達</div><div class="mid">${w.me}</div><div class="acc">${money(w.pay)}</div></div>
+      <div><div class="mut">我送達</div><div class="mid">${w.me}</div><div class="acc">${money(w.payNet)}</div>${w.ded?`<div class="badc" style="font-size:12px">已扣 ${money(w.ded)}</div>`:''}</div>
       <div><div class="mut">${P}</div><div class="mid">${w.fKnown?w.f:'—'}</div><div class="mut">${w.fKnown?(w.sup?`支援 ${w.sup}`:''):'有天缺總數'}</div></div>
-      <div><div class="mut">退件 我/${P}</div><div class="mid">${w.myRet}/${w.fRet}</div><div class="mut">${w.days} 天</div></div>
+      <div><div class="mut">退件</div><div class="mid">${w.myRet+w.fRet}</div><div class="mut">${w.days} 天</div></div>
     </div>
     <div class="kv" style="margin-top:8px"><span class="mut">里程 / 油錢 / 固定成本</span><b>${w.km} km · ${money(w.fuel)} · ${money(w.fixed)}</b></div>
-    <div class="kv"><span class="mut">扣除後實收</span><b>${money(w.net)}</b></div>
+    ${w.dedPend?`<div class="kv"><span class="mut">待確認扣款（未計入）</span><b class="warnc">${money(w.dedPend)}</b></div>`:''}
+    <div class="kv"><span class="mut">扣油錢、成本後實收</span><b>${money(w.net)}</b></div>
     <div class="g2" style="margin-top:8px">
       <div><label class="f">實際入帳</label><input inputmode="decimal" value="${esc(r.received||'')}" onchange="setRec('${w.ws}','received',this.value)"></div>
       <div><label class="f">差額</label><div class="mid ${diff==null?'':Math.abs(diff)<0.005?'okc':'badc'}" style="padding-top:4px">${diff==null?'—':money(diff)}</div></div>
@@ -706,14 +728,15 @@ function periodRange(){
 function setUI(path,v){const[a,b]=path.split('.');if(b)S.ui[a][b]=v;else S.ui[a]=v;persist();render()}
 function vStat(){
   const[from,to]=periodRange(),fixedW=Number(S.settings.weeklyFixed)||0,wwd=weekWorkDays();
-  const days=liveDays().filter(d=>d.date>=from&&d.date<=to).map(d=>({d,c:calc(d)})).filter(x=>x.c.has);
+  const allIn=liveDays().filter(d=>d.date>=from&&d.date<=to).map(d=>({d,c:calc(d)}));
+  const days=allIn.filter(x=>x.c.has);
   const tot={n:days.length,me:sum(days,x=>x.c.delivered),pay:sum(days,x=>x.c.pay),km:sum(days,x=>x.c.km||0),ret:sum(days,x=>x.c.myRet)};
-  tot.fuel=sum(days,x=>dayFuel(x.d,x.c));tot.fixed=sum(days,x=>fixedW/(wwd[weekStart(x.d.date)]||1));tot.net=tot.pay-tot.fuel-tot.fixed;
+  tot.fuel=sum(days,x=>dayFuel(x.d,x.c));tot.fixed=sum(days,x=>fixedW/(wwd[weekStart(x.d.date)]||1));tot.ded=sum(allIn,x=>x.c.ded);tot.net=tot.pay-tot.ded-tot.fuel-tot.fixed;
   const N=S.ui.num,D=S.ui.den;
   const segs=[['commute','通勤'],['sort','理貨'],['deliver','送貨']].filter(([k])=>D[k]);
   const ok=days.filter(x=>segs.every(([k])=>x.c[k]!=null));
   const noKm=ok.filter(x=>N.fuel&&x.c.km==null).length;
-  const numer=sum(ok,x=>x.c.pay-(N.fuel?dayFuel(x.d,x.c):0)-(N.fixed?fixedW/(wwd[weekStart(x.d.date)]||1):0));
+  const numer=sum(ok,x=>x.c.pay-(N.ded!==false?x.c.ded:0)-(N.fuel?dayFuel(x.d,x.c):0)-(N.fixed?fixedW/(wwd[weekStart(x.d.date)]||1):0));
   const den=sum(ok,x=>sum(segs,([k])=>x.c[k]));
   const hourly=den>0?numer/(den/60):null;
   const P=[['thisweek','本週'],['lastweek','上週'],['thismonth','本月'],['lastmonth','上月'],['all','全部'],['custom','自訂']];
@@ -727,13 +750,13 @@ function vStat(){
     <div class="kv"><span>送達件數</span><b>${tot.me} 件${tot.n?`（日均 ${(tot.me/tot.n).toFixed(1)}）`:''}</b></div>
     <div class="kv"><span>薪資（稅前）</span><b>${money(tot.pay)}</b></div>
     <div class="kv"><span>里程</span><b>${tot.km} km${tot.n?`（日均 ${(tot.km/tot.n).toFixed(0)}）`:''}</b></div>
+    ${tot.ded?`<div class="kv"><span>扣款 / 賠償</span><b>− ${money(tot.ded)}</b></div>`:''}
     <div class="kv"><span>工作油錢</span><b>− ${money(tot.fuel)}</b></div>
     <div class="kv"><span>固定成本</span><b>− ${money(tot.fixed)}</b></div>
     <div class="kv"><span>實際收入</span><b class="okc">${money(tot.net)}</b></div>
-    <div class="kv"><span>我的退件</span><b>${tot.ret} 件（少領 ${money(tot.ret*(Number(S.settings.rate)||0))}）</b></div>
   </div>
   <div class="card"><h3>時薪計算器</h3>
-    <div class="mut">分子：薪資</div><div class="tog" style="margin:6px 0 10px">${tg('num.fuel',N.fuel,'扣油錢')}${tg('num.fixed',N.fixed,'扣固定成本')}</div>
+    <div class="mut">分子：薪資</div><div class="tog" style="margin:6px 0 10px">${tg('num.ded',N.ded!==false,'扣賠償')}${tg('num.fuel',N.fuel,'扣油錢')}${tg('num.fixed',N.fixed,'扣固定成本')}</div>
     <div class="mut">分母：時間包含</div><div class="tog" style="margin:6px 0">${tg('den.commute',D.commute,'通勤')}${tg('den.sort',D.sort,'理貨')}${tg('den.deliver',D.deliver,'送貨')}</div>
     <div class="big" style="margin-top:12px">${hourly==null?'—':money(hourly)} <small>/ 小時</small></div>
     <div class="formula">${segs.length?`${money(numer)} ÷ ${hm(den)}，用 ${ok.length} 天計算`:'至少勾一種時間'}
@@ -743,6 +766,10 @@ function vStat(){
 }
 
 /* ================= 設定 ================= */
+function addReason(){const v=document.getElementById('newReason').value.trim();if(!v){toast('請輸入原因');return}if(S.settings.reasons.includes(v)){toast('已經有這個原因');return}
+  setS('reasons',[...S.settings.reasons,v]);render();toast('已新增')}
+function delReason(i){const r=S.settings.reasons[i];if(!confirm(`刪除退件原因「${r}」？\n（以前記過的退件不會受影響）`))return;setS('reasons',S.settings.reasons.filter((_,j)=>j!==i));render()}
+function mvReason(i,d){const a=[...S.settings.reasons],j=i+d;if(j<0||j>=a.length)return;[a[i],a[j]]=[a[j],a[i]];setS('reasons',a);render()}
 function setS(k,v){S.settings[k]=v;touchSettings()}
 function setLocal(k,v){S.local[k]=v.trim();persist();badge()}
 function vSet(){
@@ -758,8 +785,9 @@ function vSet(){
     <div><label class="f">每週固定成本 $（如租車）</label><input inputmode="decimal" value="${esc(s.weeklyFixed)}" onchange="setS('weeklyFixed',Number(this.value)||0)"></div>
     <div><label class="f">手動每公里油錢 $（備用）</label><input inputmode="decimal" value="${esc(s.fuelPerKm)}" onchange="setS('fuelPerKm',Number(this.value)||0)"></div>
   </div><small class="hint">固定成本會平均分攤到那週的工作天。手動油錢只在還沒有含 Trip A 的加油紀錄時使用。</small></div>
-  <div class="card"><h3>退件原因（用逗號分隔）</h3>
-    <input value="${esc(s.reasons.join(','))}" onchange="setS('reasons',this.value.split(/[,，]/).map(x=>x.trim()).filter(Boolean))"></div>
+  <div class="card"><h3>退件原因</h3>
+    <div class="evlist">${s.reasons.map((r,i)=>`<div class="rsn"><span>${esc(r)}</span><button class="sm" onclick="mvReason(${i},-1)" ${i===0?'disabled':''} aria-label="上移">↑</button><button class="del" onclick="delReason(${i})" aria-label="刪除">✕</button></div>`).join('')}</div>
+    <div class="dedadd" style="grid-template-columns:minmax(0,1fr) auto;margin-top:10px"><input id="newReason" placeholder="新增原因，例如：客人要求改期"><button onclick="addReason()">新增</button></div></div>
   <div class="card"><h3>Google Sheets 同步</h3>
     <label class="f">Apps Script 網址</label><input value="${esc(S.local.url)}" placeholder="https://script.google.com/macros/s/.../exec" onchange="setLocal('url',this.value)">
     <label class="f" style="margin-top:8px">密碼（和 Apps Script 裡的 TOKEN 一樣）</label><input value="${esc(S.local.token)}" onchange="setLocal('token',this.value)">
