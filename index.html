@@ -144,7 +144,7 @@ small.hint{display:block;color:var(--mut);font-size:12px;margin-top:6px;line-hei
 
 <script>
 /* ================= 資料 ================= */
-const APP_VERSION='v4.0';
+const APP_VERSION='v4.1';
 const LS='songhuoben_v1';
 const DEF_SETTINGS={id:'main',rate:2.5,payOffset:13,weeklyFixed:0,fuelPerKm:0,me:'Aiden',partner:'Frankie',
   reasons:['地址錯誤','無人簽收','拒收','包裹損壞','找不到地址','其他'],updatedAt:0};
@@ -477,7 +477,7 @@ function vDay(){
   const lockBtn=d.locked?'':`<button class="pri done" onclick="lockDay()">✅ 當日結算完成</button>`;
   const delBtn=S.days[curDate]&&!S.days[curDate].deleted?`<button class="sm" style="margin-top:10px;color:var(--bad)" onclick="delDay()">刪除這天紀錄</button>`:'';
 
-  if(c.allOff)return dateBar+`<div class="card" style="text-align:center"><button onclick="setOff('')">取消休息</button></div>`;
+  if(c.allOff)return dateBar+lockBar+(d.locked?'':`<div class="card" style="text-align:center"><button onclick="setOff('')">取消休息</button></div>`)+lockBtn;
   if(c.meOff)return dateBar+lockBar+`<fieldset class="lk" ${d.locked?'disabled':''}>
     <div class="card"><h3>同區統計（我休假）</h3>
       <div class="g2"><div><label class="f">帳號總件數</label><input inputmode="numeric" pattern="[0-9]*" value="${esc(d.total)}" oninput="setF('total',this.value)"></div>
