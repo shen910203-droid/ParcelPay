@@ -29,8 +29,9 @@ main{padding:12px;max-width:640px;margin:0 auto}
 .big{font-size:40px;font-weight:700;line-height:1.1}.big small{font-size:16px;color:var(--mut);font-weight:500}
 .mid{font-size:22px;font-weight:700}
 .row{display:flex;gap:8px;align-items:center}.row>*{flex:1}
+.g4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
 .g2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px}.g3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
-label.f{display:block;font-size:12px;color:var(--mut);margin-bottom:4px}
+label.f{display:block;font-size:12px;color:var(--mut);margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 input,select,textarea{width:100%;min-width:0;background:var(--card2);color:var(--tx);border:1px solid var(--line);border-radius:10px;padding:10px;font-size:16px;font-family:inherit}
 input:focus,textarea:focus{outline:none;border-color:var(--acc)}
 input[type=checkbox]{width:auto}
@@ -96,7 +97,7 @@ th,td{padding:8px 6px;text-align:right;white-space:nowrap;border-bottom:1px soli
 th:first-child,td:first-child{text-align:left}th{color:var(--mut);font-weight:500;font-size:12px}
 td .mut{margin-left:4px;font-size:12px}tbody tr{cursor:pointer}tfoot td{font-weight:700;border-bottom:0;border-top:2px solid var(--line)}
 @media(max-width:360px){th,td{padding:8px 3px;font-size:13px}td .mut{display:none}}
-.wline{background:rgba(79,140,255,.1);border:1px solid rgba(79,140,255,.3);border-radius:10px;padding:7px 10px;font-size:13px;margin:8px 0 6px;color:var(--tx)}.wline b{color:var(--acc)}
+.wline{display:flex;justify-content:space-between;gap:8px;white-space:nowrap;background:rgba(79,140,255,.1);border:1px solid rgba(79,140,255,.3);border-radius:10px;padding:7px 10px;font-size:13px;margin:8px 0 6px;color:var(--tx)}.wline b{color:var(--acc)}
 .lk{border:0;margin:0;padding:0;min-width:0}
 .lk[disabled] .chip .x{display:none}.lk[disabled] input,.lk[disabled] textarea,.lk[disabled] button{opacity:.6}
 .lockbar{display:flex;align-items:center;justify-content:space-between;gap:8px;background:rgba(46,204,113,.1);border:1px solid rgba(46,204,113,.35);color:var(--ok);border-radius:12px;padding:8px 8px 8px 12px;margin-bottom:12px;font-size:14px}
@@ -143,15 +144,27 @@ body.running nav{display:none}body.running{padding-bottom:calc(24px + env(safe-a
 .htab td{text-align:center;font-size:18px;font-weight:700;padding:6px 2px;border-top:1px solid var(--line)}
 .htab td:first-child,.htab th:first-child{text-align:left;font-size:12px;color:var(--mut);font-weight:500;width:40px}
 .htab td:last-child{color:var(--mut)}
+.htab th:last-child,.htab td:last-child{width:56px}
 .tline{font-size:13px;color:var(--mut);margin-top:6px}.tline b{color:var(--tx)}
-.dedr{display:grid;grid-template-columns:auto minmax(0,1fr) auto 34px;align-items:center;gap:8px;background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:6px 4px 6px 10px}
-.dedr .sub{font-size:14px;word-break:break-all}.dedr .del,.rsn .del{background:none;border:0;color:var(--mut);font-size:18px;min-height:36px}
+.dedr{display:grid;grid-template-columns:minmax(0,1fr) auto 34px;align-items:center;gap:8px;background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:6px 4px 6px 10px}
+.dedr .sub{font-size:13px;color:var(--mut);word-break:break-all}.dedr .del,.rsn .del{background:none;border:0;color:var(--mut);font-size:18px;min-height:36px}
 .dedadd{display:grid;grid-template-columns:90px minmax(0,1fr) auto;gap:8px}
 .rsn{display:grid;grid-template-columns:minmax(0,1fr) 40px 34px;align-items:center;gap:6px;background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:4px 4px 4px 12px}
 .rsn button[disabled]{opacity:.3}
 .tg-o{color:var(--mut);background:rgba(138,147,166,.15)}
+button.ev.k{color:var(--mut)}.acrow{display:flex;justify-content:space-between;gap:8px;white-space:nowrap}
 .acres{background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:10px;font-size:14px;line-height:1.6}.acres b{font-size:17px}
 .acres.okb{border-color:rgba(46,204,113,.5);background:rgba(46,204,113,.08)}.acres.badb{border-color:rgba(255,93,93,.5);background:rgba(255,93,93,.08)}
+.dur{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin-top:8px}
+.dur div{background:var(--card2);border-radius:8px;padding:6px 4px;text-align:center;font-size:11px;color:var(--mut);white-space:nowrap}
+.dur b{display:block;font-size:14px;color:var(--tx);font-variant-numeric:tabular-nums}
+.htab tr.sm td{font-size:15px;font-weight:600;color:var(--mut)}.htab tr td:first-child{font-size:12px!important;font-weight:500!important;color:var(--mut)!important}
+.htab tr.tot td{border-top:2px solid var(--line)}.htab tr.tot td:last-child{color:var(--tx);font-size:20px}.htab td.chk{font-size:12px;font-weight:500}
+.legend{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12px;color:var(--mut);margin-top:8px}
+.fuelr{display:grid;grid-template-columns:minmax(0,1fr) auto 34px;align-items:center;gap:8px;background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:8px 4px 8px 12px}
+.fuelr .del{background:none;border:0;color:var(--mut);font-size:18px;min-height:36px}.fuelr .mut{font-size:12px}
+.qbtn button{white-space:nowrap}
+@media(max-width:360px){.evr .tm{display:none}.evr{grid-template-columns:28px auto minmax(0,1fr) 34px}.qbtn button{font-size:15px;padding:16px 2px}}
 small.hint{display:block;color:var(--mut);font-size:12px;margin-top:6px;line-height:1.5}
 </style>
 </head>
@@ -164,7 +177,7 @@ small.hint{display:block;color:var(--mut);font-size:12px;margin-top:6px;line-hei
 
 <script>
 /* ================= 資料 ================= */
-const APP_VERSION='v4.5';
+const APP_VERSION='v4.6';
 const LS='songhuoben_v1';
 const DEF_SETTINGS={id:'main',rate:2.5,payOffset:13,weeklyFixed:0,fuelPerKm:0,me:'Aiden',partner:'Frankie',
   reasons:['地址錯誤','無人簽收','拒收','包裹損壞','找不到地址','其他'],updatedAt:0};
@@ -197,14 +210,15 @@ function toast(t){const e=document.getElementById('toast');e.textContent=t;e.cla
 
 /* ================= 計算 ================= */
 function newDay(date){return{id:date,date,total:'',start:'',end:'',missing:[],multi:[],returns:[],fReturns:[],sup:{on:false,name:'',fDel:'',sRet:''},
-  t:{leave:'',arrive:'',start:'',end:'',home:''},kmB:'',offType:'',offMiss:'',ded:[],acStart:'',acEnd:'',note:'',updatedAt:0,deleted:false}}
+  t:{leave:'',arrive:'',start:'',end:'',home:''},kmB:'',offType:'',offMiss:'',ded:[],acStart:'',acEnd:'',skip:[],note:'',updatedAt:0,deleted:false}}
 function getDay(date){const d=S.days[date];return d&&!d.deleted?d:newDay(date)}
 function calc(d){
   const s=num(d.start),e=num(d.end),T=num(d.total),rate=Number(S.settings.rate)||0;
   const offType=d.offType||(d.off?'all':''),meOff=offType==='me',allOff=offType==='all';
   const has=!offType&&s!=null&&e!=null&&e>=s;
   const inR=no=>has&&no>=s&&no<=e;
-  const numbers=has?e-s+1:0;
+  const skipIn=has?(d.skip||[]).filter(x=>inR(x.no)).length:0;
+  const numbers=has?e-s+1-skipIn:0;
   // 每個編號的件數 = max(標記的多件數, 該號缺件+退件數)；例如 150 直接退 2 件，就代表 150 有 2 件
   const perNo={};const bump=(no,k,q)=>{if(!inR(no))return;(perNo[no]=perNo[no]||{multi:0,used:0});perNo[no][k]+=q};
   d.multi.forEach(m=>{if(inR(m.no))(perNo[m.no]=perNo[m.no]||{multi:0,used:0}).multi=Math.max(perNo[m.no]?perNo[m.no].multi:0,m.qty)});
@@ -230,10 +244,11 @@ function calc(d){
   if(!supOn&&fDelivered!=null&&fDelivered<0)warn.push(`${S.settings.partner} 算出負數：總件數或範圍可能填錯`);
   if(supOn&&sDelivered!=null&&sDelivered<0)warn.push(`${supName} 算出負數：${S.settings.partner} 的件數或總件數可能有誤`);
   if(supOn&&fDelivered==null)warn.push(`今天有支援：要填 ${S.settings.partner} 說他送了幾件，才能算出 ${supName}`);
-  if(T!=null&&has&&assigned>T)warn.push('你的範圍件數已超過帳號總件數');
-  if(meOff&&T==null)warn.push('我休假：填帳號總件數，才能算出同事的件數');
+  if(T!=null&&has&&assigned>T)warn.push('你的範圍件數已超過總件數');
+  (d.skip||[]).filter(k=>d.missing.some(m=>m.no===k.no)||d.multi.some(m=>m.no===k.no)||d.returns.some(r=>r.no===k.no)).forEach(k=>warn.push(`${k.no} 記成跳號（沒這個號），但又有缺件/多件/退件`));
+  if(meOff&&T==null)warn.push('我休假：填總件數，才能算出同事的件數');
   const ded=sum((d.ded||[]).filter(x=>x.confirmed),x=>Number(x.amount)||0),dedPend=sum((d.ded||[]).filter(x=>!x.confirmed),x=>Number(x.amount)||0);
-  return{ded,dedPend,netPay:delivered*rate-ded,has,meOff,allOff,offType,counts,numbers,extra,assigned,myMissing,otherMissing,myRet,fRet,delivered,fDelivered,supOn,sDelivered,sRet,supName,
+  return{skipIn,ded,dedPend,netPay:delivered*rate-ded,has,meOff,allOff,offType,counts,numbers,extra,assigned,myMissing,otherMissing,myRet,fRet,delivered,fDelivered,supOn,sDelivered,sRet,supName,
     pay:delivered*rate,fPay:fDelivered==null?null:fDelivered*rate,km,
     commute:(()=>{const a=mins(d.t.leave,d.t.arrive),b=mins(d.t.end,d.t.home);return a==null&&b==null?null:(a||0)+(b||0)})(),sort:mins(d.t.arrive,d.t.start),deliver:mins(d.t.start,d.t.end),warn,T};
 }
@@ -273,7 +288,7 @@ function queue(type,id){S.pending=S.pending.filter(p=>!(p.type===type&&p.id===id
 let syncing=false,syncErr='';
 function recOf(type,id){return type==='settings'?S.settings:S[type][id]}
 function summaryOf(type,r){
-  if(type==='days'){const c=calc(r);return{'日期':r.date,'帳號總件數':r.total,'範圍':c.has?`${r.start}-${r.end}`:'',
+  if(type==='days'){const c=calc(r);return{'日期':r.date,'總件數':r.total,'範圍':c.has?`${r.start}-${r.end}`:'',
     '我送達':c.has?c.delivered:'','我薪資':c.has?c.pay:'','我退件':c.myRet,'Frankie送達':c.fDelivered??'','Frankie退件':c.fRet,'支援送達':c.sDelivered??'',
     '缺件':r.missing.map(m=>m.qty>1?`${m.no}x${m.qty}`:m.no).join(' '),'多件':r.multi.map(m=>`${m.no}x${m.qty}`).join(' '),
     '退件明細':r.returns.map(x=>`${x.no}x${x.qty}(${x.reason})`).join(' '),'公里':c.km??'','油錢':c.km!=null?Math.round(dayFuel(r,c)*100)/100:'','發薪日':payday(weekStart(r.date)),'備註':r.note}}
@@ -359,25 +374,25 @@ function formulaHTML(c){const P=esc(S.settings.partner),N=esc(c.supName);if(!c.c
   return ''}
 function sumTable(c){
   const P=esc(S.settings.partner),v=x=>x==null?'—':x;
-  const cols=[['我',c.meOff?'休':c.delivered,c.myRet],[P,c.fDelivered,c.fRet]];
-  if(c.supOn)cols.push([esc(c.supName),c.sDelivered,c.sRet]);
-  const dSum=cols.every(x=>x[1]!=null)?sum(cols,x=>x[1]==='休'?0:x[1]):null,rSum=sum(cols,x=>x[2]||0);
-  const miss=c.myMissing+c.otherMissing;
+  const cols=[['我',c.meOff?'休':c.delivered,c.myRet,c.meOff?0:c.myMissing],[P,c.fDelivered,c.fRet,c.otherMissing]];
+  if(c.supOn)cols.push([esc(c.supName),c.sDelivered,c.sRet,null]);
+  const dSum=cols.every(x=>x[1]!=null)?sum(cols,x=>x[1]==='休'?0:x[1]):null,rSum=sum(cols,x=>x[2]||0),mSum=c.myMissing+c.otherMissing;
+  const chk=c.T!=null&&dSum!=null?dSum+rSum+mSum:null,bad=chk!=null&&chk!==c.T;
   return `<table class="htab"><tr><th></th>${cols.map(x=>`<th>${x[0]}</th>`).join('')}<th>合計</th></tr>
-    <tr><td>送達</td>${cols.map(x=>`<td class="${x[0]==='我'?'acc':''}">${v(x[1])}</td>`).join('')}<td>${v(dSum)}</td></tr>
-    <tr><td>退件</td>${cols.map(x=>`<td>${x[2]||0}</td>`).join('')}<td>${rSum}</td></tr></table>
-  <div class="tline">帳號總件數 <b>${c.T??'—'}</b>${c.T!=null&&dSum!=null?`<br>= 送達 ${dSum} + 退件 ${rSum} + 缺件 ${miss}`:`　·　缺件 ${miss}`}</div>`}
+    <tr><td>送達</td>${cols.map((x,i)=>`<td class="${i===0?'acc':''}">${v(x[1])}</td>`).join('')}<td>${v(dSum)}</td></tr>
+    <tr class="sm"><td>退件</td>${cols.map(x=>`<td>${x[2]||0}</td>`).join('')}<td>${rSum}</td></tr>
+    <tr class="sm"><td>缺件</td>${cols.map(x=>`<td>${x[3]==null?'—':x[3]}</td>`).join('')}<td>${mSum}</td></tr>
+    <tr class="tot"><td>總件數</td><td colspan="${cols.length}" class="chk">${chk==null?'':bad?`<span class="badc">⚠️ 加總 ${chk} ≠ 總件數</span>`:'<span class="okc">✓ 對得上</span>'}</td><td>${c.T??'—'}</td></tr></table>`}
 function heroHTML(d){
   const c=calc(d),P=esc(S.settings.partner);
   if(c.allOff)return `<div class="offbox"><div class="big">全員休息</div><div class="mut">${md(d.date)}（${wd(d.date)}）沒有貨，不計件數</div></div>`;
   const ws=weekStart(d.date),w=weeksAgg().find(x=>x.ws===ws);
   return `<div class="hrow"><div><div class="mut">${c.meOff?md(d.date):'我送達'}（${wd(d.date)}）</div>${c.meOff?'<div class="big warnc">我休假</div>':`<div class="big">${c.delivered}<small> 件</small></div>`}</div>
     <div class="hr"><div class="mid ${c.meOff?'':'acc'}">${money(c.pay)}</div><div class="mut">今日</div></div></div>
-  <div class="wline">本週 ${md(ws)}–${md(addDays(ws,6))} 累計 <b>${w?w.me:0} 件 · ${money(w?w.payNet:0)}</b> → ${md(payday(ws))}（日）一起發</div>
+  <div class="wline"><span>本週累計 <b>${w?w.me:0} 件 · ${money(w?w.payNet:0)}</b></span><span>${md(payday(ws))}（日）發薪</span></div>
   ${c.has?`<div class="mut">${c.numbers} 號 + 多件 ${c.extra} − 缺件 ${c.myMissing} − 退件 ${c.myRet}</div>`:''}
-  ${c.ded||c.dedPend?`<div class="warnbox" style="color:var(--bad);border-color:rgba(255,93,93,.4);background:rgba(255,93,93,.08)">${c.ded?`扣款 −${money(c.ded)} → 今日實領 ${money(c.netPay)}`:''}${c.ded&&c.dedPend?'　':''}${c.dedPend?`<span class="warnc">待確認扣款 ${money(c.dedPend)}</span>`:''}</div>`:''}
+  ${c.ded||c.dedPend?`<div class="warnbox" style="color:var(--bad);border-color:rgba(255,93,93,.4);background:rgba(255,93,93,.08)">${c.ded?`<div>扣款 −${money(c.ded)} → 今日實領 ${money(c.netPay)}</div>`:''}${c.dedPend?`<div class="warnc">待確認扣款 ${money(c.dedPend)}</div>`:''}</div>`:''}
   ${sumTable(c)}
-  ${formulaHTML(c)}
   ${c.warn.map(w=>`<div class="warnbox">⚠️ ${esc(w)}</div>`).join('')}`;
 }
 
@@ -397,18 +412,20 @@ function listsHTML(d){
   const c=calc(d),s=num(d.start),e=num(d.end),P=esc(S.settings.partner);
   const mine=x=>!c.has||(x.no>=s&&x.no<=e);
   const myMiss=d.missing.filter(mine),myMulti=d.multi.filter(mine);
-  const oth=[...d.missing.filter(x=>!mine(x)).map(x=>({...x,_k:'missing'})),...d.multi.filter(x=>!mine(x)).map(x=>({...x,_k:'multi'}))];
+  const sk=d.skip||[],mySkip=sk.filter(mine);
+  const oth=[...sk.filter(x=>!mine(x)).map(x=>({...x,_k:'skip'})),...d.missing.filter(x=>!mine(x)).map(x=>({...x,_k:'missing'})),...d.multi.filter(x=>!mine(x)).map(x=>({...x,_k:'multi'}))];
   const mk=sum(myMulti,m=>m.qty-1),dv=Math.max(0,c.extra-mk);
   return secHTML('returns','退件','r',d.returns,`${sum(d.returns,x=>x.qty)} 件`,x=>`<b>${x.no}</b><span class="sub">${x.qty>1?`×${x.qty} `:''}${esc(x.reason)}</span>`)
    +secHTML('missing','缺件','m',myMiss,`${sum(myMiss,x=>x.qty)} 件`,x=>`<b>${x.no}</b><span class="sub">${x.qty>1?`×${x.qty}`:''}</span>`)
    +secHTML('multi','多件','x',myMulti,`${myMulti.length} 號 · +${mk} 件${dv?`<span class="mut" style="font-size:12px;font-weight:500"> ＋${dv} 由退/缺推算</span>`:''}`,x=>`<b>${x.no}</b><span class="sub">共 ${x.qty} 件</span>`)
-   +(oth.length?secHTML('others',`${P} 範圍`,'o',oth,`<span class="mut" style="font-size:13px;font-weight:500">${oth.filter(x=>x._k==='multi').length} 多件 · ${sum(oth.filter(x=>x._k==='missing'),x=>x.qty)} 缺件（不算你的）</span>`,x=>`<b>${x.no}</b><span class="sub">${x._k==='multi'?`多件 共 ${x.qty} 件`:`缺件${x.qty>1?` ×${x.qty}`:''}`}</span>`):'');
+   +(mySkip.length?secHTML('skip','跳號','o',mySkip,`${mySkip.length} 個號`,x=>`<b>${x.no}</b><span class="sub">系統沒有這號</span>`):'')
+   +(oth.length?secHTML('others',`${P} 範圍`,'o',oth,`<span class="mut" style="font-size:13px;font-weight:500">${oth.length} 筆，不算你的</span>`,x=>`<b>${x.no}</b><span class="sub">${x._k==='multi'?`多件 共 ${x.qty} 件`:x._k==='skip'?'跳號':`缺件${x.qty>1?` ×${x.qty}`:''}`}</span>`):'');
 }
 function fListHTML(d){return d.fReturns.length?secHTML('fReturns',`${esc(S.settings.partner)} 退件`,'r',d.fReturns,`${sum(d.fReturns,x=>x.qty)} 件`,x=>`<b>${x.qty} 件</b><span class="sub">${esc(x.reason)}</span>`):''}
 function runHeadHTML(d){const c=calc(d);
   return `<div class="hrow"><div><div class="big">${c.delivered}<small> 件</small></div></div><div class="hr"><div class="mid acc">${money(c.pay)}</div></div></div>
   <div class="mut">${c.has?`範圍 ${c.numbers} 號 · 多件 +${c.extra} · 缺件 −${c.myMissing} · 退件 −${c.myRet}`:'先填編號範圍'}</div>
-  ${c.has?`<div class="mut" style="margin-top:2px">${esc(S.settings.partner)} ${c.fDelivered??'—'} 件 · 帳號總數 ${c.T??'—'}</div>`:''}
+  ${c.has?`<div class="mut" style="margin-top:2px">${esc(S.settings.partner)} ${c.fDelivered??'—'} 件 · 總件數 ${c.T??'—'}</div>`:''}
   ${c.warn.map(w=>`<div class="warnbox">⚠️ ${esc(w)}</div>`).join('')}`}
 function refreshDay(){const d=getDay(curDate);
   const set=(id,h)=>{const el=document.getElementById(id);if(el)el.innerHTML=h};
@@ -417,7 +434,7 @@ function refreshDay(){const d=getDay(curDate);
 function setF(k,v){const d=getDay(curDate);d[k]=v;touch('days',d);refreshDay()}
 function setSup(k,v){const d=getDay(curDate);d.sup={...(d.sup||{on:false,name:'',fDel:'',sRet:''}),[k]:v};touch('days',d);if(k==='on')render();else refreshDay()}
 function setT(k,v){const d=getDay(curDate);d.t={...d.t,[k]:v};touch('days',d);render()}
-function durHTML(d){const c=calc(d);return `通勤 ${hm(c.commute)} · 理貨 ${hm(c.sort)} · 送貨 ${hm(c.deliver)}${c.deliver&&c.has?` · 每小時 ${(c.delivered/(c.deliver/60)).toFixed(1)} 件`:''}`}
+function durHTML(d){const c=calc(d),ph=c.deliver&&c.has?(c.delivered/(c.deliver/60)).toFixed(1):'—';return `<div class="dur"><div>通勤<b>${hm(c.commute)}</b></div><div>理貨<b>${hm(c.sort)}</b></div><div>送貨<b>${hm(c.deliver)}</b></div><div>件/時<b>${ph}</b></div></div>`}
 
 /* ---- 流程按鈕 ---- */
 function step(k){
@@ -434,7 +451,7 @@ function exitRun(silent){S.ui.run=null;persist();render();window.scrollTo(0,0)}
 
 /* ---- 復原 ---- */
 let undoSnap=null;
-function snap(d){undoSnap={date:d.date,data:JSON.stringify({missing:d.missing,multi:d.multi,returns:d.returns,fReturns:d.fReturns})}}
+function snap(d){undoSnap={date:d.date,data:JSON.stringify({missing:d.missing,multi:d.multi,returns:d.returns,fReturns:d.fReturns,skip:d.skip||[]})}}
 function undo(){if(!undoSnap)return;const d=getDay(undoSnap.date);if(d.locked){toast('這天已鎖定，要先解鎖');return}Object.assign(d,JSON.parse(undoSnap.data));touch('days',d);undoSnap=null;hideUndo();refreshDay();toast('已復原')}
 function showUndo(msg){const u=document.getElementById('undo');u.querySelector('span').textContent=msg;u.classList.add('on');clearTimeout(showUndo.t);showUndo.t=setTimeout(hideUndo,6000)}
 function hideUndo(){document.getElementById('undo').classList.remove('on')}
@@ -451,6 +468,7 @@ function qAct(kind){
   const d=getDay(curDate),s=num(d.start),e=num(d.end),inR=s!=null&&e!=null&&no>=s&&no<=e,now=Date.now();
   if(kind==='returns'){qRet=no;document.getElementById('qreason').innerHTML=`<div class="mut" style="margin-top:10px">${no} 退件原因：</div><div class="chips">${S.settings.reasons.map((r,i)=>`<button class="chip pick" ${keep} onclick="qReason(${i})">${esc(r)}</button>`).join('')}<button class="chip pick" ${keep} onclick="qCancel()">取消</button></div>`;return}
   snap(d);let msg;
+  if(kind==='skip'){d.skip=d.skip||[];if(d.skip.some(x=>x.no===no)){toast(`${no} 已經記過跳號`);qClear();inp.focus();return}d.skip.push({id:rid(),no,at:now});msg=`跳號 ${no}（系統沒有這個號）`}
   if(kind==='missing'){const x=d.missing.find(m=>m.no===no);if(x){x.qty++;x.at=now;msg=`缺件 ${no} ×${x.qty}`}else{d.missing.push({id:rid(),no,qty:1,at:now});msg=`缺件 ${no}${inR||s==null?'':`（${S.settings.partner} 的）`}`}}
   if(kind==='multi'){let x=d.multi.find(m=>m.no===no);if(x){x.qty++;x.at=now}else{x={id:rid(),no,qty:2,at:now};d.multi.push(x)}msg=`${no} 共 ${x.qty} 件（再按一次 +1）`}
   touch('days',d);refreshDay();showUndo(msg);
@@ -464,37 +482,39 @@ function qReason(i){
 }
 function qCancel(){qRet=null;document.getElementById('qreason').innerHTML='';qClear();qno().focus()}
 function rmEv(key,id){const d=getDay(curDate);if(d.locked){toast('這天已鎖定');return}const x=d[key].find(y=>y.id===id);if(!x)return;snap(d);d[key]=d[key].filter(y=>y.id!==id);touch('days',d);refreshDay();
-  showUndo(`已刪除 ${key==='fReturns'?`${S.settings.partner} 退件 ${x.qty} 件`:({missing:'缺件',multi:'多件',returns:'退件'}[key])+' '+x.no}`)}
+  showUndo(`已刪除 ${key==='fReturns'?`${S.settings.partner} 退件 ${x.qty} 件`:({missing:'缺件',multi:'多件',returns:'退件',skip:'跳號'}[key])+' '+x.no}`)}
 function addFRet(i){const q=num(document.getElementById('fq').value)||1;const d=getDay(curDate);snap(d);
   d.fReturns.push({id:rid(),qty:q,reason:S.settings.reasons[i],at:Date.now()});touch('days',d);refreshDay();showUndo(`${S.settings.partner} 退件 ${q} 件 · ${S.settings.reasons[i]}`)}
 
 /* ---- 共用區塊 ---- */
 function acHTML(d){
   const a=num(d.acStart)??1,b=num(d.acEnd),T=num(d.total);
-  let res='<div class="mut">填帳號的編號範圍和總件數，就能核對多件有沒有標齊</div>';
-  if(b!=null&&b>=a&&T!=null){const n=b-a+1,need=T-n,marked=sum(d.multi.filter(m=>m.no>=a&&m.no<=b),m=>m.qty-1),left=need-marked;
-    res=`<div class="acres ${left===0?'okb':left<0?'badb':''}"><div>${n} 號、總 ${T} 件 → 多件應有 <b>${need}</b> 件</div><div>已標 <b>${marked}</b> 件　${left===0?'✅ 全部標齊':left>0?`還差 <b>${left}</b> 件`:`⚠️ 多標了 ${-left} 件`}</div></div>`}
+  let res='<div class="mut">填範圍和總件數，核對多件有沒有標齊</div>';
+  if(b!=null&&b>=a&&T!=null){const sk=(d.skip||[]).filter(x=>x.no>=a&&x.no<=b).length,n=b-a+1-sk,need=T-n,marked=sum(d.multi.filter(m=>m.no>=a&&m.no<=b),m=>m.qty-1),left=need-marked;
+    res=`<div class="acres ${left===0?'okb':left<0?'badb':''}"><div class="acrow"><span>編號 ${b-a+1}${sk?` − 跳號 ${sk}`:''} = <b>${n}</b> 號</span><span>總 <b>${T}</b> 件</span></div>
+      <div class="acrow"><span>多件應有 <b>${need}</b> · 已標 <b>${marked}</b></span><span>${left===0?'✅ 標齊':left>0?`還差 <b>${left}</b>`:`⚠️ 多 ${-left}`}</span></div></div>`}
   return `<div class="card"><h3>全帳號核對（前一晚預標用）</h3><div class="g3">
     <div><label class="f">帳號編號從</label><input inputmode="numeric" pattern="[0-9]*" placeholder="1" value="${esc(d.acStart)}" oninput="setF('acStart',this.value);acRefresh()"></div>
     <div><label class="f">到</label><input inputmode="numeric" pattern="[0-9]*" value="${esc(d.acEnd)}" oninput="setF('acEnd',this.value);acRefresh()"></div>
-    <div><label class="f">帳號總件數</label><input inputmode="numeric" pattern="[0-9]*" value="${esc(d.total)}" oninput="setF('total',this.value);acRefresh()"></div></div>
+    <div><label class="f">總件數</label><input inputmode="numeric" pattern="[0-9]*" value="${esc(d.total)}" oninput="setF('total',this.value);acRefresh()"></div></div>
     <div id="acres" style="margin-top:10px">${res}</div></div>`}
 function acRefresh(){const el=document.getElementById('acres');if(el){const t=document.createElement('div');t.innerHTML=acHTML(getDay(curDate));el.innerHTML=t.querySelector('#acres').innerHTML}}
 function rangeHTML(d,noTotal){return `<div class="card"><h3>編號範圍</h3><div class="${noTotal?'g2':'g3'}">
   <div><label class="f">我從</label><input inputmode="numeric" pattern="[0-9]*" value="${esc(d.start)}" oninput="setF('start',this.value)"></div>
   <div><label class="f">到</label><input inputmode="numeric" pattern="[0-9]*" value="${esc(d.end)}" oninput="setF('end',this.value)"></div>
-  ${noTotal?'':`<div><label class="f">帳號總件數</label><input inputmode="numeric" pattern="[0-9]*" value="${esc(d.total)}" oninput="setF('total',this.value)"></div>`}</div></div>`}
+  ${noTotal?'':`<div><label class="f">總件數</label><input inputmode="numeric" pattern="[0-9]*" value="${esc(d.total)}" oninput="setF('total',this.value)"></div>`}</div></div>`}
 function quickHTML(){const dv=S.ui.qdraft&&S.ui.qdraft.date===curDate?S.ui.qdraft.v:'';
   return `<div class="card quick">
     <input id="qno" class="qin" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" enterkeyhint="done" placeholder="輸入編號" value="${esc(dv)}" oninput="qDraft(this.value)">
-    <div class="g3 qbtn">
+    <div class="g4 qbtn">
       <button class="ev m" ${keep} onclick="qAct('missing')">缺件</button>
       <button class="ev x" ${keep} onclick="qAct('multi')">多件 +1</button>
       <button class="ev r" ${keep} onclick="qAct('returns')">退件</button>
+      <button class="ev k" ${keep} onclick="qAct('skip')">跳號</button>
     </div><div id="qreason"></div>
   </div>`}
 function partnerHTML(d,c){const P=esc(S.settings.partner);
-  return `<label class="f" style="margin-top:12px">${P} 退件（填件數，再點原因）</label>
+  return `<label class="f" style="margin-top:12px">${P} 退件：填件數 → 點原因</label>
     <div class="frow"><input id="fq" inputmode="numeric" pattern="[0-9]*" value="1"><div class="chips" style="margin:0">${S.settings.reasons.map((r,i)=>`<button class="chip pick" onclick="addFRet(${i})">${esc(r)}</button>`).join('')}</div></div>
     <div id="flist" style="margin-top:10px">${fListHTML(d)}</div>
     <div class="chips" style="margin-top:12px"><span class="chip pick ${c.supOn?'sel':''}" onclick="setSup('on',${!c.supOn})">${c.supOn?'☑':'☐'} 今天有支援人員</span></div>
@@ -502,10 +522,10 @@ function partnerHTML(d,c){const P=esc(S.settings.partner);
       <div><label class="f">${P} 件數</label><input inputmode="numeric" pattern="[0-9]*" value="${esc(d.sup.fDel)}" oninput="setSup('fDel',this.value)"></div>
       <div><label class="f">支援退件數</label><input inputmode="numeric" pattern="[0-9]*" value="${esc(d.sup.sRet)}" oninput="setSup('sRet',this.value)"></div>
       <div><label class="f">支援名字</label><input value="${esc(d.sup.name)}" placeholder="支援" oninput="setSup('name',this.value)"></div>
-    </div><small class="hint">有支援時，${P} 的件數用他自己說的數字，支援＝總數扣掉其他所有人倒推。</small>`:''}`}
+    </div><small class="hint">支援件數＝總件數扣掉其他人倒推</small>`:''}`}
 function stepsHTML(d){
   return `<div class="steps">${STEPS.map(([k,l],i)=>`<div class="stp ${d.t[k]?'ok':''}"><span class="n">${d.t[k]?'✓':i+1}</span><span class="l">${l}</span><input type="time" value="${esc(d.t[k])}" onchange="setT('${k}',this.value)" aria-label="${l}時間"></div>`).join('')}</div>
-  <div class="mut" id="dur" style="margin-top:6px">${durHTML(d)}</div>`}
+  <div id="dur">${durHTML(d)}</div>`}
 
 /* ---- 送貨模式（全螢幕，跳出 app 回來也會留在這裡） ---- */
 function vRun(){
@@ -532,15 +552,15 @@ function vDay(){
     return `<button class="${x===curDate?'on':''} ${x===today()?'td':''}" onclick="setDate('${x}')"><small>${wd(x)}</small><b>${pd(x).getDate()}</b><i class="st ${stt}">${stt==='all'?'休':stt==='off'?'我休':stt==='lock'?'✓':stt==='has'?'•':''}</i></button>`}).join('')}</div>
   ${!isToday?`<button class="sm totoday" onclick="setDate(today())">回到今天</button>`:''}
   <div class="card" id="hero">${heroHTML(d)}</div>`;
-  const lockBar=d.locked?`<div class="lockbar"><span>🔒 ${md(curDate)} 已結算，內容已鎖定</span><button onclick="unlockDay()">解鎖編輯</button></div>`:'';
+  const lockBar=d.locked?`<div class="lockbar"><span>🔒 ${md(curDate)} 已結算</span><button onclick="unlockDay()">解鎖編輯</button></div>`:'';
   const lockBtn=d.locked?'':`<button class="pri done" onclick="lockDay()">✅ 當日結算完成</button>`;
   const delBtn=S.days[curDate]&&!S.days[curDate].deleted?`<button class="sm" style="margin-top:10px;color:var(--bad)" onclick="delDay()">刪除這天紀錄</button>`:'';
 
   if(c.allOff)return dateBar+lockBar+(d.locked?'':`<div class="card" style="text-align:center"><button onclick="setOff('')">取消休息</button></div>`)+lockBtn;
   if(c.meOff)return dateBar+lockBar+`<fieldset class="lk" ${d.locked?'disabled':''}>
     <div class="card"><h3>同區統計（我休假）</h3>
-      <div class="g2"><div><label class="f">帳號總件數</label><input inputmode="numeric" pattern="[0-9]*" value="${esc(d.total)}" oninput="setF('total',this.value)"></div>
-      <div><label class="f">缺件數（${P} 說的）</label><input inputmode="numeric" pattern="[0-9]*" value="${esc(d.offMiss)}" oninput="setF('offMiss',this.value)"></div></div>
+      <div class="g2"><div><label class="f">總件數</label><input inputmode="numeric" pattern="[0-9]*" value="${esc(d.total)}" oninput="setF('total',this.value)"></div>
+      <div><label class="f">缺件數</label><input inputmode="numeric" pattern="[0-9]*" value="${esc(d.offMiss)}" oninput="setF('offMiss',this.value)"></div></div>
       ${partnerHTML(d,c)}
       <label class="f" style="margin-top:12px">備註</label><textarea rows="2" oninput="setF('note',this.value)">${esc(d.note)}</textarea>
       <div class="row" style="margin-top:10px"><button class="sm" onclick="setOff('')">取消休假</button>${delBtn.replace('margin-top:10px;','')}</div>
@@ -562,13 +582,13 @@ function vDay(){
   ${nothing&&!d.locked?`<div class="g2" style="margin-bottom:12px"><button class="offbtn" onclick="setOff('me')">🏖 我休假<br><small>同事有上班</small></button><button class="offbtn" onclick="setOff('all')">😴 全員休息<br><small>沒有貨</small></button></div>`:''}
   ${next?`<div class="card nextcard">${next}</div>`:''}
   <fieldset class="lk" ${d.locked?'disabled':''}>
-  <div class="card"><h3>今天進度</h3>${stepsHTML(d)}<small class="hint">按上面的大按鈕會自動記時間；時間錯了直接點右邊修改。</small></div>
+  <div class="card"><h3>今天進度</h3>${stepsHTML(d)}<small class="hint">大按鈕會自動記時間，點時間可修改</small></div>
   <div class="card"><h3>紀錄</h3><div id="lists">${listsHTML(d)}</div></div>
   <div class="card"><h3>收工後</h3>
     <label class="f">今日工作里程（Trip B km）</label>
     <input inputmode="decimal" placeholder="出門前歸零，回家看 B" value="${esc(d.kmB)}" oninput="setF('kmB',this.value)" onchange="render()">
     <div class="mut" style="margin-top:6px">${(()=>{if(c.km==null)return '';const k=costPerKmOn(d.date);
-      return `${c.km} km · 油錢約 ${money(c.km*k.v)}${k.src==='auto'?`（${money(k.price)}/L · ${k.kmPerL.toFixed(2)} km/L）`:'（暫用手動每公里油錢）'}`})()}</div>
+      return `<div>${c.km} km · 油錢約 <b>${money(c.km*k.v)}</b></div><div style="font-size:12px">${k.src==='auto'?`油價 ${money(k.price)}/L · 油耗 ${k.kmPerL.toFixed(2)} km/L`:'暫用備用每公里油錢'}</div>`})()}</div>
     ${partnerHTML(d,c)}
     <label class="f" style="margin-top:12px">備註</label><textarea rows="2" oninput="setF('note',this.value)">${esc(d.note)}</textarea>
     ${delBtn}
@@ -579,9 +599,9 @@ function vDay(){
 }
 function dedHTML(d){const L=(d.ded||[]).slice().sort((a,b)=>(b.at||0)-(a.at||0));
   return `<div class="card"><h3>扣款 / 賠償</h3>
-    ${L.length?`<div class="evlist" style="margin-bottom:10px">${L.map(x=>`<div class="dedr"><b class="badc">−${money(Number(x.amount)||0)}</b><span class="sub">${esc(x.note)||'（沒寫原因）'}</span><button class="chip pick ${x.confirmed?'sel':''}" onclick="dedToggle('${x.id}')">${x.confirmed?'已扣':'待確認'}</button><button class="del" onclick="dedDel('${x.id}')" aria-label="刪除">✕</button></div>`).join('')}</div>`:''}
+    ${L.length?`<div class="evlist" style="margin-bottom:10px">${L.map(x=>`<div class="dedr"><div><b class="badc">−${money(Number(x.amount)||0)}</b><div class="sub">${esc(x.note)||'（沒寫原因）'}</div></div><button class="chip pick ${x.confirmed?'sel':''}" onclick="dedToggle('${x.id}')">${x.confirmed?'已扣':'待確認'}</button><button class="del" onclick="dedDel('${x.id}')" aria-label="刪除">✕</button></div>`).join('')}</div>`:''}
     <div class="dedadd"><input id="dedAmt" inputmode="decimal" placeholder="金額 $"><input id="dedNote" placeholder="原因（例：包裹損壞賠償）"><button onclick="dedAdd()">新增</button></div>
-    <small class="hint">「待確認」不會從薪資扣掉；確定被扣了點一下改成「已扣」，就會算進當週發薪。結算鎖定的日子也可以加。</small></div>`}
+    <small class="hint">待確認不扣錢；確定被扣再點成「已扣」</small></div>`}
 function dedAdd(){const a=num(document.getElementById('dedAmt').value);if(!(a>0)){toast('請輸入金額');return}
   const d=getDay(curDate);d.ded=[...(d.ded||[]),{id:rid(),amount:a,note:document.getElementById('dedNote').value.trim(),confirmed:false,at:Date.now()}];touch('days',d);render();toast('已記錄（待確認）')}
 function dedToggle(id){const d=getDay(curDate);d.ded=(d.ded||[]).map(x=>x.id===id?{...x,confirmed:!x.confirmed}:x);touch('days',d);render()}
@@ -630,7 +650,7 @@ function settleText(){const{from,to,rows,all,T}=settleData(),P=S.settings.partne
 async function copySettle(){const t=settleText();try{await navigator.clipboard.writeText(t);toast('已複製，可直接貼給會計')}
   catch(e){const a=document.createElement('textarea');a.value=t;document.body.appendChild(a);a.select();try{document.execCommand('copy');toast('已複製')}catch(_){toast('複製失敗')}a.remove()}}
 function csvSettle(){const{from,to,rows,all,T}=settleData(),P=S.settings.partner,M=S.settings.me;
-  const out=[['日期','星期','帳號總件數',M,P,'支援','退件','缺件',M+'扣款']];
+  const out=[['日期','星期','總件數',M,P,'支援','退件','缺件',M+'扣款']];
   all.forEach(({d,c,st})=>out.push((st==='off'||st==='none')?[d.date,wd(d.date),st==='off'?'全員休息':'未記錄']:[d.date,wd(d.date),c.T??'',st==='meoff'?'休假':c.delivered,c.fDelivered??'',c.supOn?(c.sDelivered??''):'',c.myRet+c.fRet+c.sRet,c.myMissing+c.otherMissing,c.ded||'']));
   out.push(['合計','',T.total,T.me,T.f,T.sup,T.myRet+T.fRet+T.sRet,T.miss,T.ded||'']);
   out.push([M+' 薪資','',(T.pay).toFixed(2)]);if(T.ded)out.push([M+' 實領（扣款後）','',(T.pay-T.ded).toFixed(2)]);
@@ -649,10 +669,7 @@ function vSettle(){
     ${all.length?`<div class="tbl"><table><thead><tr><th>日期</th><th>總數</th><th>${M}</th><th>${P}</th>${hasSup?'<th>支援</th>':''}<th>退/缺</th></tr></thead><tbody>
     ${all.map(({d,c,st})=>(st==='off'||st==='none')?`<tr class="dim" onclick="curDate='${d.date}';go('day')"><td>${md(d.date)}<span class="mut">${wd(d.date)}</span></td><td colspan="${hasSup?5:4}" style="text-align:center">${st==='off'?'全員休息':'<span class="warnc">未記錄</span>'}</td></tr>`:`<tr onclick="curDate='${d.date}';go('day')"><td>${md(d.date)}<span class="mut">${wd(d.date)}</span>${d.locked?'':' <span class="warnc" title="未結算">●</span>'}</td><td>${c.T??'—'}</td><td class="acc">${st==='meoff'?'<span class="warnc">休</span>':c.delivered}</td><td>${c.fDelivered??'—'}</td>${hasSup?`<td>${c.supOn?(c.sDelivered??'—'):''}</td>`:''}<td class="mut">${c.myRet+c.fRet+c.sRet}/${c.myMissing+c.otherMissing}</td></tr>`).join('')}
     </tbody><tfoot><tr><td>合計</td><td>${T.total}</td><td class="acc">${T.me}</td><td>${T.f}${T.fMissing?'*':''}</td>${hasSup?`<td>${T.sup}</td>`:''}<td>${T.myRet+T.fRet+T.sRet}/${T.miss}</td></tr></tfoot></table></div>
-    ${T.fMissing?`<small class="hint">* 有幾天缺 ${P} 的數字（沒填總件數，或有支援但沒填他的件數），沒有算進合計</small>`:''}
-    ${rows.some(x=>!x.d.locked)?`<small class="hint"><span class="warnc">●</span> 表示那天還沒按「當日結算完成」</small>`:''}
-    ${T.none?`<small class="hint"><span class="warnc">未記錄</span>：那天沒有件數也沒標休假或休息，點進去補</small>`:''}
-    <small class="hint">${T.work} 天上班${T.meoff?` · ${T.meoff} 天我休假`:''}${T.off?` · ${T.off} 天全員休息`:''}。點任一列可以跳到那天。</small>`:'<div class="mut">這段期間沒有紀錄</div>'}
+    <div class="legend"><span>${T.work} 天上班${T.meoff?` · ${T.meoff} 我休`:''}${T.off?` · ${T.off} 全休`:''}</span>${rows.some(x=>!x.d.locked)?'<span><span class="warnc">●</span> 未結算</span>':''}${T.fMissing?`<span>* ${P} 有天缺數字</span>`:''}</div>`:'<div class="mut">這段期間沒有紀錄</div>'}
   </div>
   <div class="card"><h3>每人合計</h3>
     <div class="kv"><span>${M}</span><b>${T.me} 件 · ${money(T.me*rate)}</b></div>
@@ -690,7 +707,7 @@ function vPay(){
       <div><div class="mut">${P}</div><div class="mid">${w.fKnown?w.f:'—'}</div><div class="mut">${w.fKnown?(w.sup?`支援 ${w.sup}`:''):'有天缺總數'}</div></div>
       <div><div class="mut">退件</div><div class="mid">${w.myRet+w.fRet}</div><div class="mut">${w.days} 天</div></div>
     </div>
-    <div class="kv" style="margin-top:8px"><span class="mut">里程 / 油錢 / 固定成本</span><b>${w.km} km · ${money(w.fuel)} · ${money(w.fixed)}</b></div>
+    <div class="dur"><div>里程<b>${w.km} km</b></div><div>油錢<b>${money(w.fuel)}</b></div><div>固定成本<b>${money(w.fixed)}</b></div><div>天數<b>${w.days}</b></div></div>
     ${w.dedPend?`<div class="kv"><span class="mut">待確認扣款（未計入）</span><b class="warnc">${money(w.dedPend)}</b></div>`:''}
     <div class="kv"><span class="mut">扣油錢、成本後實收</span><b>${money(w.net)}</b></div>
     <div class="g2" style="margin-top:8px">
@@ -713,9 +730,9 @@ function vFuel(){
   return `
   <div class="card"><h3>目前每公里油錢</h3>
     <div class="mid">${money(k.v)} <span class="mut" style="font-size:13px">/ km</span></div>
-    ${k.src==='auto'?`<div class="mut">長期油耗 ${c.kmPerL.toFixed(2)} km/L（${(100/c.kmPerL).toFixed(1)} L/100km，${c.n} 次、${c.km.toFixed(0)} km）× 最近油價 ${money(k.price)}/L</div>`
+    ${k.src==='auto'?`<div class="dur"><div>km/L<b>${c.kmPerL.toFixed(2)}</b></div><div>L/100km<b>${(100/c.kmPerL).toFixed(1)}</b></div><div>油價/L<b>${money(k.price)}</b></div><div>加滿次數<b>${c.n}</b></div></div>`
       :'<div class="mut">還沒有含 A 里程的加油紀錄，暫用設定裡的手動值</div>'}
-    <small class="hint">每個送貨日的油錢 = 當天 B 里程 × 長期油耗 × 當天之前最近一次加油的油價。每次都加滿、加完把 A 歸零，油耗最準。</small>
+    <small class="hint">每日油錢 = B 里程 × 長期油耗 × 當時油價</small>
   </div>
   <div class="card"><h3>新增加油</h3>
     <div class="g2">
@@ -727,10 +744,10 @@ function vFuel(){
     <div class="chips"><span class="chip pick ${F.full?'sel':''}" onclick="F.full=!F.full;render()">${F.full?'☑':'☐'} 有加滿</span></div>
     <label class="f" style="margin-top:8px">備註</label><input value="${esc(F.note)}" oninput="F.note=this.value">
     <button class="pri" style="width:100%;margin-top:10px" onclick="addFuel()">記錄</button>
-    <small class="hint">加滿 → 填 A，加完把 A 歸零。沒加滿 → 取消勾選，A 不要歸零，這次的公升數會併入下次加滿一起算油耗。不知道上次加滿後開了多少的（例如補記以前的），A 留空，只算油價。</small>
+    <small class="hint">加滿：填 A，加完 A 歸零</small><small class="hint" style="margin-top:0">沒加滿：取消勾選，A 不歸零</small>
   </div>
   <div class="card"><h3>加油紀錄</h3>
-    ${list.length?list.map(x=>{const a=num(x.tripA);return `<div class="kv"><span style="flex:1">${md(x.date)}${x.full===false?' <span class="warnc">未滿</span>':''} · ${x.liters}L · ${money(x.amount/x.liters)}/L${a?` · ${a}km`:''}${x.note?` · <span class="mut">${esc(x.note)}</span>`:''}</span><b>${money(Number(x.amount))}</b><button class="sm" onclick="delFuel('${x.id}')">✕</button></div>`}).join(''):'<div class="mut">尚無紀錄</div>'}
+    ${list.length?`<div class="evlist">${list.map(x=>{const a=num(x.tripA);return `<div class="fuelr"><div><b>${md(x.date)}</b>${x.full===false?' <span class="warnc">未滿</span>':''}<div class="mut">${x.liters}L · ${money(x.amount/x.liters)}/L${a?` · ${a}km`:''}</div>${x.note?`<div class="mut">${esc(x.note)}</div>`:''}</div><b>${money(Number(x.amount))}</b><button class="del" onclick="delFuel('${x.id}')" aria-label="刪除">✕</button></div>`}).join('')}</div>`:'<div class="mut">尚無紀錄</div>'}
   </div>`;
 }
 
@@ -795,27 +812,27 @@ function vSet(){
   const s=S.settings;
   return `
   <div class="card"><h3>薪資</h3><div class="g2">
-    <div><label class="f">每件 $</label><input inputmode="decimal" value="${esc(s.rate)}" onchange="setS('rate',Number(this.value)||0)"></div>
+    <div><label class="f">每件單價 $</label><input inputmode="decimal" value="${esc(s.rate)}" onchange="setS('rate',Number(this.value)||0)"></div>
     <div><label class="f">週一後幾天發薪</label><input inputmode="numeric" value="${esc(s.payOffset)}" onchange="setS('payOffset',Number(this.value)||13)"></div>
     <div><label class="f">我的名字</label><input value="${esc(s.me)}" onchange="setS('me',this.value)"></div>
     <div><label class="f">同事名字</label><input value="${esc(s.partner)}" onchange="setS('partner',this.value)"></div>
-  </div><small class="hint">一週 = 週一到週日。預設 13 天：11/16（一）那週 → 11/29（日）發薪。</small></div>
+  </div><small class="hint">週一～週日為一週，13 天＝下週日發薪</small></div>
   <div class="card"><h3>成本</h3><div class="g2">
-    <div><label class="f">每週固定成本 $（如租車）</label><input inputmode="decimal" value="${esc(s.weeklyFixed)}" onchange="setS('weeklyFixed',Number(this.value)||0)"></div>
-    <div><label class="f">手動每公里油錢 $（備用）</label><input inputmode="decimal" value="${esc(s.fuelPerKm)}" onchange="setS('fuelPerKm',Number(this.value)||0)"></div>
-  </div><small class="hint">固定成本會平均分攤到那週的工作天。手動油錢只在還沒有含 Trip A 的加油紀錄時使用。</small></div>
+    <div><label class="f">每週固定成本 $</label><input inputmode="decimal" value="${esc(s.weeklyFixed)}" onchange="setS('weeklyFixed',Number(this.value)||0)"></div>
+    <div><label class="f">備用每公里油錢 $</label><input inputmode="decimal" value="${esc(s.fuelPerKm)}" onchange="setS('fuelPerKm',Number(this.value)||0)"></div>
+  </div><small class="hint">固定成本平均分到當週工作天</small></div>
   <div class="card"><h3>退件原因</h3>
     <div class="evlist">${s.reasons.map((r,i)=>`<div class="rsn"><span>${esc(r)}</span><button class="sm" onclick="mvReason(${i},-1)" ${i===0?'disabled':''} aria-label="上移">↑</button><button class="del" onclick="delReason(${i})" aria-label="刪除">✕</button></div>`).join('')}</div>
     <div class="dedadd" style="grid-template-columns:minmax(0,1fr) auto;margin-top:10px"><input id="newReason" placeholder="新增原因，例如：客人要求改期"><button onclick="addReason()">新增</button></div></div>
   <div class="card"><h3>Google Sheets 同步</h3>
     <label class="f">Apps Script 網址</label><input value="${esc(S.local.url)}" placeholder="https://script.google.com/macros/s/.../exec" onchange="setLocal('url',this.value)">
-    <label class="f" style="margin-top:8px">密碼（和 Apps Script 裡的 TOKEN 一樣）</label><input value="${esc(S.local.token)}" onchange="setLocal('token',this.value)">
+    <label class="f" style="margin-top:8px">密碼（同 Apps Script TOKEN）</label><input value="${esc(S.local.token)}" onchange="setLocal('token',this.value)">
     <button class="pri" style="width:100%;margin-top:10px" onclick="testConn()">測試連線</button>
     <div id="conn" class="formula" style="display:none"></div>
     <div class="g2" style="margin-top:8px"><button onclick="manualSync()">立即同步</button><button onclick="pull(false)">從雲端下載</button></div>
-    <small class="hint">每次修改會先存在手機，有網路時自動上傳；沒訊號也能照常記錄。換手機時填同樣的網址和密碼，按「從雲端下載」。</small>
+    <small class="hint">先存手機，有網路自動上傳</small><small class="hint" style="margin-top:0">換手機：填同樣網址密碼 → 從雲端下載</small>
   </div>
-  <div class="card"><h3>備份</h3><div class="g2"><button onclick="backup()">下載 JSON 備份</button><button onclick="document.getElementById('imp').click()">匯入 JSON</button></div>
+  <div class="card"><h3>備份</h3><div class="g2"><button onclick="backup()">下載備份</button><button onclick="document.getElementById('imp').click()">匯入備份</button></div>
     <input type="file" id="imp" accept=".json" style="display:none" onchange="restore(this.files[0])"></div>
   <div class="mut" style="text-align:center;margin:4px 0 12px">ParcelPay ${APP_VERSION} · <a href="#" style="color:var(--acc)" onclick="event.preventDefault();forceUpdate()">強制更新</a></div>`;
 }
@@ -840,7 +857,7 @@ function dl(name,text,type){const b=new Blob([text],{type});const a=document.cre
 function csv(rows){return '﻿'+rows.map(r=>r.map(v=>{v=v==null?'':String(v);return /[",\n\r]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v}).join(',')).join('\r\n')}
 function csvDays(){
   const P=S.settings.partner;
-  const rows=[['日期','星期','週起','發薪日','帳號總件數','我的範圍','號碼數','多件+','我缺件','我退件','我送達','我薪資',P+'範圍缺件',P+'退件',P+'送達','支援名字','支援送達','支援退件','缺件明細','多件明細','退件明細','公里','油錢','通勤分','理貨分','送貨分','備註']];
+  const rows=[['日期','星期','週起','發薪日','總件數','我的範圍','號碼數','多件+','我缺件','我退件','我送達','我薪資',P+'範圍缺件',P+'退件',P+'送達','支援名字','支援送達','支援退件','缺件明細','多件明細','退件明細','公里','油錢','通勤分','理貨分','送貨分','備註']];
   liveDays().sort((a,b)=>a.date<b.date?-1:1).forEach(d=>{const c=calc(d);if(!c.has&&!d.total)return;
     rows.push([d.date,wd(d.date),weekStart(d.date),payday(weekStart(d.date)),d.total,c.has?`${d.start}-${d.end}`:'',c.numbers,c.extra,c.myMissing,c.myRet,c.delivered,c.pay.toFixed(2),c.otherMissing,c.fRet,c.fDelivered??'',c.supOn?c.supName:'',c.sDelivered??'',c.supOn?c.sRet:'',
       d.missing.map(m=>m.qty>1?`${m.no}x${m.qty}`:m.no).join(' '),d.multi.map(m=>`${m.no}x${m.qty}`).join(' '),d.returns.map(x=>`${x.no}x${x.qty}(${x.reason})`).join(' '),c.km??'',c.km!=null?dayFuel(d,c).toFixed(2):'',c.commute??'',c.sort??'',c.deliver??'',d.note])});
