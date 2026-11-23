@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0f1115">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="ParcelPay">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/svg+xml" href="icon.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<title>ParcelPay 送貨本</title>
+<style>
+:root{--bg:#0f1115;--card:#181b22;--card2:#1f232c;--line:#2a2f3a;--tx:#e8eaf0;--mut:#8a93a6;--acc:#4f8cff;--ok:#2ecc71;--warn:#f5a524;--bad:#ff5d5d}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.45 -apple-system,"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;padding-bottom:calc(72px + env(safe-area-inset-bottom))}
+header{position:sticky;top:0;z-index:5;padding-top:calc(12px + env(safe-area-inset-top)) !important;background:rgba(15,17,21,.94);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--line);padding-left:max(16px,calc((100% - 640px)/2 + 12px))!important;padding-right:max(16px,calc((100% - 640px)/2 + 12px))!important}
+h1{font-size:18px;margin:0;letter-spacing:.3px;display:flex;align-items:center;gap:8px;white-space:nowrap}h1 .sub{font-size:12px;color:var(--mut);font-weight:500}.logo{width:26px;height:26px;border-radius:7px}
+.badge{font-size:12px;padding:4px 10px;border-radius:99px;background:var(--card2);color:var(--mut);border:0}
+.badge.ok{color:var(--ok)}.badge.warn{color:var(--warn)}.badge.bad{color:var(--bad)}
+main{padding:12px;max-width:640px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
+.card h3{margin:0 0 10px;font-size:13px;color:var(--mut);font-weight:600;letter-spacing:.5px}
+.mut{color:var(--mut);font-size:13px}.acc{color:var(--acc)}.okc{color:var(--ok)}.badc{color:var(--bad)}.warnc{color:var(--warn)}
+.big{font-size:40px;font-weight:700;line-height:1.1}.big small{font-size:16px;color:var(--mut);font-weight:500}
+.mid{font-size:22px;font-weight:700}
+.row{display:flex;gap:8px;align-items:center}.row>*{flex:1}
+.g2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px}.g3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+label.f{display:block;font-size:12px;color:var(--mut);margin-bottom:4px}
+input,select,textarea{width:100%;min-width:0;background:var(--card2);color:var(--tx);border:1px solid var(--line);border-radius:10px;padding:10px;font-size:16px;font-family:inherit}
+input:focus,textarea:focus{outline:none;border-color:var(--acc)}
+input[type=checkbox]{width:auto}
+button{font-family:inherit;font-size:15px;border-radius:10px;border:1px solid var(--line);background:var(--card2);color:var(--tx);padding:10px 12px;cursor:pointer}
+button.pri{background:var(--acc);border-color:var(--acc);color:#fff;font-weight:600}
+button.sm{padding:6px 10px;font-size:13px}
+button.ev{padding:14px 6px;font-weight:600}
+button.ev.m{color:var(--warn)}button.ev.x{color:var(--acc)}button.ev.r{color:var(--bad)}
+.datebar{margin-bottom:12px}.datebar button{flex:0 0 48px}
+.split{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.split>div{background:var(--card2);border-radius:10px;padding:10px}
+.split b{display:block;font-size:20px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.chip{display:inline-flex;align-items:center;gap:6px;background:var(--card2);border:1px solid var(--line);border-radius:99px;padding:5px 6px 5px 11px;font-size:14px}
+.chip .x{background:none;border:0;color:var(--mut);padding:0 6px;font-size:16px}
+.chip.sel{border-color:var(--acc);color:var(--acc)}
+.chip.pick{padding:7px 12px;cursor:pointer}
+.sec{margin-top:12px}.sec:first-child{margin-top:0}
+.sech{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--mut)}
+.trow{display:grid;grid-template-columns:58px minmax(0,1fr) 54px;gap:8px;align-items:center;margin-bottom:8px}
+.warnbox{background:rgba(245,165,36,.1);border:1px solid rgba(245,165,36,.4);color:var(--warn);border-radius:10px;padding:8px 10px;font-size:13px;margin-top:10px}
+.kv{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--line);font-size:14px}.kv:last-child{border:0}
+.kv b{font-weight:600}.kv>:last-child{text-align:right}.kv>:first-child{min-width:0}
+nav{position:fixed;bottom:0;left:0;right:0;display:flex;justify-content:center;background:#12151b;border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom);z-index:6}
+nav button{flex:1;max-width:128px;background:none;border:0;border-radius:0;color:var(--mut);padding:9px 0 10px;font-size:12px}
+nav button svg{display:block;margin:0 auto 3px;width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+nav button.on{color:var(--acc)}
+#modal{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:flex-end;justify-content:center;z-index:10}
+#modal.on{display:flex}
+.sheet{background:var(--card);width:100%;max-width:640px;border-radius:18px 18px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom));border-top:1px solid var(--line)}
+.sheet h2{margin:0 0 12px;font-size:17px}
+.step{display:grid;grid-template-columns:56px 1fr 56px;gap:8px;align-items:center}
+.step div{text-align:center;font-size:26px;font-weight:700}
+.toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:#2b3140;color:#fff;padding:9px 16px;border-radius:99px;font-size:14px;z-index:20;opacity:0;transition:opacity .2s;pointer-events:none}
+.toast.on{opacity:1}
+.wk{cursor:default}
+.wkh{display:flex;justify-content:space-between;align-items:baseline}
+.tog{display:flex;flex-wrap:wrap;gap:6px}
+.formula{background:var(--card2);border-radius:10px;padding:10px;font-size:13px;color:var(--mut);margin-top:10px}
+small.hint{display:block;color:var(--mut);font-size:12px;margin-top:6px;line-height:1.5}
+</style>
+</head>
+<body>
+<header><h1><img src="icon.svg" alt="" class="logo">ParcelPay <span class="sub">送貨本</span></h1><button id="badge" class="badge" onclick="manualSync()">—</button></header>
+<main id="view"></main>
+<nav id="nav"></nav>
+<div id="modal" onclick="if(event.target===this)closeM()"><div class="sheet" id="sheet"></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ================= 資料 ================= */
+const LS='songhuoben_v1';
+const DEF_SETTINGS={id:'main',rate:2.5,payOffset:13,weeklyFixed:0,fuelPerKm:0,me:'Aiden',partner:'Frankie',
+  reasons:['地址錯誤','無人簽收','拒收','包裹損壞','找不到地址','其他'],updatedAt:0};
+let S={days:{},fuel:{},weeks:{},settings:{...DEF_SETTINGS},pending:[],local:{url:'',token:''},ui:{num:{fuel:true,fixed:false},den:{commute:false,sort:true,deliver:true},period:'thisweek',from:'',to:''}};
+function load(){
+  try{const j=JSON.parse(localStorage.getItem(LS)||'null');
+    if(j){S={...S,...j};S.settings={...DEF_SETTINGS,...(j.settings||{})};S.ui={...S.ui,...(j.ui||{})};}
+  }catch(e){console.error(e)}
+}
+function persist(){try{localStorage.setItem(LS,JSON.stringify(S))}catch(e){toast('本機儲存失敗')}}
+
+/* ================= 工具 ================= */
+const pad=n=>String(n).padStart(2,'0');
+const ymd=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const pd=s=>{const[a,b,c]=s.split('-').map(Number);return new Date(a,b-1,c)};
+const addDays=(s,n)=>{const d=pd(s);d.setDate(d.getDate()+n);return ymd(d)};
+const today=()=>ymd(new Date());
+const weekStart=s=>{const d=pd(s);d.setDate(d.getDate()-((d.getDay()+6)%7));return ymd(d)};
+const payday=ws=>addDays(ws,Number(S.settings.payOffset)||13);
+const md=s=>{const d=pd(s);return `${d.getMonth()+1}/${d.getDate()}`};
+const wd=s=>'日一二三四五六'[pd(s).getDay()];
+const money=n=>(n<0?'-':'')+'$'+Math.abs(Math.round(n*100)/100).toFixed(2);
+const num=v=>(v===''||v==null||isNaN(Number(v)))?null:Number(v);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const rid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+const sum=(a,f)=>a.reduce((s,x)=>s+(f?f(x):x),0);
+function mins(a,b){if(!a||!b)return null;const[h1,m1]=a.split(':').map(Number),[h2,m2]=b.split(':').map(Number);let d=(h2*60+m2)-(h1*60+m1);if(d<0)d+=1440;return d}
+const hm=m=>m==null?'—':`${Math.floor(m/60)}h${pad(m%60)}m`;
+function toast(t){const e=document.getElementById('toast');e.textContent=t;e.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove('on'),1800)}
+
+/* ================= 計算 ================= */
+function newDay(date){return{id:date,date,total:'',start:'',end:'',missing:[],multi:[],returns:[],fReturns:[],
+  t:{leave:'',arrive:'',start:'',end:''},kmB:'',note:'',updatedAt:0,deleted:false}}
+function getDay(date){const d=S.days[date];return d&&!d.deleted?d:newDay(date)}
+function calc(d){
+  const s=num(d.start),e=num(d.end),T=num(d.total),rate=Number(S.settings.rate)||0;
+  const has=s!=null&&e!=null&&e>=s;
+  const inR=no=>has&&no>=s&&no<=e;
+  const numbers=has?e-s+1:0;
+  const extra=sum(d.multi.filter(m=>inR(m.no)),m=>Math.max(0,m.qty-1));
+  const assigned=numbers+extra;
+  const myMissing=sum(d.missing.filter(m=>inR(m.no)),m=>m.qty);
+  const otherMissing=sum(d.missing.filter(m=>!inR(m.no)),m=>m.qty);
+  const myRet=sum(d.returns,r=>r.qty);
+  const fRet=sum(d.fReturns,r=>r.qty);
+  const delivered=has?assigned-myMissing-myRet:0;
+  const fDelivered=(has&&T!=null)?T-assigned-otherMissing-fRet:null;
+  const km=num(d.kmB);
+  const warn=[];
+  if(s!=null&&e!=null&&e<s)warn.push('結束編號小於起始編號');
+  d.multi.filter(m=>has&&!inR(m.no)).forEach(m=>warn.push(`多件 ${m.no} 不在你的範圍，沒有計入`));
+  d.returns.filter(r=>has&&!inR(r.no)).forEach(r=>warn.push(`退件 ${r.no} 不在你的範圍`));
+  d.returns.filter(r=>d.missing.some(m=>m.no===r.no)).forEach(r=>warn.push(`${r.no} 同時記了缺件和退件，會被扣兩次`));
+  if(fDelivered!=null&&fDelivered<0)warn.push('Frankie 算出負數：總件數或範圍可能填錯');
+  if(T!=null&&has&&assigned>T)warn.push('你的範圍件數已超過帳號總件數');
+  return{has,numbers,extra,assigned,myMissing,otherMissing,myRet,fRet,delivered,fDelivered,
+    pay:delivered*rate,fPay:fDelivered==null?null:fDelivered*rate,km,
+    commute:mins(d.t.leave,d.t.arrive),sort:mins(d.t.arrive,d.t.start),deliver:mins(d.t.start,d.t.end),warn,T};
+}
+function liveDays(){return Object.values(S.days).filter(d=>!d.deleted)}
+function fills(){return Object.values(S.fuel).filter(x=>!x.deleted&&num(x.liters)>0&&num(x.amount)>0).sort((a,b)=>a.date<b.date?-1:a.date>b.date?1:(a.updatedAt||0)-(b.updatedAt||0))}
+/* 長期油耗：每次「加滿且有 A」為一段，該段公升 = 上次加滿後所有加油（含沒加滿的）*/
+function consumption(){
+  let km=0,L=0,n=0,acc=0,started=false;
+  for(const x of fills()){
+    acc+=Number(x.liters);
+    if(x.full!==false){
+      if(started&&num(x.tripA)>0){km+=Number(x.tripA);L+=acc;n++}
+      started=true;acc=0;
+    }
+  }
+  return n&&L>0?{kmPerL:km/L,lPerKm:L/km,km,L,n}:null;
+}
+/* 某天的油價：當天以前最近一次加油的單價（油箱裡就是那批油） */
+function priceOn(date){
+  const f=fills();if(!f.length)return null;
+  let p=null;for(const x of f){if(x.date<=date)p=x;else break}
+  p=p||f[0];return{price:x2(p.amount/p.liters),from:p.date};
+}
+const x2=v=>Number(v);
+function costPerKmOn(date){
+  const c=consumption(),p=priceOn(date);
+  if(c&&p)return{v:c.lPerKm*p.price,src:'auto',price:p.price,from:p.from,kmPerL:c.kmPerL};
+  return{v:Number(S.settings.fuelPerKm)||0,src:'manual'};
+}
+const dayFuel=(d,c)=>(c.km||0)*costPerKmOn(d.date).v;
+function weekWorkDays(){const m={};liveDays().forEach(d=>{if(calc(d).has){const w=weekStart(d.date);m[w]=(m[w]||0)+1}});return m}
+
+/* ================= 存檔 / 同步 ================= */
+function touch(type,rec){rec.updatedAt=Date.now();S[type][rec.id]=rec;persist();queue(type,rec.id)}
+function touchSettings(){S.settings.updatedAt=Date.now();persist();queue('settings','main')}
+function queue(type,id){S.pending=S.pending.filter(p=>!(p.type===type&&p.id===id));S.pending.push({type,id});persist();badge();clearTimeout(queue.t);queue.t=setTimeout(flush,1500)}
+let syncing=false,syncErr='';
+function recOf(type,id){return type==='settings'?S.settings:S[type][id]}
+function summaryOf(type,r){
+  if(type==='days'){const c=calc(r);return{'日期':r.date,'帳號總件數':r.total,'範圍':c.has?`${r.start}-${r.end}`:'',
+    '我送達':c.has?c.delivered:'','我薪資':c.has?c.pay:'','我退件':c.myRet,'Frankie送達':c.fDelivered??'','Frankie退件':c.fRet,
+    '缺件':r.missing.map(m=>m.qty>1?`${m.no}x${m.qty}`:m.no).join(' '),'多件':r.multi.map(m=>`${m.no}x${m.qty}`).join(' '),
+    '退件明細':r.returns.map(x=>`${x.no}x${x.qty}(${x.reason})`).join(' '),'公里':c.km??'','油錢':c.km!=null?Math.round(dayFuel(r,c)*100)/100:'','發薪日':payday(weekStart(r.date)),'備註':r.note}}
+  if(type==='fuel')return{'日期':r.date,'金額':r.amount,'公升':r.liters,'TripA':r.tripA,'油價':r.liters?r.amount/r.liters:'','km/L':(r.tripA&&r.liters)?r.tripA/r.liters:'','備註':r.note};
+  if(type==='weeks')return{'週起':r.id,'發薪日':payday(r.id),'實際入帳':r.received,'備註':r.note};
+  return{};
+}
+async function api(body){
+  const r=await fetch(S.local.url,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({...body,token:S.local.token})});
+  const j=await r.json();if(!j.ok)throw new Error(j.error||'伺服器錯誤');return j;
+}
+async function flush(){
+  if(!S.local.url||syncing||!S.pending.length){badge();return}
+  if(!navigator.onLine){syncErr='離線';badge();return}
+  syncing=true;badge();
+  const batch=S.pending.slice(0,40).map(p=>{const r=recOf(p.type,p.id);return r?{type:p.type,id:p.id,ts:r.updatedAt,data:r,summary:summaryOf(p.type,r)}:null}).filter(Boolean);
+  try{
+    await api({action:'upsert',items:batch});
+    batch.forEach(b=>{const r=recOf(b.type,b.id);if(r&&r.updatedAt===b.ts)S.pending=S.pending.filter(p=>!(p.type===b.type&&p.id===b.id))});
+    syncErr='';persist();
+  }catch(e){syncErr=errMsg(e)}
+  syncing=false;badge();
+  if(S.pending.length&&!syncErr)setTimeout(flush,300);
+}
+async function pull(silent){
+  if(!S.local.url)return;
+  syncing=true;badge();
+  try{
+    const j=await api({action:'pull'});let n=0;
+    (j.items||[]).forEach(it=>{
+      const d=it.data;if(!d)return;
+      if(it.type==='settings'){if((d.updatedAt||0)>(S.settings.updatedAt||0)){S.settings={...DEF_SETTINGS,...d};n++}return}
+      if(!S[it.type])return;
+      const l=S[it.type][it.id];
+      if(!l||(d.updatedAt||0)>(l.updatedAt||0)){S[it.type][it.id]=d;n++}
+    });
+    syncErr='';persist();if(!silent)toast(`已從雲端更新 ${n} 筆`);if(n&&!(document.activeElement&&document.activeElement.matches('input,textarea')))render();
+  }catch(e){syncErr=errMsg(e);if(!silent)toast('下載失敗：'+syncErr)}
+  syncing=false;badge();flush();
+}
+const errMsg=e=>/fetch|network|load failed/i.test(e&&e.message||'')?'無網路':(e&&e.message)||'失敗';
+function badge(){
+  const b=document.getElementById('badge');let t,c='';
+  if(!S.local.url){t='未連雲端';c='warn'}
+  else if(syncing){t='同步中…'}
+  else if(syncErr){t=S.pending.length?`待同步 ${S.pending.length} · ${syncErr}`:syncErr;c=syncErr==='無網路'?'warn':'bad'}
+  else if(S.pending.length){t=`待同步 ${S.pending.length}`;c='warn'}
+  else{t='已同步';c='ok'}
+  b.textContent=t;b.className='badge '+c;
+}
+function manualSync(){if(!S.local.url){go('set');return}syncErr='';flush().then(()=>pull(false))}
+
+/* ================= 導覽 ================= */
+let tab='day',curDate=today();
+const IC={
+ day:'<path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z"/><path d="M4 7.5l8 4.5 8-4.5M12 12v9"/>',
+ week:'<rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/><path d="M8 14h2M14 14h2M8 17h2"/>',
+ fuel:'<path d="M5 20V5.5A1.5 1.5 0 0 1 6.5 4h6A1.5 1.5 0 0 1 14 5.5V20M3.5 20h12M5 10h9"/><path d="M14 8h2.5a1.5 1.5 0 0 1 1.5 1.5V16a1.5 1.5 0 0 0 3 0V8.5L18.5 6"/>',
+ stat:'<path d="M4 20h16"/><rect x="5.5" y="11" width="3" height="6" rx="1"/><rect x="10.5" y="7" width="3" height="10" rx="1"/><rect x="15.5" y="4" width="3" height="13" rx="1"/>',
+ set:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-1.8-.3 1.6 1.6 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.6 1.6 0 0 0-1-1.5 1.6 1.6 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.6 1.6 0 0 0 .3-1.8 1.6 1.6 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.6 1.6 0 0 0 1.5-1 1.6 1.6 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.6 1.6 0 0 0 1.8.3H9a1.6 1.6 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.6 1.6 0 0 0 1 1.5 1.6 1.6 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.6 1.6 0 0 0-.3 1.8V9a1.6 1.6 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.6 1.6 0 0 0-1.5 1z"/>'};
+const TABS=[['day','今日'],['week','每週'],['fuel','油錢'],['stat','統計'],['set','設定']];
+function go(t){tab=t;render();window.scrollTo(0,0)}
+function render(){
+  document.getElementById('nav').innerHTML=TABS.map(([k,l])=>`<button class="${tab===k?'on':''}" onclick="go('${k}')"><svg viewBox="0 0 24 24">${IC[k]}</svg>${l}</button>`).join('');
+  const v={day:vDay,week:vWeek,fuel:vFuel,stat:vStat,set:vSet}[tab]();
+  document.getElementById('view').innerHTML=v;badge();
+}
+
+/* ================= 今日 ================= */
+function shiftDate(n){curDate=addDays(curDate,n);render()}
+function setDate(v){if(v){curDate=v;render()}}
+function heroHTML(d){
+  const c=calc(d),P=esc(S.settings.partner);
+  return `<div class="mut">我送達（${wd(d.date)}）</div>
+  <div class="row" style="align-items:flex-end"><div class="big">${c.delivered} <small>件</small></div><div class="mid acc" style="text-align:right">${money(c.pay)}</div></div>
+  <div class="mut" style="margin-top:6px">${c.has?`${c.numbers} 號 + 多件 ${c.extra} − 缺件 ${c.myMissing} − 退件 ${c.myRet}`:'先輸入你的編號範圍'}</div>
+  <div class="split">
+    <div><span class="mut">${P} 送達</span><b>${c.fDelivered??'—'}</b><span class="mut">${c.fDelivered==null?(c.T==null?'需填帳號總件數':''):`退件 ${c.fRet} · ${money(c.fPay)}`}</span></div>
+    <div><span class="mut">發薪日</span><b>${md(payday(weekStart(d.date)))}</b><span class="mut">週 ${md(weekStart(d.date))}–${md(addDays(weekStart(d.date),6))}</span></div>
+  </div>
+  ${c.has&&c.fDelivered!=null?`<div class="formula">${P} = 總 ${c.T} − 我範圍 ${c.assigned} − ${P}範圍缺件 ${c.otherMissing} − ${P}退件 ${c.fRet}</div>`:''}
+  ${c.warn.map(w=>`<div class="warnbox">⚠️ ${esc(w)}</div>`).join('')}`;
+}
+function refreshHero(){const h=document.getElementById('hero');if(h)h.innerHTML=heroHTML(getDay(curDate))}
+function setF(k,v){const d=getDay(curDate);d[k]=v;touch('days',d);refreshHero()}
+function setT(k,v){const d=getDay(curDate);d.t={...d.t,[k]:v};touch('days',d);refreshHero();const el=document.getElementById('dur');if(el)el.innerHTML=durHTML(d)}
+function nowT(k){const n=new Date();setT(k,`${pad(n.getHours())}:${pad(n.getMinutes())}`);render()}
+function durHTML(d){const c=calc(d);return `通勤 ${hm(c.commute)} · 理貨 ${hm(c.sort)} · 送貨 ${hm(c.deliver)}${c.deliver?` · 每小時 ${(c.delivered/(c.deliver/60)).toFixed(1)} 件`:''}`}
+function chipList(d,key,fmt){return d[key].length?`<div class="chips">${d[key].map(x=>`<span class="chip">${fmt(x)}<button class="x" onclick="rmEv('${key}','${x.id}')">✕</button></span>`).join('')}</div>`:''}
+function vDay(){
+  const d=getDay(curDate),c=calc(d),P=esc(S.settings.partner);
+  return `
+  <div class="row datebar"><button onclick="shiftDate(-1)">◀</button><input type="date" value="${curDate}" onchange="setDate(this.value)"><button onclick="shiftDate(1)">▶</button></div>
+  <div class="card" id="hero">${heroHTML(d)}</div>
+
+  <div class="card"><h3>帳號與範圍</h3>
+    <div class="g3">
+      <div><label class="f">帳號總件數</label><input inputmode="numeric" value="${esc(d.total)}" oninput="setF('total',this.value)"></div>
+      <div><label class="f">我從</label><input inputmode="numeric" value="${esc(d.start)}" oninput="setF('start',this.value)"></div>
+      <div><label class="f">到</label><input inputmode="numeric" value="${esc(d.end)}" oninput="setF('end',this.value)" onchange="render()"></div>
+    </div>
+  </div>
+
+  <div class="card"><h3>送貨中遇到的狀況</h3>
+    <div class="g3"><button class="ev m" onclick="openEv('missing')">＋ 缺件</button><button class="ev x" onclick="openEv('multi')">＋ 多件</button><button class="ev r" onclick="openEv('returns')">＋ 退件</button></div>
+    ${d.missing.length?`<div class="sec"><div class="sech">缺件（早上點不到）</div>${chipList(d,'missing',x=>`${x.no}${x.qty>1?` ×${x.qty}`:''}${(c.has&&(x.no<num(d.start)||x.no>num(d.end)))?` <span class="mut">${P}</span>`:''}`)}</div>`:''}
+    ${d.multi.length?`<div class="sec"><div class="sech">同址多件</div>${chipList(d,'multi',x=>`${x.no} 共${x.qty}件`)}</div>`:''}
+    ${d.returns.length?`<div class="sec"><div class="sech">我的退件</div>${chipList(d,'returns',x=>`${x.no}${x.qty>1?` ×${x.qty}`:''} · ${esc(x.reason)}`)}</div>`:''}
+    <small class="hint">缺件可填任何編號，不在你範圍內的自動算 ${P} 的。</small>
+  </div>
+
+  <div class="card"><div class="sech" style="margin-bottom:6px"><h3 style="margin:0">${P} 退件</h3><button class="sm" onclick="openEv('fReturns')">＋ 新增</button></div>
+    ${chipList(d,'fReturns',x=>`${x.qty} 件 · ${esc(x.reason)}`)||'<div class="mut">收工後問他退了幾件</div>'}
+  </div>
+
+  <div class="card"><h3>時間</h3>
+    ${[['leave','出門'],['arrive','到倉庫'],['start','開始送貨'],['end','送完']].map(([k,l])=>`<div class="trow"><span class="mut">${l}</span><input type="time" value="${esc(d.t[k])}" onchange="setT('${k}',this.value)"><button class="sm" onclick="nowT('${k}')">現在</button></div>`).join('')}
+    <div class="mut" id="dur">${durHTML(d)}</div>
+  </div>
+
+  <div class="card"><h3>今日工作里程（Trip B）</h3>
+    <input inputmode="decimal" placeholder="出門前歸零，回家看 B" value="${esc(d.kmB)}" oninput="setF('kmB',this.value)" onchange="render()">
+    <div class="mut" style="margin-top:8px">${(()=>{if(c.km==null)return '出門前把 B 歸零，回家填 B 的讀數';const k=costPerKmOn(d.date);
+      return `${c.km} km · 油錢約 ${money(c.km*k.v)}${k.src==='auto'?`（${money(k.price)}/L · ${k.kmPerL.toFixed(2)} km/L）`:'（暫用手動每公里油錢）'}`})()}</div>
+  </div>
+
+  <div class="card"><h3>備註</h3><textarea rows="2" oninput="setF('note',this.value)">${esc(d.note)}</textarea>
+    ${S.days[curDate]&&!S.days[curDate].deleted?`<button class="sm" style="margin-top:10px;color:var(--bad)" onclick="delDay()">刪除這天紀錄</button>`:''}
+  </div>`;
+}
+function delDay(){if(!confirm(`刪除 ${curDate} 的所有紀錄？`))return;const d=newDay(curDate);d.deleted=true;touch('days',d);render()}
+
+/* ---- 事件彈窗 ---- */
+let M=null;
+const EVT={missing:'缺件（倉庫點不到）',multi:'同址多件',returns:'我的退件',fReturns:'Frankie 退件'};
+function openEv(kind){M={kind,no:'',qty:kind==='multi'?2:1,reason:'',note:''};drawM();setTimeout(()=>{const i=document.getElementById('mno');if(i)i.focus()},50)}
+function drawM(){
+  const k=M.kind,needNo=k!=='fReturns',needR=k==='returns'||k==='fReturns';
+  document.getElementById('sheet').innerHTML=`
+  <h2>${k==='fReturns'?esc(S.settings.partner)+' 退件':EVT[k]}</h2>
+  ${needNo?`<label class="f">編號</label><input id="mno" inputmode="numeric" value="${esc(M.no)}" oninput="M.no=this.value" style="font-size:22px">`:''}
+  <label class="f" style="margin-top:12px">${k==='multi'?'這個編號總共幾件':'件數'}</label>
+  <div class="step"><button onclick="M.qty=Math.max(${k==='multi'?2:1},M.qty-1);drawM()">−</button><div>${M.qty}</div><button onclick="M.qty++;drawM()">＋</button></div>
+  ${needR?`<label class="f" style="margin-top:12px">原因</label><div class="chips">${S.settings.reasons.map((r,i)=>`<span class="chip pick ${M.reason===r?'sel':''}" onclick="M.reason=S.settings.reasons[${i}];drawM()">${esc(r)}</span>`).join('')}</div>`:''}
+  <div class="g2" style="margin-top:16px"><button onclick="closeM()">取消</button><button class="pri" onclick="saveEv()">儲存</button></div>`;
+  document.getElementById('modal').classList.add('on');
+}
+function closeM(){document.getElementById('modal').classList.remove('on');M=null}
+function saveEv(){
+  const k=M.kind,d=getDay(curDate);
+  const no=num(M.no);
+  if(k!=='fReturns'&&no==null){toast('請輸入編號');return}
+  if((k==='returns'||k==='fReturns')&&!M.reason){toast('請選退件原因');return}
+  const item={id:rid(),no,qty:M.qty,reason:M.reason};
+  if(k==='multi')d.multi=d.multi.filter(x=>x.no!==no);
+  if(k==='missing')d.missing=d.missing.filter(x=>x.no!==no);
+  d[k]=[...d[k],item].sort((a,b)=>(a.no||0)-(b.no||0));
+  touch('days',d);closeM();render();toast('已記錄');
+}
+function rmEv(key,id){const d=getDay(curDate);d[key]=d[key].filter(x=>x.id!==id);touch('days',d);render()}
+
+/* ================= 每週 ================= */
+function weeksAgg(){
+  const fixed=Number(S.settings.weeklyFixed)||0,W={};
+  liveDays().forEach(d=>{const c=calc(d);if(!c.has)return;const ws=weekStart(d.date);
+    const w=W[ws]||(W[ws]={ws,days:0,me:0,pay:0,f:0,fKnown:true,myRet:0,fRet:0,km:0,fuel:0});
+    w.days++;w.fuel+=dayFuel(d,c);w.me+=c.delivered;w.pay+=c.pay;w.myRet+=c.myRet;w.fRet+=c.fRet;w.km+=c.km||0;
+    if(c.fDelivered==null)w.fKnown=false;else w.f+=c.fDelivered;});
+  return Object.values(W).map(w=>({...w,fixed,net:w.pay-w.fuel-fixed,pd:payday(w.ws),rec:S.weeks[w.ws]})).sort((a,b)=>b.ws<a.ws?-1:1);
+}
+function setRec(ws,k,v){const r=S.weeks[ws]||{id:ws,received:'',note:'',deleted:false};r[k]=v;touch('weeks',r);render()}
+function vWeek(){
+  const W=weeksAgg(),t=today(),P=esc(S.settings.partner);
+  const next=W.filter(w=>w.pd>=t).sort((a,b)=>a.pd<b.pd?-1:1)[0];
+  const owed=W.filter(w=>w.pd<=t&&!(w.rec&&num(w.rec.received)!=null));
+  return `
+  <div class="card"><div class="g2">
+    <div><div class="mut">下一個發薪日</div><div class="mid">${next?md(next.pd)+'（'+wd(next.pd)+'）':'—'}</div><div class="acc">${next?money(next.pay):''}</div></div>
+    <div><div class="mut">已過發薪日未入帳</div><div class="mid ${owed.length?'badc':'okc'}">${money(sum(owed,w=>w.pay))}</div><div class="mut">${owed.length} 週</div></div>
+  </div>
+  <div class="g2" style="margin-top:12px"><button onclick="csvDays()">匯出每日 Excel</button><button onclick="csvWeeks()">匯出每週 Excel</button></div></div>
+  ${W.length?W.map(w=>{const r=w.rec||{};const rv=num(r.received);const diff=rv==null?null:rv-w.pay;
+  return `<div class="card wk">
+    <div class="wkh"><b>${md(w.ws)} – ${md(addDays(w.ws,6))}</b><span class="mut">發薪 ${md(w.pd)}（${wd(w.pd)}）</span></div>
+    <div class="g3" style="margin-top:10px">
+      <div><div class="mut">我送達</div><div class="mid">${w.me}</div><div class="acc">${money(w.pay)}</div></div>
+      <div><div class="mut">${P}</div><div class="mid">${w.fKnown?w.f:'—'}</div><div class="mut">${w.fKnown?'':'有天缺總數'}</div></div>
+      <div><div class="mut">退件 我/${P}</div><div class="mid">${w.myRet}/${w.fRet}</div><div class="mut">${w.days} 天</div></div>
+    </div>
+    <div class="kv" style="margin-top:8px"><span class="mut">里程 / 油錢 / 固定成本</span><b>${w.km} km · ${money(w.fuel)} · ${money(w.fixed)}</b></div>
+    <div class="kv"><span class="mut">扣除後實收</span><b>${money(w.net)}</b></div>
+    <div class="g2" style="margin-top:8px">
+      <div><label class="f">實際入帳</label><input inputmode="decimal" value="${esc(r.received||'')}" onchange="setRec('${w.ws}','received',this.value)"></div>
+      <div><label class="f">差額</label><div class="mid ${diff==null?'':Math.abs(diff)<0.005?'okc':'badc'}" style="padding-top:4px">${diff==null?'—':money(diff)}</div></div>
+    </div>
+  </div>`}).join(''):'<div class="card mut">還沒有紀錄</div>'}`;
+}
+
+/* ================= 油錢 ================= */
+let F={date:today(),amount:'',liters:'',tripA:'',full:true,note:''};
+function addFuel(){
+  if(!(num(F.amount)>0)||!(num(F.liters)>0)){toast('金額和公升都要填');return}
+  const r={id:rid(),date:F.date,amount:Number(F.amount),liters:Number(F.liters),tripA:F.full?(num(F.tripA)??''):'',full:F.full,note:F.note,deleted:false};
+  touch('fuel',r);const w=F.full;F={date:today(),amount:'',liters:'',tripA:'',full:true,note:''};render();toast(w?'已記錄，記得把 A 歸零':'已記錄，A 不要歸零');
+}
+function delFuel(id){if(!confirm('刪除這筆加油？'))return;const r=S.fuel[id];r.deleted=true;touch('fuel',r);render()}
+function vFuel(){
+  const c=consumption(),k=costPerKmOn(today()),list=fills().slice().reverse();
+  return `
+  <div class="card"><h3>目前每公里油錢</h3>
+    <div class="mid">${money(k.v)} <span class="mut" style="font-size:13px">/ km</span></div>
+    ${k.src==='auto'?`<div class="mut">長期油耗 ${c.kmPerL.toFixed(2)} km/L（${(100/c.kmPerL).toFixed(1)} L/100km，${c.n} 次、${c.km.toFixed(0)} km）× 最近油價 ${money(k.price)}/L</div>`
+      :'<div class="mut">還沒有含 A 里程的加油紀錄，暫用設定裡的手動值</div>'}
+    <small class="hint">每個送貨日的油錢 = 當天 B 里程 × 長期油耗 × 當天之前最近一次加油的油價。每次都加滿、加完把 A 歸零，油耗最準。</small>
+  </div>
+  <div class="card"><h3>新增加油</h3>
+    <div class="g2">
+      <div><label class="f">日期</label><input type="date" value="${F.date}" onchange="F.date=this.value"></div>
+      <div><label class="f">金額 $</label><input inputmode="decimal" value="${esc(F.amount)}" oninput="F.amount=this.value"></div>
+      <div><label class="f">公升</label><input inputmode="decimal" value="${esc(F.liters)}" oninput="F.liters=this.value"></div>
+      <div><label class="f">Trip A km</label><input inputmode="decimal" ${F.full?'':'disabled placeholder="沒加滿不用填"'} value="${esc(F.tripA)}" oninput="F.tripA=this.value"></div>
+    </div>
+    <div class="chips"><span class="chip pick ${F.full?'sel':''}" onclick="F.full=!F.full;render()">${F.full?'☑':'☐'} 有加滿</span></div>
+    <label class="f" style="margin-top:8px">備註</label><input value="${esc(F.note)}" oninput="F.note=this.value">
+    <button class="pri" style="width:100%;margin-top:10px" onclick="addFuel()">記錄</button>
+    <small class="hint">加滿 → 填 A，加完把 A 歸零。沒加滿 → 取消勾選，A 不要歸零，這次的公升數會併入下次加滿一起算油耗。第一次用的那次加滿，A 留空就好。</small>
+  </div>
+  <div class="card"><h3>加油紀錄</h3>
+    ${list.length?list.map(x=>{const a=num(x.tripA);return `<div class="kv"><span style="flex:1">${md(x.date)}${x.full===false?' <span class="warnc">未滿</span>':''} · ${x.liters}L · ${money(x.amount/x.liters)}/L${a?` · ${a}km`:''}${x.note?` · <span class="mut">${esc(x.note)}</span>`:''}</span><b>${money(Number(x.amount))}</b><button class="sm" onclick="delFuel('${x.id}')">✕</button></div>`}).join(''):'<div class="mut">尚無紀錄</div>'}
+  </div>`;
+}
+
+/* ================= 統計 / 時薪 ================= */
+function periodRange(){
+  const t=today(),p=S.ui.period;
+  if(p==='thisweek'){const w=weekStart(t);return[w,addDays(w,6)]}
+  if(p==='lastweek'){const w=addDays(weekStart(t),-7);return[w,addDays(w,6)]}
+  if(p==='thismonth'){const d=pd(t);return[ymd(new Date(d.getFullYear(),d.getMonth(),1)),ymd(new Date(d.getFullYear(),d.getMonth()+1,0))]}
+  if(p==='lastmonth'){const d=pd(t);return[ymd(new Date(d.getFullYear(),d.getMonth()-1,1)),ymd(new Date(d.getFullYear(),d.getMonth(),0))]}
+  if(p==='custom')return[S.ui.from||'0000-01-01',S.ui.to||'9999-12-31'];
+  return['0000-01-01','9999-12-31'];
+}
+function setUI(path,v){const[a,b]=path.split('.');if(b)S.ui[a][b]=v;else S.ui[a]=v;persist();render()}
+function vStat(){
+  const[from,to]=periodRange(),fixedW=Number(S.settings.weeklyFixed)||0,wwd=weekWorkDays();
+  const days=liveDays().filter(d=>d.date>=from&&d.date<=to).map(d=>({d,c:calc(d)})).filter(x=>x.c.has);
+  const tot={n:days.length,me:sum(days,x=>x.c.delivered),pay:sum(days,x=>x.c.pay),km:sum(days,x=>x.c.km||0),ret:sum(days,x=>x.c.myRet)};
+  tot.fuel=sum(days,x=>dayFuel(x.d,x.c));tot.fixed=sum(days,x=>fixedW/(wwd[weekStart(x.d.date)]||1));tot.net=tot.pay-tot.fuel-tot.fixed;
+  const N=S.ui.num,D=S.ui.den;
+  const segs=[['commute','通勤'],['sort','理貨'],['deliver','送貨']].filter(([k])=>D[k]);
+  const ok=days.filter(x=>segs.every(([k])=>x.c[k]!=null));
+  const noKm=ok.filter(x=>N.fuel&&x.c.km==null).length;
+  const numer=sum(ok,x=>x.c.pay-(N.fuel?dayFuel(x.d,x.c):0)-(N.fixed?fixedW/(wwd[weekStart(x.d.date)]||1):0));
+  const den=sum(ok,x=>sum(segs,([k])=>x.c[k]));
+  const hourly=den>0?numer/(den/60):null;
+  const P=[['thisweek','本週'],['lastweek','上週'],['thismonth','本月'],['lastmonth','上月'],['all','全部'],['custom','自訂']];
+  const tg=(path,on,label)=>`<span class="chip pick ${on?'sel':''}" onclick="setUI('${path}',${!on})">${on?'☑':'☐'} ${label}</span>`;
+  return `
+  <div class="card"><div class="chips" style="margin:0">${P.map(([k,l])=>`<span class="chip pick ${S.ui.period===k?'sel':''}" onclick="setUI('period','${k}')">${l}</span>`).join('')}</div>
+    ${S.ui.period==='custom'?`<div class="g2" style="margin-top:10px"><input type="date" value="${S.ui.from}" onchange="setUI('from',this.value)"><input type="date" value="${S.ui.to}" onchange="setUI('to',this.value)"></div>`:''}
+    <div class="mut" style="margin-top:8px">${from.startsWith('0000')?'全部期間':md(from)+' – '+md(to)} · ${tot.n} 個工作天</div>
+  </div>
+  <div class="card"><h3>收入</h3>
+    <div class="kv"><span>送達件數</span><b>${tot.me} 件${tot.n?`（日均 ${(tot.me/tot.n).toFixed(1)}）`:''}</b></div>
+    <div class="kv"><span>薪資（稅前）</span><b>${money(tot.pay)}</b></div>
+    <div class="kv"><span>里程</span><b>${tot.km} km${tot.n?`（日均 ${(tot.km/tot.n).toFixed(0)}）`:''}</b></div>
+    <div class="kv"><span>工作油錢</span><b>− ${money(tot.fuel)}</b></div>
+    <div class="kv"><span>固定成本</span><b>− ${money(tot.fixed)}</b></div>
+    <div class="kv"><span>實際收入</span><b class="okc">${money(tot.net)}</b></div>
+    <div class="kv"><span>我的退件</span><b>${tot.ret} 件（少領 ${money(tot.ret*(Number(S.settings.rate)||0))}）</b></div>
+  </div>
+  <div class="card"><h3>時薪計算器</h3>
+    <div class="mut">分子：薪資</div><div class="tog" style="margin:6px 0 10px">${tg('num.fuel',N.fuel,'扣油錢')}${tg('num.fixed',N.fixed,'扣固定成本')}</div>
+    <div class="mut">分母：時間包含</div><div class="tog" style="margin:6px 0">${tg('den.commute',D.commute,'通勤')}${tg('den.sort',D.sort,'理貨')}${tg('den.deliver',D.deliver,'送貨')}</div>
+    <div class="big" style="margin-top:12px">${hourly==null?'—':money(hourly)} <small>/ 小時</small></div>
+    <div class="formula">${segs.length?`${money(numer)} ÷ ${hm(den)}，用 ${ok.length} 天計算`:'至少勾一種時間'}
+    ${days.length-ok.length>0&&segs.length?`<br>⚠️ ${days.length-ok.length} 天時間沒填完整，已排除（分子分母都不算）`:''}
+    ${noKm?`<br>⚠️ ${noKm} 天沒填里程，那幾天沒扣到油錢`:''}</div>
+  </div>`;
+}
+
+/* ================= 設定 ================= */
+function setS(k,v){S.settings[k]=v;touchSettings()}
+function setLocal(k,v){S.local[k]=v.trim();persist();badge()}
+function vSet(){
+  const s=S.settings;
+  return `
+  <div class="card"><h3>薪資</h3><div class="g2">
+    <div><label class="f">每件 $</label><input inputmode="decimal" value="${esc(s.rate)}" onchange="setS('rate',Number(this.value)||0)"></div>
+    <div><label class="f">週一後幾天發薪</label><input inputmode="numeric" value="${esc(s.payOffset)}" onchange="setS('payOffset',Number(this.value)||13)"></div>
+    <div><label class="f">我的名字</label><input value="${esc(s.me)}" onchange="setS('me',this.value)"></div>
+    <div><label class="f">同事名字</label><input value="${esc(s.partner)}" onchange="setS('partner',this.value)"></div>
+  </div><small class="hint">一週 = 週一到週日。預設 13 天：11/16（一）那週 → 11/29（日）發薪。</small></div>
+  <div class="card"><h3>成本</h3><div class="g2">
+    <div><label class="f">每週固定成本 $（如租車）</label><input inputmode="decimal" value="${esc(s.weeklyFixed)}" onchange="setS('weeklyFixed',Number(this.value)||0)"></div>
+    <div><label class="f">手動每公里油錢 $（備用）</label><input inputmode="decimal" value="${esc(s.fuelPerKm)}" onchange="setS('fuelPerKm',Number(this.value)||0)"></div>
+  </div><small class="hint">固定成本會平均分攤到那週的工作天。手動油錢只在還沒有含 Trip A 的加油紀錄時使用。</small></div>
+  <div class="card"><h3>退件原因（用逗號分隔）</h3>
+    <input value="${esc(s.reasons.join(','))}" onchange="setS('reasons',this.value.split(/[,，]/).map(x=>x.trim()).filter(Boolean))"></div>
+  <div class="card"><h3>Google Sheets 同步</h3>
+    <label class="f">Apps Script 網址</label><input value="${esc(S.local.url)}" placeholder="https://script.google.com/macros/s/.../exec" onchange="setLocal('url',this.value)">
+    <label class="f" style="margin-top:8px">密碼（和 Apps Script 裡的 TOKEN 一樣）</label><input value="${esc(S.local.token)}" onchange="setLocal('token',this.value)">
+    <div class="g2" style="margin-top:10px"><button class="pri" onclick="manualSync()">立即同步</button><button onclick="pull(false)">從雲端下載</button></div>
+    <small class="hint">每次修改會先存在手機，有網路時自動上傳；沒訊號也能照常記錄。換手機時填同樣的網址和密碼，按「從雲端下載」。</small>
+  </div>
+  <div class="card"><h3>備份</h3><div class="g2"><button onclick="backup()">下載 JSON 備份</button><button onclick="document.getElementById('imp').click()">匯入 JSON</button></div>
+    <input type="file" id="imp" accept=".json" style="display:none" onchange="restore(this.files[0])"></div>`;
+}
+
+/* ================= 匯出 / 備份 ================= */
+function dl(name,text,type){const b=new Blob([text],{type});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),2000)}
+function csv(rows){return '﻿'+rows.map(r=>r.map(v=>{v=v==null?'':String(v);return /[",\n\r]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v}).join(',')).join('\r\n')}
+function csvDays(){
+  const P=S.settings.partner;
+  const rows=[['日期','星期','週起','發薪日','帳號總件數','我的範圍','號碼數','多件+','我缺件','我退件','我送達','我薪資',P+'範圍缺件',P+'退件',P+'送達','缺件明細','多件明細','退件明細','公里','油錢','通勤分','理貨分','送貨分','備註']];
+  liveDays().sort((a,b)=>a.date<b.date?-1:1).forEach(d=>{const c=calc(d);if(!c.has&&!d.total)return;
+    rows.push([d.date,wd(d.date),weekStart(d.date),payday(weekStart(d.date)),d.total,c.has?`${d.start}-${d.end}`:'',c.numbers,c.extra,c.myMissing,c.myRet,c.delivered,c.pay.toFixed(2),c.otherMissing,c.fRet,c.fDelivered??'',
+      d.missing.map(m=>m.qty>1?`${m.no}x${m.qty}`:m.no).join(' '),d.multi.map(m=>`${m.no}x${m.qty}`).join(' '),d.returns.map(x=>`${x.no}x${x.qty}(${x.reason})`).join(' '),c.km??'',c.km!=null?dayFuel(d,c).toFixed(2):'',c.commute??'',c.sort??'',c.deliver??'',d.note])});
+  dl(`送貨每日_${today()}.csv`,csv(rows),'text/csv;charset=utf-8');
+}
+function csvWeeks(){
+  const P=S.settings.partner;
+  const rows=[['週起','週迄','發薪日','工作天','我送達','我應領',P+'送達','我退件',P+'退件','公里','油錢','固定成本','實收','實際入帳','差額']];
+  weeksAgg().slice().reverse().forEach(w=>{const rv=w.rec?num(w.rec.received):null;
+    rows.push([w.ws,addDays(w.ws,6),w.pd,w.days,w.me,w.pay.toFixed(2),w.fKnown?w.f:'',w.myRet,w.fRet,w.km,w.fuel.toFixed(2),w.fixed.toFixed(2),w.net.toFixed(2),rv??'',rv==null?'':(rv-w.pay).toFixed(2)])});
+  dl(`送貨每週_${today()}.csv`,csv(rows),'text/csv;charset=utf-8');
+}
+function backup(){dl(`ParcelPay備份_${today()}.json`,JSON.stringify({days:S.days,fuel:S.fuel,weeks:S.weeks,settings:S.settings},null,1),'application/json')}
+function restore(file){if(!file)return;const r=new FileReader();r.onload=()=>{try{const j=JSON.parse(r.result);
+  if(!confirm('匯入會用備份內較新的資料覆蓋，確定？'))return;let n=0;
+  ['days','fuel','weeks'].forEach(t=>Object.values(j[t]||{}).forEach(x=>{const l=S[t][x.id];if(!l||(x.updatedAt||0)>=(l.updatedAt||0)){S[t][x.id]=x;S.pending=S.pending.filter(p=>!(p.type===t&&p.id===x.id));S.pending.push({type:t,id:x.id});n++}}));
+  if(j.settings){S.settings={...DEF_SETTINGS,...j.settings};S.pending=S.pending.filter(p=>p.type!=='settings');S.pending.push({type:'settings',id:'main'})}
+  persist();render();flush();toast(`匯入 ${n} 筆`)}catch(e){toast('檔案格式錯誤')}};r.readAsText(file)}
+
+/* ================= 啟動 ================= */
+load();render();
+if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('sw.js').catch(()=>{});
+if(S.local.url)pull(true);
+window.addEventListener('online',()=>{syncErr='';flush()});
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){if(tab==='day'&&!document.activeElement.matches('input,textarea'))render();flush()}});
+setInterval(()=>{if(S.pending.length&&!syncing)flush()},30000);
+</script>
+</body>
+</html>
