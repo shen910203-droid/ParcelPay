@@ -87,6 +87,14 @@ body.typing nav{display:none}body.typing .undo,body.typing .toast{bottom:12px}
 .undo{position:fixed;left:50%;bottom:calc(76px + env(safe-area-inset-bottom));transform:translateX(-50%);background:#2b3140;color:#fff;border-radius:12px;padding:6px 6px 6px 14px;display:none;align-items:center;gap:12px;z-index:21;max-width:92vw;font-size:14px;box-shadow:0 6px 20px rgba(0,0,0,.4)}
 .undo.on{display:flex}.undo span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .undo button{background:var(--acc);border:0;color:#fff;font-weight:600;padding:8px 12px}
+.seg{display:grid;grid-template-columns:1fr 1fr;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:4px;margin-bottom:12px}
+.seg button{border:0;background:none;color:var(--mut);padding:9px}.seg button.on{background:var(--card2);color:var(--tx);font-weight:600}
+.tbl{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:0 -4px}
+table{width:100%;border-collapse:collapse;font-size:14px;font-variant-numeric:tabular-nums}
+th,td{padding:8px 6px;text-align:right;white-space:nowrap;border-bottom:1px solid var(--line)}
+th:first-child,td:first-child{text-align:left}th{color:var(--mut);font-weight:500;font-size:12px}
+td .mut{margin-left:4px;font-size:12px}tbody tr{cursor:pointer}tfoot td{font-weight:700;border-bottom:0;border-top:2px solid var(--line)}
+@media(max-width:360px){th,td{padding:8px 3px;font-size:13px}td .mut{display:none}}
 small.hint{display:block;color:var(--mut);font-size:12px;margin-top:6px;line-height:1.5}
 </style>
 </head>
@@ -130,7 +138,7 @@ const hm=m=>m==null?'—':`${Math.floor(m/60)}h${pad(m%60)}m`;
 function toast(t){const e=document.getElementById('toast');e.textContent=t;e.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove('on'),1800)}
 
 /* ================= 計算 ================= */
-function newDay(date){return{id:date,date,total:'',start:'',end:'',missing:[],multi:[],returns:[],fReturns:[],
+function newDay(date){return{id:date,date,total:'',start:'',end:'',missing:[],multi:[],returns:[],fReturns:[],sup:{on:false,name:'',fDel:'',sRet:''},
   t:{leave:'',arrive:'',start:'',end:''},kmB:'',note:'',updatedAt:0,deleted:false}}
 function getDay(date){const d=S.days[date];return d&&!d.deleted?d:newDay(date)}
 function calc(d){
@@ -145,16 +153,21 @@ function calc(d){
   const myRet=sum(d.returns,r=>r.qty);
   const fRet=sum(d.fReturns,r=>r.qty);
   const delivered=has?assigned-myMissing-myRet:0;
-  const fDelivered=(has&&T!=null)?T-assigned-otherMissing-fRet:null;
+  const sup=d.sup||{},supOn=!!sup.on,sRet=supOn?(num(sup.sRet)||0):0,supName=(sup.name||'').trim()||'支援';
+  let fDelivered,sDelivered=null;
+  if(supOn){fDelivered=num(sup.fDel);sDelivered=(has&&T!=null&&fDelivered!=null)?T-assigned-otherMissing-fDelivered-fRet-sRet:null}
+  else fDelivered=(has&&T!=null)?T-assigned-otherMissing-fRet:null;
   const km=num(d.kmB);
   const warn=[];
   if(s!=null&&e!=null&&e<s)warn.push('結束編號小於起始編號');
   d.multi.filter(m=>has&&!inR(m.no)).forEach(m=>warn.push(`多件 ${m.no} 不在你的範圍，沒有計入`));
   d.returns.filter(r=>has&&!inR(r.no)).forEach(r=>warn.push(`退件 ${r.no} 不在你的範圍`));
   d.returns.filter(r=>d.missing.some(m=>m.no===r.no)).forEach(r=>warn.push(`${r.no} 同時記了缺件和退件，會被扣兩次`));
-  if(fDelivered!=null&&fDelivered<0)warn.push('Frankie 算出負數：總件數或範圍可能填錯');
+  if(!supOn&&fDelivered!=null&&fDelivered<0)warn.push(`${S.settings.partner} 算出負數：總件數或範圍可能填錯`);
+  if(supOn&&sDelivered!=null&&sDelivered<0)warn.push(`${supName} 算出負數：${S.settings.partner} 的件數或總件數可能有誤`);
+  if(supOn&&fDelivered==null)warn.push(`今天有支援：要填 ${S.settings.partner} 說他送了幾件，才能算出 ${supName}`);
   if(T!=null&&has&&assigned>T)warn.push('你的範圍件數已超過帳號總件數');
-  return{has,numbers,extra,assigned,myMissing,otherMissing,myRet,fRet,delivered,fDelivered,
+  return{has,numbers,extra,assigned,myMissing,otherMissing,myRet,fRet,delivered,fDelivered,supOn,sDelivered,sRet,supName,
     pay:delivered*rate,fPay:fDelivered==null?null:fDelivered*rate,km,
     commute:mins(d.t.leave,d.t.arrive),sort:mins(d.t.arrive,d.t.start),deliver:mins(d.t.start,d.t.end),warn,T};
 }
@@ -195,7 +208,7 @@ let syncing=false,syncErr='';
 function recOf(type,id){return type==='settings'?S.settings:S[type][id]}
 function summaryOf(type,r){
   if(type==='days'){const c=calc(r);return{'日期':r.date,'帳號總件數':r.total,'範圍':c.has?`${r.start}-${r.end}`:'',
-    '我送達':c.has?c.delivered:'','我薪資':c.has?c.pay:'','我退件':c.myRet,'Frankie送達':c.fDelivered??'','Frankie退件':c.fRet,
+    '我送達':c.has?c.delivered:'','我薪資':c.has?c.pay:'','我退件':c.myRet,'Frankie送達':c.fDelivered??'','Frankie退件':c.fRet,'支援送達':c.sDelivered??'',
     '缺件':r.missing.map(m=>m.qty>1?`${m.no}x${m.qty}`:m.no).join(' '),'多件':r.multi.map(m=>`${m.no}x${m.qty}`).join(' '),
     '退件明細':r.returns.map(x=>`${x.no}x${x.qty}(${x.reason})`).join(' '),'公里':c.km??'','油錢':c.km!=null?Math.round(dayFuel(r,c)*100)/100:'','發薪日':payday(weekStart(r.date)),'備註':r.note}}
   if(type==='fuel')return{'日期':r.date,'金額':r.amount,'公升':r.liters,'TripA':r.tripA,'油價':r.liters?r.amount/r.liters:'','km/L':(r.tripA&&r.liters)?r.tripA/r.liters:'','備註':r.note};
@@ -255,7 +268,7 @@ const IC={
  fuel:'<path d="M5 20V5.5A1.5 1.5 0 0 1 6.5 4h6A1.5 1.5 0 0 1 14 5.5V20M3.5 20h12M5 10h9"/><path d="M14 8h2.5a1.5 1.5 0 0 1 1.5 1.5V16a1.5 1.5 0 0 0 3 0V8.5L18.5 6"/>',
  stat:'<path d="M4 20h16"/><rect x="5.5" y="11" width="3" height="6" rx="1"/><rect x="10.5" y="7" width="3" height="10" rx="1"/><rect x="15.5" y="4" width="3" height="13" rx="1"/>',
  set:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-1.8-.3 1.6 1.6 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.6 1.6 0 0 0-1-1.5 1.6 1.6 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.6 1.6 0 0 0 .3-1.8 1.6 1.6 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.6 1.6 0 0 0 1.5-1 1.6 1.6 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.6 1.6 0 0 0 1.8.3H9a1.6 1.6 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.6 1.6 0 0 0 1 1.5 1.6 1.6 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.6 1.6 0 0 0-.3 1.8V9a1.6 1.6 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.6 1.6 0 0 0-1.5 1z"/>'};
-const TABS=[['day','今日'],['week','每週'],['fuel','油錢'],['stat','統計'],['set','設定']];
+const TABS=[['day','今日'],['week','結算'],['fuel','油錢'],['stat','統計'],['set','設定']];
 function go(t){tab=t;render();window.scrollTo(0,0)}
 function render(){
   document.getElementById('nav').innerHTML=TABS.map(([k,l])=>`<button class="${tab===k?'on':''}" onclick="go('${k}')"><svg viewBox="0 0 24 24">${IC[k]}</svg>${l}</button>`).join('');
@@ -271,8 +284,10 @@ function heroHTML(d){
   return `<div class="hrow"><div><div class="mut">我送達（${wd(d.date)}）</div><div class="big">${c.delivered}<small> 件</small></div></div>
     <div class="hr"><div class="mid acc">${money(c.pay)}</div><div class="mut">發薪 ${md(payday(weekStart(d.date)))}</div></div></div>
   <div class="mut">${c.has?`${c.numbers} 號 + 多件 ${c.extra} − 缺件 ${c.myMissing} − 退件 ${c.myRet}`:'先填下面的編號範圍'}</div>
-  <div class="fline"><span>${P}</span><b>${c.fDelivered??'—'}</b><span class="mut">${c.fDelivered==null?(c.T==null?'填帳號總件數後算出':''):`件 · 退 ${c.fRet}`}</span></div>
-  ${c.has&&c.fDelivered!=null?`<div class="formula">${P} = 總 ${c.T} − 我範圍 ${c.assigned} − ${P}缺件 ${c.otherMissing} − ${P}退件 ${c.fRet}</div>`:''}
+  <div class="fline"><span>${P}</span><b>${c.fDelivered??'—'}</b><span class="mut">${c.fDelivered==null?(c.supOn?'問他送了幾件':(c.T==null?'填帳號總件數後算出':'')):`件 · 退 ${c.fRet}${c.supOn?' · 他說的':''}`}</span></div>
+  ${c.supOn?`<div class="fline"><span>${esc(c.supName)}</span><b>${c.sDelivered??'—'}</b><span class="mut">件${c.sRet?` · 退 ${c.sRet}`:''}</span></div>`:''}
+  ${c.has&&!c.supOn&&c.fDelivered!=null?`<div class="formula">${P} = 總 ${c.T} − 我範圍 ${c.assigned} − ${P}缺件 ${c.otherMissing} − ${P}退件 ${c.fRet}</div>`:''}
+  ${c.has&&c.supOn&&c.sDelivered!=null?`<div class="formula">${esc(c.supName)} = 總 ${c.T} − 我範圍 ${c.assigned} − 其他缺件 ${c.otherMissing} − ${P} ${c.fDelivered} − ${P}退 ${c.fRet} − ${esc(c.supName)}退 ${c.sRet}</div>`:''}
   ${c.warn.map(w=>`<div class="warnbox">⚠️ ${esc(w)}</div>`).join('')}`;
 }
 function listsHTML(d){
@@ -285,6 +300,7 @@ function listsHTML(d){
   return out||'<div class="mut">還沒有紀錄。輸入編號後按上面的按鈕。</div>';
 }
 function refreshDay(){const d=getDay(curDate);const h=document.getElementById('hero');if(h)h.innerHTML=heroHTML(d);const l=document.getElementById('lists');if(l)l.innerHTML=listsHTML(d);const f=document.getElementById('flist');if(f)f.innerHTML=fListHTML(d)}
+function setSup(k,v){const d=getDay(curDate);d.sup={...(d.sup||{on:false,name:'',fDel:'',sRet:''}),[k]:v};touch('days',d);if(k==='on')render();else refreshDay()}
 function setF(k,v){const d=getDay(curDate);d[k]=v;touch('days',d);refreshDay()}
 function setT(k,v){const d=getDay(curDate);d.t={...d.t,[k]:v};touch('days',d);refreshDay();const el=document.getElementById('dur');if(el)el.innerHTML=durHTML(d)}
 function nowT(k){const n=new Date(),v=`${pad(n.getHours())}:${pad(n.getMinutes())}`;setT(k,v);const i=document.getElementById('t_'+k);if(i)i.value=v;toast(`${{leave:'出門',arrive:'到倉庫',start:'開始送貨',end:'送完'}[k]} ${v}`)}
@@ -368,6 +384,12 @@ function vDay(){
     <label class="f" style="margin-top:12px">${P} 退件（填件數，再點原因）</label>
     <div class="frow"><input id="fq" inputmode="numeric" pattern="[0-9]*" value="1"><div class="chips" style="margin:0">${S.settings.reasons.map((r,i)=>`<button class="chip pick" onclick="addFRet(${i})">${esc(r)}</button>`).join('')}</div></div>
     <div id="flist">${fListHTML(d)}</div>
+    <div class="chips" style="margin-top:12px"><span class="chip pick ${c.supOn?'sel':''}" onclick="setSup('on',${!c.supOn})">${c.supOn?'☑':'☐'} 今天有支援人員</span></div>
+    ${c.supOn?`<div class="g3" style="margin-top:8px">
+      <div><label class="f">${P} 送了幾件</label><input inputmode="numeric" pattern="[0-9]*" value="${esc(d.sup.fDel)}" oninput="setSup('fDel',this.value)"></div>
+      <div><label class="f">支援退件數</label><input inputmode="numeric" pattern="[0-9]*" value="${esc(d.sup.sRet)}" oninput="setSup('sRet',this.value)"></div>
+      <div><label class="f">支援名字</label><input value="${esc(d.sup.name)}" placeholder="支援" oninput="setSup('name',this.value)"></div>
+    </div><small class="hint">有支援時，${P} 的件數改成他自己說的數字，支援的件數＝總數扣掉其他所有人倒推。</small>`:''}
     <label class="f" style="margin-top:12px">備註</label><textarea rows="2" oninput="setF('note',this.value)">${esc(d.note)}</textarea>
     ${S.days[curDate]&&!S.days[curDate].deleted?`<button class="sm" style="margin-top:10px;color:var(--bad)" onclick="delDay()">刪除這天紀錄</button>`:''}
   </div>`;
@@ -378,13 +400,70 @@ function delDay(){if(!confirm(`刪除 ${curDate} 的所有紀錄？`))return;con
 function weeksAgg(){
   const fixed=Number(S.settings.weeklyFixed)||0,W={};
   liveDays().forEach(d=>{const c=calc(d);if(!c.has)return;const ws=weekStart(d.date);
-    const w=W[ws]||(W[ws]={ws,days:0,me:0,pay:0,f:0,fKnown:true,myRet:0,fRet:0,km:0,fuel:0});
+    const w=W[ws]||(W[ws]={ws,days:0,me:0,pay:0,f:0,fKnown:true,myRet:0,fRet:0,km:0,fuel:0,sup:0});
     w.days++;w.fuel+=dayFuel(d,c);w.me+=c.delivered;w.pay+=c.pay;w.myRet+=c.myRet;w.fRet+=c.fRet;w.km+=c.km||0;
-    if(c.fDelivered==null)w.fKnown=false;else w.f+=c.fDelivered;});
+    if(c.fDelivered==null)w.fKnown=false;else w.f+=c.fDelivered;w.sup+=c.sDelivered||0;});
   return Object.values(W).map(w=>({...w,fixed,net:w.pay-w.fuel-fixed,pd:payday(w.ws),rec:S.weeks[w.ws]})).sort((a,b)=>b.ws<a.ws?-1:1);
+}
+/* ---- 結算表 ---- */
+function settleRange(){const f=S.ui.sFrom||weekStart(today());return[f,S.ui.sTo&&S.ui.sTo>=f?S.ui.sTo:addDays(f,6)]}
+function setSettle(kind,v){if(kind==='this'){S.ui.sFrom=weekStart(today());S.ui.sTo=addDays(S.ui.sFrom,6)}
+  else if(kind==='last'){S.ui.sFrom=addDays(weekStart(today()),-7);S.ui.sTo=addDays(S.ui.sFrom,6)}
+  else if(kind==='from'){S.ui.sFrom=v;if(!S.ui.sTo||S.ui.sTo<v)S.ui.sTo=addDays(weekStart(v),6)}
+  else if(kind==='to')S.ui.sTo=v;persist();render()}
+function settleData(){const[from,to]=settleRange();
+  const rows=liveDays().filter(d=>d.date>=from&&d.date<=to).sort((a,b)=>a.date<b.date?-1:1).map(d=>({d,c:calc(d)})).filter(x=>x.c.has);
+  const T={total:sum(rows,x=>x.c.T||0),me:sum(rows,x=>x.c.delivered),pay:sum(rows,x=>x.c.pay),f:sum(rows,x=>x.c.fDelivered||0),fMissing:rows.some(x=>x.c.fDelivered==null),
+    sup:sum(rows,x=>x.c.sDelivered||0),supDays:rows.filter(x=>x.c.supOn).length,myRet:sum(rows,x=>x.c.myRet),fRet:sum(rows,x=>x.c.fRet),sRet:sum(rows,x=>x.c.sRet),
+    miss:sum(rows,x=>x.c.myMissing+x.c.otherMissing)};
+  return{from,to,rows,T}}
+function settleText(){const{from,to,rows,T}=settleData(),P=S.settings.partner,M=S.settings.me,rate=Number(S.settings.rate)||0;
+  const L=[`${md(from)}–${md(to)} 送貨件數`];
+  rows.forEach(({d,c})=>L.push(`${md(d.date)}(${wd(d.date)}) 總${c.T??'-'}｜${M} ${c.delivered}｜${P} ${c.fDelivered??'-'}${c.supOn?`｜${c.supName} ${c.sDelivered??'-'}`:''}`));
+  L.push(`合計：${M} ${T.me} 件 ${money(T.me*rate)}｜${P} ${T.f} 件${T.supDays?`｜支援 ${T.sup} 件`:''}`);
+  L.push(`退件：${M} ${T.myRet}｜${P} ${T.fRet}${T.supDays?`｜支援 ${T.sRet}`:''}　缺件 ${T.miss}`);
+  return L.join('\n')}
+async function copySettle(){const t=settleText();try{await navigator.clipboard.writeText(t);toast('已複製，可直接貼給會計')}
+  catch(e){const a=document.createElement('textarea');a.value=t;document.body.appendChild(a);a.select();try{document.execCommand('copy');toast('已複製')}catch(_){toast('複製失敗')}a.remove()}}
+function csvSettle(){const{from,to,rows,T}=settleData(),P=S.settings.partner,M=S.settings.me;
+  const out=[['日期','星期','帳號總件數',M,P,'支援',M+'退件',P+'退件','支援退件','缺件']];
+  rows.forEach(({d,c})=>out.push([d.date,wd(d.date),c.T??'',c.delivered,c.fDelivered??'',c.supOn?(c.sDelivered??''):'',c.myRet,c.fRet,c.supOn?c.sRet:'',c.myMissing+c.otherMissing]));
+  out.push(['合計','',T.total,T.me,T.f,T.sup,T.myRet,T.fRet,T.sRet,T.miss]);
+  out.push([M+' 薪資','',(T.pay).toFixed(2)]);
+  dl(`ParcelPay結算_${from}_${to}.csv`,csv(out),'text/csv;charset=utf-8')}
+function vSettle(){
+  const{from,to,rows,T}=settleData(),P=esc(S.settings.partner),M=esc(S.settings.me),hasSup=T.supDays>0,rate=Number(S.settings.rate)||0;
+  const tw=weekStart(today()),lw=addDays(tw,-7);
+  return `
+  <div class="card"><div class="chips" style="margin:0">
+      <span class="chip pick ${from===tw&&to===addDays(tw,6)?'sel':''}" onclick="setSettle('this')">本週</span>
+      <span class="chip pick ${from===lw&&to===addDays(lw,6)?'sel':''}" onclick="setSettle('last')">上週</span></div>
+    <div class="g2" style="margin-top:10px"><div><label class="f">從</label><input type="date" value="${from}" onchange="setSettle('from',this.value)"></div>
+      <div><label class="f">到</label><input type="date" value="${to}" onchange="setSettle('to',this.value)"></div></div>
+  </div>
+  <div class="card"><h3>每日件數</h3>
+    ${rows.length?`<div class="tbl"><table><thead><tr><th>日期</th><th>總數</th><th>${M}</th><th>${P}</th>${hasSup?'<th>支援</th>':''}<th>退/缺</th></tr></thead><tbody>
+    ${rows.map(({d,c})=>`<tr onclick="curDate='${d.date}';go('day')"><td>${md(d.date)}<span class="mut">${wd(d.date)}</span></td><td>${c.T??'—'}</td><td class="acc">${c.delivered}</td><td>${c.fDelivered??'—'}</td>${hasSup?`<td>${c.supOn?(c.sDelivered??'—'):''}</td>`:''}<td class="mut">${c.myRet+c.fRet+c.sRet}/${c.myMissing+c.otherMissing}</td></tr>`).join('')}
+    </tbody><tfoot><tr><td>合計</td><td>${T.total}</td><td class="acc">${T.me}</td><td>${T.f}${T.fMissing?'*':''}</td>${hasSup?`<td>${T.sup}</td>`:''}<td>${T.myRet+T.fRet+T.sRet}/${T.miss}</td></tr></tfoot></table></div>
+    ${T.fMissing?`<small class="hint">* 有幾天缺 ${P} 的數字（沒填總件數，或有支援但沒填他的件數），沒有算進合計</small>`:''}
+    <small class="hint">點任一列可以跳到那天修改。</small>`:'<div class="mut">這段期間沒有紀錄</div>'}
+  </div>
+  <div class="card"><h3>每人合計</h3>
+    <div class="kv"><span>${M}</span><b>${T.me} 件 · ${money(T.me*rate)}</b></div>
+    <div class="kv"><span>${P}</span><b>${T.f} 件 · ${money(T.f*rate)}</b></div>
+    ${hasSup?`<div class="kv"><span>支援（${T.supDays} 天）</span><b>${T.sup} 件</b></div>`:''}
+    <div class="kv"><span>退件 ${M}/${P}${hasSup?'/支援':''}</span><b>${T.myRet}/${T.fRet}${hasSup?'/'+T.sRet:''}</b></div>
+    <div class="kv"><span>缺件</span><b>${T.miss}</b></div>
+    <div class="g2" style="margin-top:12px"><button class="pri" onclick="copySettle()">複製給會計</button><button onclick="csvSettle()">匯出 Excel</button></div>
+  </div>`;
 }
 function setRec(ws,k,v){const r=S.weeks[ws]||{id:ws,received:'',note:'',deleted:false};r[k]=v;touch('weeks',r);render()}
 function vWeek(){
+  const seg=`<div class="seg"><button class="${S.ui.wv!=='pay'?'on':''}" onclick="S.ui.wv='settle';persist();render()">結算表</button><button class="${S.ui.wv==='pay'?'on':''}" onclick="S.ui.wv='pay';persist();render()">發薪 / 入帳</button></div>`;
+  if(S.ui.wv!=='pay')return seg+vSettle();
+  return seg+vPay();
+}
+function vPay(){
   const W=weeksAgg(),t=today(),P=esc(S.settings.partner);
   const next=W.filter(w=>w.pd>=t).sort((a,b)=>a.pd<b.pd?-1:1)[0];
   const owed=W.filter(w=>w.pd<=t&&!(w.rec&&num(w.rec.received)!=null));
@@ -399,7 +478,7 @@ function vWeek(){
     <div class="wkh"><b>${md(w.ws)} – ${md(addDays(w.ws,6))}</b><span class="mut">發薪 ${md(w.pd)}（${wd(w.pd)}）</span></div>
     <div class="g3" style="margin-top:10px">
       <div><div class="mut">我送達</div><div class="mid">${w.me}</div><div class="acc">${money(w.pay)}</div></div>
-      <div><div class="mut">${P}</div><div class="mid">${w.fKnown?w.f:'—'}</div><div class="mut">${w.fKnown?'':'有天缺總數'}</div></div>
+      <div><div class="mut">${P}</div><div class="mid">${w.fKnown?w.f:'—'}</div><div class="mut">${w.fKnown?(w.sup?`支援 ${w.sup}`:''):'有天缺總數'}</div></div>
       <div><div class="mut">退件 我/${P}</div><div class="mid">${w.myRet}/${w.fRet}</div><div class="mut">${w.days} 天</div></div>
     </div>
     <div class="kv" style="margin-top:8px"><span class="mut">里程 / 油錢 / 固定成本</span><b>${w.km} km · ${money(w.fuel)} · ${money(w.fixed)}</b></div>
@@ -544,17 +623,17 @@ function dl(name,text,type){const b=new Blob([text],{type});const a=document.cre
 function csv(rows){return '﻿'+rows.map(r=>r.map(v=>{v=v==null?'':String(v);return /[",\n\r]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v}).join(',')).join('\r\n')}
 function csvDays(){
   const P=S.settings.partner;
-  const rows=[['日期','星期','週起','發薪日','帳號總件數','我的範圍','號碼數','多件+','我缺件','我退件','我送達','我薪資',P+'範圍缺件',P+'退件',P+'送達','缺件明細','多件明細','退件明細','公里','油錢','通勤分','理貨分','送貨分','備註']];
+  const rows=[['日期','星期','週起','發薪日','帳號總件數','我的範圍','號碼數','多件+','我缺件','我退件','我送達','我薪資',P+'範圍缺件',P+'退件',P+'送達','支援名字','支援送達','支援退件','缺件明細','多件明細','退件明細','公里','油錢','通勤分','理貨分','送貨分','備註']];
   liveDays().sort((a,b)=>a.date<b.date?-1:1).forEach(d=>{const c=calc(d);if(!c.has&&!d.total)return;
-    rows.push([d.date,wd(d.date),weekStart(d.date),payday(weekStart(d.date)),d.total,c.has?`${d.start}-${d.end}`:'',c.numbers,c.extra,c.myMissing,c.myRet,c.delivered,c.pay.toFixed(2),c.otherMissing,c.fRet,c.fDelivered??'',
+    rows.push([d.date,wd(d.date),weekStart(d.date),payday(weekStart(d.date)),d.total,c.has?`${d.start}-${d.end}`:'',c.numbers,c.extra,c.myMissing,c.myRet,c.delivered,c.pay.toFixed(2),c.otherMissing,c.fRet,c.fDelivered??'',c.supOn?c.supName:'',c.sDelivered??'',c.supOn?c.sRet:'',
       d.missing.map(m=>m.qty>1?`${m.no}x${m.qty}`:m.no).join(' '),d.multi.map(m=>`${m.no}x${m.qty}`).join(' '),d.returns.map(x=>`${x.no}x${x.qty}(${x.reason})`).join(' '),c.km??'',c.km!=null?dayFuel(d,c).toFixed(2):'',c.commute??'',c.sort??'',c.deliver??'',d.note])});
   dl(`送貨每日_${today()}.csv`,csv(rows),'text/csv;charset=utf-8');
 }
 function csvWeeks(){
   const P=S.settings.partner;
-  const rows=[['週起','週迄','發薪日','工作天','我送達','我應領',P+'送達','我退件',P+'退件','公里','油錢','固定成本','實收','實際入帳','差額']];
+  const rows=[['週起','週迄','發薪日','工作天','我送達','我應領',P+'送達','支援送達','我退件',P+'退件','公里','油錢','固定成本','實收','實際入帳','差額']];
   weeksAgg().slice().reverse().forEach(w=>{const rv=w.rec?num(w.rec.received):null;
-    rows.push([w.ws,addDays(w.ws,6),w.pd,w.days,w.me,w.pay.toFixed(2),w.fKnown?w.f:'',w.myRet,w.fRet,w.km,w.fuel.toFixed(2),w.fixed.toFixed(2),w.net.toFixed(2),rv??'',rv==null?'':(rv-w.pay).toFixed(2)])});
+    rows.push([w.ws,addDays(w.ws,6),w.pd,w.days,w.me,w.pay.toFixed(2),w.fKnown?w.f:'',w.sup,w.myRet,w.fRet,w.km,w.fuel.toFixed(2),w.fixed.toFixed(2),w.net.toFixed(2),rv??'',rv==null?'':(rv-w.pay).toFixed(2)])});
   dl(`送貨每週_${today()}.csv`,csv(rows),'text/csv;charset=utf-8');
 }
 function backup(){dl(`ParcelPay備份_${today()}.json`,JSON.stringify({days:S.days,fuel:S.fuel,weeks:S.weeks,settings:S.settings},null,1),'application/json')}

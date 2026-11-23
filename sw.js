@@ -1,5 +1,5 @@
 // ParcelPay 離線支援：網頁優先抓最新版，沒訊號時用快取
-const CACHE = 'parcelpay-v2';
+const CACHE = 'parcelpay-v3';
 const FILES = ['./', './index.html', './manifest.webmanifest', './icon.svg', './icon-192.png', './icon-512.png', './apple-touch-icon.png', './favicon-32.png'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES))); self.skipWaiting(); });
 self.addEventListener('activate', e => {
