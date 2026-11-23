@@ -121,9 +121,9 @@ body.running nav{display:none}body.running{padding-bottom:calc(24px + env(safe-a
 .nextcard .bigbtn{margin-bottom:8px}.editbtn{display:block;margin:0 auto}
 .offbtn small{color:var(--mut);font-size:12px}.offbtn{line-height:1.4;margin:0}
 .evlist{display:flex;flex-direction:column;gap:6px}
-.evr{display:grid;grid-template-columns:40px 42px auto minmax(0,1fr) 40px;align-items:center;gap:8px;background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:6px 4px 6px 10px;font-size:15px}
+.evr{display:grid;grid-template-columns:28px auto minmax(0,1fr) 36px 34px;align-items:center;gap:8px;background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:6px 4px 6px 10px;font-size:15px}
 .evr .tm{color:var(--mut);font-size:12px;font-variant-numeric:tabular-nums}.evr b{font-size:17px;font-variant-numeric:tabular-nums}
-.evr .sub{color:var(--tx);font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.evr .sub{color:var(--tx);font-size:14px;line-height:1.3;word-break:break-all}
 .evr .del{background:none;border:0;color:var(--mut);font-size:18px;padding:6px 0;min-height:36px}
 .tag{font-size:12px;font-weight:600;border-radius:6px;padding:2px 0;text-align:center}
 .tg-m{color:var(--warn);background:rgba(245,165,36,.12)}.tg-x{color:var(--acc);background:rgba(79,140,255,.12)}.tg-r{color:var(--bad);background:rgba(255,93,93,.12)}
@@ -133,6 +133,17 @@ body.running nav{display:none}body.running{padding-bottom:calc(24px + env(safe-a
 .stp.ok .n{background:var(--ok);color:#fff}.stp input{min-height:38px;padding:6px 10px}
 .lk[disabled] .evr .del{display:none}
 .evtot{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}.evtot span{font-size:13px;font-weight:600;border-radius:8px;padding:4px 10px}
+.evr .no{color:var(--mut);font-size:12px;font-variant-numeric:tabular-nums}
+.sec2{border:1px solid var(--line);border-radius:12px;margin-top:8px;overflow:hidden}.sec2:first-child{margin-top:0}
+.sech2{width:100%;display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:10px;background:var(--card2);border:0;border-radius:0;padding:12px;text-align:left}
+.sech2 b{font-size:17px}.sech2 .tag{padding:3px 8px;white-space:nowrap}.chev{color:var(--mut);font-size:12px}
+.sec2 .evlist{padding:8px}
+.htab{width:100%;border-collapse:collapse;margin-top:10px;font-variant-numeric:tabular-nums;table-layout:fixed}
+.htab th{font-size:12px;color:var(--mut);font-weight:500;padding:4px 2px;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.htab td{text-align:center;font-size:18px;font-weight:700;padding:6px 2px;border-top:1px solid var(--line)}
+.htab td:first-child,.htab th:first-child{text-align:left;font-size:12px;color:var(--mut);font-weight:500;width:40px}
+.htab td:last-child{color:var(--mut)}
+.tline{font-size:13px;color:var(--mut);margin-top:6px}.tline b{color:var(--tx)}
 small.hint{display:block;color:var(--mut);font-size:12px;margin-top:6px;line-height:1.5}
 </style>
 </head>
@@ -145,7 +156,7 @@ small.hint{display:block;color:var(--mut);font-size:12px;margin-top:6px;line-hei
 
 <script>
 /* ================= 資料 ================= */
-const APP_VERSION='v4.2';
+const APP_VERSION='v4.3';
 const LS='songhuoben_v1';
 const DEF_SETTINGS={id:'main',rate:2.5,payOffset:13,weeklyFixed:0,fuelPerKm:0,me:'Aiden',partner:'Frankie',
   reasons:['地址錯誤','無人簽收','拒收','包裹損壞','找不到地址','其他'],updatedAt:0};
@@ -338,6 +349,16 @@ function formulaHTML(c){const P=esc(S.settings.partner),N=esc(c.supName);if(!c.c
   if(!c.supOn&&c.fDelivered!=null)return `<div class="formula">${P} = 總 ${c.T}${mine} − ${ml} ${c.otherMissing} − ${P}退件 ${c.fRet}</div>`;
   if(c.supOn&&c.sDelivered!=null)return `<div class="formula">${N} = 總 ${c.T}${mine} − ${ml} ${c.otherMissing} − ${P} ${c.fDelivered} − ${P}退 ${c.fRet} − ${N}退 ${c.sRet}</div>`;
   return ''}
+function sumTable(c){
+  const P=esc(S.settings.partner),v=x=>x==null?'—':x;
+  const cols=[['我',c.meOff?'休':c.delivered,c.myRet],[P,c.fDelivered,c.fRet]];
+  if(c.supOn)cols.push([esc(c.supName),c.sDelivered,c.sRet]);
+  const dSum=cols.every(x=>x[1]!=null)?sum(cols,x=>x[1]==='休'?0:x[1]):null,rSum=sum(cols,x=>x[2]||0);
+  const miss=c.myMissing+c.otherMissing;
+  return `<table class="htab"><tr><th></th>${cols.map(x=>`<th>${x[0]}</th>`).join('')}<th>合計</th></tr>
+    <tr><td>送達</td>${cols.map(x=>`<td class="${x[0]==='我'?'acc':''}">${v(x[1])}</td>`).join('')}<td>${v(dSum)}</td></tr>
+    <tr><td>退件</td>${cols.map(x=>`<td>${x[2]||0}</td>`).join('')}<td>${rSum}</td></tr></table>
+  <div class="tline">帳號總件數 <b>${c.T??'—'}</b>${c.T!=null&&dSum!=null?`<br>= 送達 ${dSum} + 退件 ${rSum} + 缺件 ${miss}`:`　·　缺件 ${miss}`}</div>`}
 function heroHTML(d){
   const c=calc(d),P=esc(S.settings.partner);
   if(c.allOff)return `<div class="offbox"><div class="big">全員休息</div><div class="mut">${md(d.date)}（${wd(d.date)}）沒有貨，不計件數</div></div>`;
@@ -346,8 +367,7 @@ function heroHTML(d){
     <div class="hr"><div class="mid ${c.meOff?'':'acc'}">${money(c.pay)}</div><div class="mut">今日</div></div></div>
   <div class="wline">本週 ${md(ws)}–${md(addDays(ws,6))} 累計 <b>${w?w.me:0} 件 · ${money(w?w.pay:0)}</b> → ${md(payday(ws))}（日）一起發</div>
   ${c.has?`<div class="mut">${c.numbers} 號 + 多件 ${c.extra} − 缺件 ${c.myMissing} − 退件 ${c.myRet}</div>`:''}
-  <div class="fline"><span>${P}</span><b>${c.fDelivered??'—'}</b><span class="mut">${c.fDelivered==null?(c.supOn?'問他送了幾件':(c.T==null?'填帳號總件數後算出':'')):`件 · 退 ${c.fRet}${c.supOn?' · 他說的':''}`}</span></div>
-  ${c.supOn?`<div class="fline"><span>${esc(c.supName)}</span><b>${c.sDelivered??'—'}</b><span class="mut">件${c.sRet?` · 退 ${c.sRet}`:''}</span></div>`:''}
+  ${sumTable(c)}
   ${formulaHTML(c)}
   ${c.warn.map(w=>`<div class="warnbox">⚠️ ${esc(w)}</div>`).join('')}`;
 }
@@ -358,16 +378,23 @@ function eventsOf(d){const ev=[];
   d.multi.forEach(x=>ev.push({k:'multi',x,label:'多件',cls:'x',sub:`共 ${x.qty} 件`}));
   d.returns.forEach(x=>ev.push({k:'returns',x,label:'退件',cls:'r',sub:`${x.qty>1?`×${x.qty} `:''}${x.reason}`}));
   return ev.sort((a,b)=>(b.x.at||0)-(a.x.at||0)||(b.x.no-a.x.no))}
+function secState(k){S.ui.sec=S.ui.sec||{};return !!S.ui.sec[k]}
+function toggleSec(k){S.ui.sec=S.ui.sec||{};S.ui.sec[k]=!S.ui.sec[k];persist();refreshDay()}
+function secHTML(key,title,cls,items,count,rowFn){
+  const open=secState(key),list=items.slice().sort((a,b)=>(a.at||0)-(b.at||0)).map((x,i)=>({x,n:i+1})).reverse();
+  return `<div class="sec2 ${open?'open':''}"><button class="sech2" onclick="toggleSec('${key}')"><span class="tag tg-${cls}">${title}</span><b>${count}</b><span class="chev">${items.length?(open?'收起 ▲':'展開 ▼'):''}</span></button>
+    ${open&&list.length?`<div class="evlist">${list.map(({x,n})=>`<div class="evr"><span class="no">#${n}</span>${rowFn(x)}<span class="tm">${tmStr(x.at)}</span><button class="del" onclick="rmEv('${key}','${x.id}')" aria-label="刪除">✕</button></div>`).join('')}</div>`:''}</div>`}
 function listsHTML(d){
-  const c=calc(d),s=num(d.start),e=num(d.end),P=esc(S.settings.partner),ev=eventsOf(d);
-  if(!ev.length)return '<div class="mut">還沒有紀錄</div>';
-  const tot=`<div class="evtot"><span class="tg-r">退件 ${sum(d.returns,x=>x.qty)} 件</span><span class="tg-m">缺件 ${sum(d.missing,x=>x.qty)} 件</span><span class="tg-x">多件 +${c.extra}</span></div>`;
-  return tot+`<div class="evlist">${ev.map(v=>`<div class="evr"><span class="tm">${tmStr(v.x.at)}</span><span class="tag tg-${v.cls}">${v.label}</span><b>${v.x.no}</b><span class="sub">${esc(v.sub)}${v.k==='missing'&&c.has&&(v.x.no<s||v.x.no>e)?` <span class="mut">${P}</span>`:''}</span><button class="del" onclick="rmEv('${v.k}','${v.x.id}')" aria-label="刪除">✕</button></div>`).join('')}</div>`;
+  const c=calc(d),s=num(d.start),e=num(d.end),P=esc(S.settings.partner);
+  return secHTML('returns','退件','r',d.returns,`${sum(d.returns,x=>x.qty)} 件`,x=>`<b>${x.no}</b><span class="sub">${x.qty>1?`×${x.qty} `:''}${esc(x.reason)}</span>`)
+   +secHTML('missing','缺件','m',d.missing,`${sum(d.missing,x=>x.qty)} 件`,x=>`<b>${x.no}</b><span class="sub">${x.qty>1?`×${x.qty}`:''}${c.has&&(x.no<s||x.no>e)?` <span class="mut">${P}</span>`:''}</span>`)
+   +secHTML('multi','多件','x',d.multi,(()=>{const mk=sum(d.multi.filter(m=>c.has&&m.no>=s&&m.no<=e),m=>m.qty-1),dv=Math.max(0,c.extra-mk);return `${d.multi.length} 號 · +${mk} 件${dv?`<span class="mut" style="font-size:12px;font-weight:500"> ＋${dv} 由退/缺推算</span>`:''}`})(),x=>`<b>${x.no}</b><span class="sub">共 ${x.qty} 件</span>`);
 }
-function fListHTML(d){return d.fReturns.length?`<div class="evlist">${d.fReturns.slice().sort((a,b)=>(b.at||0)-(a.at||0)).map(x=>`<div class="evr"><span class="tm">${tmStr(x.at)}</span><span class="tag tg-r">退件</span><b>${x.qty} 件</b><span class="sub">${esc(x.reason)}</span><button class="del" onclick="rmEv('fReturns','${x.id}')" aria-label="刪除">✕</button></div>`).join('')}</div>`:''}
+function fListHTML(d){return d.fReturns.length?secHTML('fReturns',`${esc(S.settings.partner)} 退件`,'r',d.fReturns,`${sum(d.fReturns,x=>x.qty)} 件`,x=>`<b>${x.qty} 件</b><span class="sub">${esc(x.reason)}</span>`):''}
 function runHeadHTML(d){const c=calc(d);
   return `<div class="hrow"><div><div class="big">${c.delivered}<small> 件</small></div></div><div class="hr"><div class="mid acc">${money(c.pay)}</div></div></div>
   <div class="mut">${c.has?`範圍 ${c.numbers} 號 · 多件 +${c.extra} · 缺件 −${c.myMissing} · 退件 −${c.myRet}`:'先填編號範圍'}</div>
+  ${c.has?`<div class="mut" style="margin-top:2px">${esc(S.settings.partner)} ${c.fDelivered??'—'} 件 · 帳號總數 ${c.T??'—'}</div>`:''}
   ${c.warn.map(w=>`<div class="warnbox">⚠️ ${esc(w)}</div>`).join('')}`}
 function refreshDay(){const d=getDay(curDate);
   const set=(id,h)=>{const el=document.getElementById(id);if(el)el.innerHTML=h};
@@ -375,7 +402,7 @@ function refreshDay(){const d=getDay(curDate);
 
 function setF(k,v){const d=getDay(curDate);d[k]=v;touch('days',d);refreshDay()}
 function setSup(k,v){const d=getDay(curDate);d.sup={...(d.sup||{on:false,name:'',fDel:'',sRet:''}),[k]:v};touch('days',d);if(k==='on')render();else refreshDay()}
-function setT(k,v){const d=getDay(curDate);d.t={...d.t,[k]:v};touch('days',d);refreshDay();const el=document.getElementById('dur');if(el)el.innerHTML=durHTML(d)}
+function setT(k,v){const d=getDay(curDate);d.t={...d.t,[k]:v};touch('days',d);render()}
 function durHTML(d){const c=calc(d);return `通勤 ${hm(c.commute)} · 理貨 ${hm(c.sort)} · 送貨 ${hm(c.deliver)}${c.deliver&&c.has?` · 每小時 ${(c.delivered/(c.deliver/60)).toFixed(1)} 件`:''}`}
 
 /* ---- 流程按鈕 ---- */
@@ -444,7 +471,7 @@ function quickHTML(){const dv=S.ui.qdraft&&S.ui.qdraft.date===curDate?S.ui.qdraf
 function partnerHTML(d,c){const P=esc(S.settings.partner);
   return `<label class="f" style="margin-top:12px">${P} 退件（填件數，再點原因）</label>
     <div class="frow"><input id="fq" inputmode="numeric" pattern="[0-9]*" value="1"><div class="chips" style="margin:0">${S.settings.reasons.map((r,i)=>`<button class="chip pick" onclick="addFRet(${i})">${esc(r)}</button>`).join('')}</div></div>
-    <div id="flist">${fListHTML(d)}</div>
+    <div id="flist" style="margin-top:10px">${fListHTML(d)}</div>
     <div class="chips" style="margin-top:12px"><span class="chip pick ${c.supOn?'sel':''}" onclick="setSup('on',${!c.supOn})">${c.supOn?'☑':'☐'} 今天有支援人員</span></div>
     ${c.supOn?`<div class="g3" style="margin-top:8px">
       <div><label class="f">${P} 件數</label><input inputmode="numeric" pattern="[0-9]*" value="${esc(d.sup.fDel)}" oninput="setSup('fDel',this.value)"></div>
@@ -466,7 +493,7 @@ function vRun(){
   ${showRange?rangeHTML(d):''}
   ${quickHTML()}
   ${isToday&&!delivering?`<button class="pri bigbtn" onclick="step('start')">▶ 點完了，開始送貨</button>`:''}
-  <div class="card"><h3>紀錄（新的在上）</h3><div id="lists">${listsHTML(d)}</div></div>
+  <div class="card"><h3>紀錄</h3><div id="lists">${listsHTML(d)}</div></div>
   ${isToday&&delivering?`<button class="pri bigbtn okbg" onclick="step('end')">✓ 送完</button>`:''}
   ${!isToday?`<button class="pri bigbtn" onclick="exitRun()">完成</button>`:''}`;
 }
@@ -510,7 +537,7 @@ function vDay(){
   ${next?`<div class="card nextcard">${next}</div>`:''}
   <fieldset class="lk" ${d.locked?'disabled':''}>
   <div class="card"><h3>今天進度</h3>${stepsHTML(d)}<small class="hint">按上面的大按鈕會自動記時間；時間錯了直接點右邊修改。</small></div>
-  <div class="card"><h3>紀錄（新的在上）</h3><div id="lists">${listsHTML(d)}</div></div>
+  <div class="card"><h3>紀錄</h3><div id="lists">${listsHTML(d)}</div></div>
   <div class="card"><h3>收工後</h3>
     <label class="f">今日工作里程（Trip B km）</label>
     <input inputmode="decimal" placeholder="出門前歸零，回家看 B" value="${esc(d.kmB)}" oninput="setF('kmB',this.value)" onchange="render()">
