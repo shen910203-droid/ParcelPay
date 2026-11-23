@@ -38,7 +38,6 @@ button.pri{background:var(--acc);border-color:var(--acc);color:#fff;font-weight:
 button.sm{padding:6px 10px;font-size:13px}
 button.ev{padding:14px 6px;font-weight:600}
 button.ev.m{color:var(--warn)}button.ev.x{color:var(--acc)}button.ev.r{color:var(--bad)}
-.datebar{margin-bottom:12px}.datebar button{flex:0 0 48px}
 .split{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
 .split>div{background:var(--card2);border-radius:10px;padding:10px}
 .split b{display:block;font-size:20px}
@@ -49,7 +48,6 @@ button.ev.m{color:var(--warn)}button.ev.x{color:var(--acc)}button.ev.r{color:var
 .chip.pick{padding:7px 12px;cursor:pointer}
 .sec{margin-top:12px}.sec:first-child{margin-top:0}
 .sech{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--mut)}
-.trow{display:grid;grid-template-columns:58px minmax(0,1fr) 54px;gap:8px;align-items:center;margin-bottom:8px}
 .warnbox{background:rgba(245,165,36,.1);border:1px solid rgba(245,165,36,.4);color:var(--warn);border-radius:10px;padding:8px 10px;font-size:13px;margin-top:10px}
 .kv{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--line);font-size:14px}.kv:last-child{border:0}
 .kv b{font-weight:600}.kv>:last-child{text-align:right}.kv>:first-child{min-width:0}
@@ -69,6 +67,26 @@ nav button.on{color:var(--acc)}
 .wkh{display:flex;justify-content:space-between;align-items:baseline}
 .tog{display:flex;flex-wrap:wrap;gap:6px}
 .formula{background:var(--card2);border-radius:10px;padding:10px;font-size:13px;color:var(--mut);margin-top:10px}
+/* iPhone Safari：日期/時間欄位不縮的問題 */
+input[type=date],input[type=time]{-webkit-appearance:none;appearance:none;display:block;min-height:44px;line-height:22px;text-align:left}
+input::-webkit-date-and-time-value{text-align:left;margin:0}
+input::-webkit-datetime-edit{padding:0}
+.badge{max-width:46vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@media(max-width:370px){h1 .sub{display:none}}
+body.typing nav{display:none}body.typing .undo,body.typing .toast{bottom:12px}
+.datebar{display:grid;grid-template-columns:48px minmax(0,1fr) 48px;gap:8px;margin-bottom:12px}
+.hrow{display:flex;justify-content:space-between;align-items:flex-end;gap:8px}.hr{text-align:right}
+.fline{display:flex;align-items:baseline;gap:8px;margin-top:10px;background:var(--card2);border-radius:10px;padding:8px 10px}.fline b{font-size:20px}
+.quick{position:relative}
+.qin{font-size:28px!important;font-weight:700;text-align:center;padding:12px!important;letter-spacing:2px}
+.qbtn{margin-top:10px}.qbtn button{padding:16px 4px;font-size:17px}
+.chip .x{min-width:32px;min-height:28px;font-size:17px}
+.punch{font-weight:600}
+.trow{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;margin-bottom:8px}
+.frow{display:grid;grid-template-columns:64px minmax(0,1fr);gap:8px;align-items:start}
+.undo{position:fixed;left:50%;bottom:calc(76px + env(safe-area-inset-bottom));transform:translateX(-50%);background:#2b3140;color:#fff;border-radius:12px;padding:6px 6px 6px 14px;display:none;align-items:center;gap:12px;z-index:21;max-width:92vw;font-size:14px;box-shadow:0 6px 20px rgba(0,0,0,.4)}
+.undo.on{display:flex}.undo span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.undo button{background:var(--acc);border:0;color:#fff;font-weight:600;padding:8px 12px}
 small.hint{display:block;color:var(--mut);font-size:12px;margin-top:6px;line-height:1.5}
 </style>
 </head>
@@ -76,8 +94,8 @@ small.hint{display:block;color:var(--mut);font-size:12px;margin-top:6px;line-hei
 <header><h1><img src="icon.svg" alt="" class="logo">ParcelPay <span class="sub">送貨本</span></h1><button id="badge" class="badge" onclick="manualSync()">—</button></header>
 <main id="view"></main>
 <nav id="nav"></nav>
-<div id="modal" onclick="if(event.target===this)closeM()"><div class="sheet" id="sheet"></div></div>
 <div class="toast" id="toast"></div>
+<div class="undo" id="undo"><span></span><button onclick="undo()">復原</button></div>
 
 <script>
 /* ================= 資料 ================= */
@@ -217,7 +235,7 @@ async function pull(silent){
   }catch(e){syncErr=errMsg(e);if(!silent)toast('下載失敗：'+syncErr)}
   syncing=false;badge();flush();
 }
-const errMsg=e=>/fetch|network|load failed/i.test(e&&e.message||'')?'無網路':(e&&e.message)||'失敗';
+const errMsg=e=>/fetch|network|load failed|json|unexpected/i.test(e&&e.message||'')?(navigator.onLine?'連不到雲端':'無網路'):(e&&e.message)||'失敗';
 function badge(){
   const b=document.getElementById('badge');let t,c='';
   if(!S.local.url){t='未連雲端';c='warn'}
@@ -245,98 +263,116 @@ function render(){
   document.getElementById('view').innerHTML=v;badge();
 }
 
-/* ================= 今日 ================= */
+/* ================= 今日（快速輸入） ================= */
 function shiftDate(n){curDate=addDays(curDate,n);render()}
 function setDate(v){if(v){curDate=v;render()}}
 function heroHTML(d){
   const c=calc(d),P=esc(S.settings.partner);
-  return `<div class="mut">我送達（${wd(d.date)}）</div>
-  <div class="row" style="align-items:flex-end"><div class="big">${c.delivered} <small>件</small></div><div class="mid acc" style="text-align:right">${money(c.pay)}</div></div>
-  <div class="mut" style="margin-top:6px">${c.has?`${c.numbers} 號 + 多件 ${c.extra} − 缺件 ${c.myMissing} − 退件 ${c.myRet}`:'先輸入你的編號範圍'}</div>
-  <div class="split">
-    <div><span class="mut">${P} 送達</span><b>${c.fDelivered??'—'}</b><span class="mut">${c.fDelivered==null?(c.T==null?'需填帳號總件數':''):`退件 ${c.fRet} · ${money(c.fPay)}`}</span></div>
-    <div><span class="mut">發薪日</span><b>${md(payday(weekStart(d.date)))}</b><span class="mut">週 ${md(weekStart(d.date))}–${md(addDays(weekStart(d.date),6))}</span></div>
-  </div>
-  ${c.has&&c.fDelivered!=null?`<div class="formula">${P} = 總 ${c.T} − 我範圍 ${c.assigned} − ${P}範圍缺件 ${c.otherMissing} − ${P}退件 ${c.fRet}</div>`:''}
+  return `<div class="hrow"><div><div class="mut">我送達（${wd(d.date)}）</div><div class="big">${c.delivered}<small> 件</small></div></div>
+    <div class="hr"><div class="mid acc">${money(c.pay)}</div><div class="mut">發薪 ${md(payday(weekStart(d.date)))}</div></div></div>
+  <div class="mut">${c.has?`${c.numbers} 號 + 多件 ${c.extra} − 缺件 ${c.myMissing} − 退件 ${c.myRet}`:'先填下面的編號範圍'}</div>
+  <div class="fline"><span>${P}</span><b>${c.fDelivered??'—'}</b><span class="mut">${c.fDelivered==null?(c.T==null?'填帳號總件數後算出':''):`件 · 退 ${c.fRet}`}</span></div>
+  ${c.has&&c.fDelivered!=null?`<div class="formula">${P} = 總 ${c.T} − 我範圍 ${c.assigned} − ${P}缺件 ${c.otherMissing} − ${P}退件 ${c.fRet}</div>`:''}
   ${c.warn.map(w=>`<div class="warnbox">⚠️ ${esc(w)}</div>`).join('')}`;
 }
-function refreshHero(){const h=document.getElementById('hero');if(h)h.innerHTML=heroHTML(getDay(curDate))}
-function setF(k,v){const d=getDay(curDate);d[k]=v;touch('days',d);refreshHero()}
-function setT(k,v){const d=getDay(curDate);d.t={...d.t,[k]:v};touch('days',d);refreshHero();const el=document.getElementById('dur');if(el)el.innerHTML=durHTML(d)}
-function nowT(k){const n=new Date();setT(k,`${pad(n.getHours())}:${pad(n.getMinutes())}`);render()}
+function listsHTML(d){
+  const c=calc(d),P=esc(S.settings.partner),s=num(d.start),e=num(d.end);
+  const chip=(key,x,label)=>`<span class="chip">${label}<button class="x" onclick="rmEv('${key}','${x.id}')" aria-label="刪除">✕</button></span>`;
+  const sec=(t,key,fmt)=>d[key].length?`<div class="sec"><div class="sech">${t}</div><div class="chips">${d[key].map(x=>chip(key,x,fmt(x))).join('')}</div></div>`:'';
+  const out=sec('缺件','missing',x=>`${x.no}${x.qty>1?` ×${x.qty}`:''}${(c.has&&(x.no<s||x.no>e))?` <span class="mut">${P}</span>`:''}`)
+   +sec('同址多件','multi',x=>`${x.no} 共${x.qty}件`)
+   +sec('我的退件','returns',x=>`${x.no}${x.qty>1?` ×${x.qty}`:''} · ${esc(x.reason)}`);
+  return out||'<div class="mut">還沒有紀錄。輸入編號後按上面的按鈕。</div>';
+}
+function refreshDay(){const d=getDay(curDate);const h=document.getElementById('hero');if(h)h.innerHTML=heroHTML(d);const l=document.getElementById('lists');if(l)l.innerHTML=listsHTML(d);const f=document.getElementById('flist');if(f)f.innerHTML=fListHTML(d)}
+function setF(k,v){const d=getDay(curDate);d[k]=v;touch('days',d);refreshDay()}
+function setT(k,v){const d=getDay(curDate);d.t={...d.t,[k]:v};touch('days',d);refreshDay();const el=document.getElementById('dur');if(el)el.innerHTML=durHTML(d)}
+function nowT(k){const n=new Date(),v=`${pad(n.getHours())}:${pad(n.getMinutes())}`;setT(k,v);const i=document.getElementById('t_'+k);if(i)i.value=v;toast(`${{leave:'出門',arrive:'到倉庫',start:'開始送貨',end:'送完'}[k]} ${v}`)}
 function durHTML(d){const c=calc(d);return `通勤 ${hm(c.commute)} · 理貨 ${hm(c.sort)} · 送貨 ${hm(c.deliver)}${c.deliver?` · 每小時 ${(c.delivered/(c.deliver/60)).toFixed(1)} 件`:''}`}
-function chipList(d,key,fmt){return d[key].length?`<div class="chips">${d[key].map(x=>`<span class="chip">${fmt(x)}<button class="x" onclick="rmEv('${key}','${x.id}')">✕</button></span>`).join('')}</div>`:''}
+
+/* 復原 */
+let undoSnap=null;
+function snap(d){undoSnap={date:d.date,data:JSON.stringify({missing:d.missing,multi:d.multi,returns:d.returns,fReturns:d.fReturns})}}
+function undo(){if(!undoSnap)return;const d=getDay(undoSnap.date);Object.assign(d,JSON.parse(undoSnap.data));touch('days',d);undoSnap=null;hideUndo();refreshDay();toast('已復原')}
+function showUndo(msg){const u=document.getElementById('undo');u.querySelector('span').textContent=msg;u.classList.add('on');clearTimeout(showUndo.t);showUndo.t=setTimeout(hideUndo,6000)}
+function hideUndo(){document.getElementById('undo').classList.remove('on')}
+
+/* 快速輸入：輸入編號 → 按按鈕；按鈕不會讓鍵盤收起來 */
+let qRet=null;
+const keep='onpointerdown="event.preventDefault()" onmousedown="event.preventDefault()"';
+function qno(){return document.getElementById('qno')}
+function qAct(kind){
+  const inp=qno(),no=num(inp.value&&inp.value.trim());
+  if(no==null){toast('先輸入編號');inp.focus();return}
+  const d=getDay(curDate),s=num(d.start),e=num(d.end),inR=s!=null&&e!=null&&no>=s&&no<=e;
+  if(kind==='returns'){qRet=no;document.getElementById('qreason').innerHTML=`<div class="mut" style="margin-top:10px">${no} 退件原因：</div><div class="chips">${S.settings.reasons.map((r,i)=>`<button class="chip pick" ${keep} onclick="qReason(${i})">${esc(r)}</button>`).join('')}<button class="chip pick" ${keep} onclick="qCancel()">取消</button></div>`;return}
+  snap(d);let msg;
+  if(kind==='missing'){const x=d.missing.find(m=>m.no===no);if(x){x.qty++;msg=`缺件 ${no} ×${x.qty}`}else{d.missing.push({id:rid(),no,qty:1});msg=`缺件 ${no}${inR||s==null?'':`（${S.settings.partner} 的）`}`}d.missing.sort((a,b)=>a.no-b.no)}
+  if(kind==='multi'){const x=d.multi.find(m=>m.no===no);if(x){x.qty++}else d.multi.push({id:rid(),no,qty:2});const q=(x||d.multi.find(m=>m.no===no)).qty;msg=`${no} 共 ${q} 件`;d.multi.sort((a,b)=>a.no-b.no)}
+  touch('days',d);refreshDay();showUndo(msg+(kind==='multi'?'（再按一次 +1）':''));
+  if(kind==='multi'&&s!=null&&!inR)toast(`⚠️ ${no} 不在你的範圍`);
+  if(kind==='multi'){inp.focus();inp.select()}else{inp.value='';inp.focus()}
+}
+function qReason(i){
+  const d=getDay(curDate);snap(d);
+  d.returns.push({id:rid(),no:qRet,qty:1,reason:S.settings.reasons[i]});d.returns.sort((a,b)=>a.no-b.no);
+  touch('days',d);showUndo(`退件 ${qRet} · ${S.settings.reasons[i]}`);qCancel();refreshDay();
+}
+function qCancel(){qRet=null;document.getElementById('qreason').innerHTML='';const i=qno();i.value='';i.focus()}
+function rmEv(key,id){const d=getDay(curDate);const x=d[key].find(y=>y.id===id);snap(d);d[key]=d[key].filter(y=>y.id!==id);touch('days',d);refreshDay();
+  showUndo(`已刪除 ${key==='fReturns'?`${S.settings.partner} 退件 ${x.qty} 件`:x.no}`)}
+
+/* Frankie 退件 */
+function fListHTML(d){return d.fReturns.length?`<div class="chips">${d.fReturns.map(x=>`<span class="chip">${x.qty} 件 · ${esc(x.reason)}<button class="x" onclick="rmEv('fReturns','${x.id}')">✕</button></span>`).join('')}</div>`:''}
+function addFRet(i){const q=num(document.getElementById('fq').value)||1;const d=getDay(curDate);snap(d);
+  d.fReturns.push({id:rid(),qty:q,reason:S.settings.reasons[i]});touch('days',d);refreshDay();showUndo(`${S.settings.partner} 退件 ${q} 件 · ${S.settings.reasons[i]}`)}
+
 function vDay(){
   const d=getDay(curDate),c=calc(d),P=esc(S.settings.partner);
   return `
-  <div class="row datebar"><button onclick="shiftDate(-1)">◀</button><input type="date" value="${curDate}" onchange="setDate(this.value)"><button onclick="shiftDate(1)">▶</button></div>
+  <div class="datebar"><button onclick="shiftDate(-1)" aria-label="前一天">◀</button><input type="date" value="${curDate}" onchange="setDate(this.value)"><button onclick="shiftDate(1)" aria-label="後一天">▶</button></div>
   <div class="card" id="hero">${heroHTML(d)}</div>
 
-  <div class="card"><h3>帳號與範圍</h3>
+  <div class="card quick">
+    <input id="qno" class="qin" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" enterkeyhint="done" placeholder="輸入編號">
+    <div class="g3 qbtn">
+      <button class="ev m" ${keep} onclick="qAct('missing')">缺件</button>
+      <button class="ev x" ${keep} onclick="qAct('multi')">多件 +1</button>
+      <button class="ev r" ${keep} onclick="qAct('returns')">退件</button>
+    </div>
+    <div id="qreason"></div>
+    <small class="hint">多件：155 有 2 件就按一次「多件」，3 件按兩次。按錯就點下面紀錄的 ✕，或按「復原」。</small>
+  </div>
+
+  <div class="card"><h3>今天的紀錄</h3><div id="lists">${listsHTML(d)}</div></div>
+
+  <div class="card"><h3>編號範圍</h3>
     <div class="g3">
-      <div><label class="f">帳號總件數</label><input inputmode="numeric" value="${esc(d.total)}" oninput="setF('total',this.value)"></div>
-      <div><label class="f">我從</label><input inputmode="numeric" value="${esc(d.start)}" oninput="setF('start',this.value)"></div>
-      <div><label class="f">到</label><input inputmode="numeric" value="${esc(d.end)}" oninput="setF('end',this.value)" onchange="render()"></div>
+      <div><label class="f">我從</label><input inputmode="numeric" pattern="[0-9]*" value="${esc(d.start)}" oninput="setF('start',this.value)"></div>
+      <div><label class="f">到</label><input inputmode="numeric" pattern="[0-9]*" value="${esc(d.end)}" oninput="setF('end',this.value)"></div>
+      <div><label class="f">帳號總件數</label><input inputmode="numeric" pattern="[0-9]*" value="${esc(d.total)}" oninput="setF('total',this.value)"></div>
     </div>
   </div>
 
-  <div class="card"><h3>送貨中遇到的狀況</h3>
-    <div class="g3"><button class="ev m" onclick="openEv('missing')">＋ 缺件</button><button class="ev x" onclick="openEv('multi')">＋ 多件</button><button class="ev r" onclick="openEv('returns')">＋ 退件</button></div>
-    ${d.missing.length?`<div class="sec"><div class="sech">缺件（早上點不到）</div>${chipList(d,'missing',x=>`${x.no}${x.qty>1?` ×${x.qty}`:''}${(c.has&&(x.no<num(d.start)||x.no>num(d.end)))?` <span class="mut">${P}</span>`:''}`)}</div>`:''}
-    ${d.multi.length?`<div class="sec"><div class="sech">同址多件</div>${chipList(d,'multi',x=>`${x.no} 共${x.qty}件`)}</div>`:''}
-    ${d.returns.length?`<div class="sec"><div class="sech">我的退件</div>${chipList(d,'returns',x=>`${x.no}${x.qty>1?` ×${x.qty}`:''} · ${esc(x.reason)}`)}</div>`:''}
-    <small class="hint">缺件可填任何編號，不在你範圍內的自動算 ${P} 的。</small>
-  </div>
-
-  <div class="card"><div class="sech" style="margin-bottom:6px"><h3 style="margin:0">${P} 退件</h3><button class="sm" onclick="openEv('fReturns')">＋ 新增</button></div>
-    ${chipList(d,'fReturns',x=>`${x.qty} 件 · ${esc(x.reason)}`)||'<div class="mut">收工後問他退了幾件</div>'}
-  </div>
-
-  <div class="card"><h3>時間</h3>
-    ${[['leave','出門'],['arrive','到倉庫'],['start','開始送貨'],['end','送完']].map(([k,l])=>`<div class="trow"><span class="mut">${l}</span><input type="time" value="${esc(d.t[k])}" onchange="setT('${k}',this.value)"><button class="sm" onclick="nowT('${k}')">現在</button></div>`).join('')}
+  <div class="card"><h3>打卡</h3>
+    ${[['leave','出門'],['arrive','到倉庫'],['start','開始送貨'],['end','送完']].map(([k,l])=>`<div class="trow"><button class="punch" onclick="nowT('${k}')">${l}</button><input id="t_${k}" type="time" value="${esc(d.t[k])}" onchange="setT('${k}',this.value)"></div>`).join('')}
     <div class="mut" id="dur">${durHTML(d)}</div>
+    <small class="hint">按左邊按鈕＝記下現在時間；時間錯了點右邊修改。</small>
   </div>
 
-  <div class="card"><h3>今日工作里程（Trip B）</h3>
+  <div class="card"><h3>收工後</h3>
+    <label class="f">今日工作里程（Trip B km）</label>
     <input inputmode="decimal" placeholder="出門前歸零，回家看 B" value="${esc(d.kmB)}" oninput="setF('kmB',this.value)" onchange="render()">
-    <div class="mut" style="margin-top:8px">${(()=>{if(c.km==null)return '出門前把 B 歸零，回家填 B 的讀數';const k=costPerKmOn(d.date);
+    <div class="mut" style="margin-top:6px">${(()=>{if(c.km==null)return '';const k=costPerKmOn(d.date);
       return `${c.km} km · 油錢約 ${money(c.km*k.v)}${k.src==='auto'?`（${money(k.price)}/L · ${k.kmPerL.toFixed(2)} km/L）`:'（暫用手動每公里油錢）'}`})()}</div>
-  </div>
-
-  <div class="card"><h3>備註</h3><textarea rows="2" oninput="setF('note',this.value)">${esc(d.note)}</textarea>
+    <label class="f" style="margin-top:12px">${P} 退件（填件數，再點原因）</label>
+    <div class="frow"><input id="fq" inputmode="numeric" pattern="[0-9]*" value="1"><div class="chips" style="margin:0">${S.settings.reasons.map((r,i)=>`<button class="chip pick" onclick="addFRet(${i})">${esc(r)}</button>`).join('')}</div></div>
+    <div id="flist">${fListHTML(d)}</div>
+    <label class="f" style="margin-top:12px">備註</label><textarea rows="2" oninput="setF('note',this.value)">${esc(d.note)}</textarea>
     ${S.days[curDate]&&!S.days[curDate].deleted?`<button class="sm" style="margin-top:10px;color:var(--bad)" onclick="delDay()">刪除這天紀錄</button>`:''}
   </div>`;
 }
 function delDay(){if(!confirm(`刪除 ${curDate} 的所有紀錄？`))return;const d=newDay(curDate);d.deleted=true;touch('days',d);render()}
-
-/* ---- 事件彈窗 ---- */
-let M=null;
-const EVT={missing:'缺件（倉庫點不到）',multi:'同址多件',returns:'我的退件',fReturns:'Frankie 退件'};
-function openEv(kind){M={kind,no:'',qty:kind==='multi'?2:1,reason:'',note:''};drawM();setTimeout(()=>{const i=document.getElementById('mno');if(i)i.focus()},50)}
-function drawM(){
-  const k=M.kind,needNo=k!=='fReturns',needR=k==='returns'||k==='fReturns';
-  document.getElementById('sheet').innerHTML=`
-  <h2>${k==='fReturns'?esc(S.settings.partner)+' 退件':EVT[k]}</h2>
-  ${needNo?`<label class="f">編號</label><input id="mno" inputmode="numeric" value="${esc(M.no)}" oninput="M.no=this.value" style="font-size:22px">`:''}
-  <label class="f" style="margin-top:12px">${k==='multi'?'這個編號總共幾件':'件數'}</label>
-  <div class="step"><button onclick="M.qty=Math.max(${k==='multi'?2:1},M.qty-1);drawM()">−</button><div>${M.qty}</div><button onclick="M.qty++;drawM()">＋</button></div>
-  ${needR?`<label class="f" style="margin-top:12px">原因</label><div class="chips">${S.settings.reasons.map((r,i)=>`<span class="chip pick ${M.reason===r?'sel':''}" onclick="M.reason=S.settings.reasons[${i}];drawM()">${esc(r)}</span>`).join('')}</div>`:''}
-  <div class="g2" style="margin-top:16px"><button onclick="closeM()">取消</button><button class="pri" onclick="saveEv()">儲存</button></div>`;
-  document.getElementById('modal').classList.add('on');
-}
-function closeM(){document.getElementById('modal').classList.remove('on');M=null}
-function saveEv(){
-  const k=M.kind,d=getDay(curDate);
-  const no=num(M.no);
-  if(k!=='fReturns'&&no==null){toast('請輸入編號');return}
-  if((k==='returns'||k==='fReturns')&&!M.reason){toast('請選退件原因');return}
-  const item={id:rid(),no,qty:M.qty,reason:M.reason};
-  if(k==='multi')d.multi=d.multi.filter(x=>x.no!==no);
-  if(k==='missing')d.missing=d.missing.filter(x=>x.no!==no);
-  d[k]=[...d[k],item].sort((a,b)=>(a.no||0)-(b.no||0));
-  touch('days',d);closeM();render();toast('已記錄');
-}
-function rmEv(key,id){const d=getDay(curDate);d[key]=d[key].filter(x=>x.id!==id);touch('days',d);render()}
 
 /* ================= 每週 ================= */
 function weeksAgg(){
@@ -479,11 +515,28 @@ function vSet(){
   <div class="card"><h3>Google Sheets 同步</h3>
     <label class="f">Apps Script 網址</label><input value="${esc(S.local.url)}" placeholder="https://script.google.com/macros/s/.../exec" onchange="setLocal('url',this.value)">
     <label class="f" style="margin-top:8px">密碼（和 Apps Script 裡的 TOKEN 一樣）</label><input value="${esc(S.local.token)}" onchange="setLocal('token',this.value)">
-    <div class="g2" style="margin-top:10px"><button class="pri" onclick="manualSync()">立即同步</button><button onclick="pull(false)">從雲端下載</button></div>
+    <button class="pri" style="width:100%;margin-top:10px" onclick="testConn()">測試連線</button>
+    <div id="conn" class="formula" style="display:none"></div>
+    <div class="g2" style="margin-top:8px"><button onclick="manualSync()">立即同步</button><button onclick="pull(false)">從雲端下載</button></div>
     <small class="hint">每次修改會先存在手機，有網路時自動上傳；沒訊號也能照常記錄。換手機時填同樣的網址和密碼，按「從雲端下載」。</small>
   </div>
   <div class="card"><h3>備份</h3><div class="g2"><button onclick="backup()">下載 JSON 備份</button><button onclick="document.getElementById('imp').click()">匯入 JSON</button></div>
     <input type="file" id="imp" accept=".json" style="display:none" onchange="restore(this.files[0])"></div>`;
+}
+
+async function testConn(){
+  const o=document.getElementById('conn');o.style.display='block';const say=h=>o.innerHTML=h;
+  const u=S.local.url;
+  if(!u)return say('❌ 還沒貼 Apps Script 網址');
+  if(!/^https:\/\/script\.google\.com\/macros\/s\/[^/]+\/exec$/.test(u))return say('❌ 網址格式不對：要是 https://script.google.com/macros/s/…/exec，不能是 /dev 或編輯器網址');
+  if(!navigator.onLine)return say('❌ 手機目前沒有網路');
+  say('1/2 連線 Apps Script…');
+  try{const r=await fetch(u);const t=await r.text();
+    if(!t.includes('API OK'))return say(/<html|<!doctype/i.test(t)?'❌ 連到了，但拿到的是 Google 網頁，不是 API。<br>→ 部署設定「誰可以存取」要選「所有人」，改完要部署成新版本':'❌ 回應不對：'+esc(t.slice(0,80))+'<br>→ 確認貼的是 ParcelPay 的 Apps Script，並已部署新版本');
+  }catch(e){return say('❌ 連不到 Apps Script。<br>最常見：部署時「誰可以存取」不是「所有人」（選成「擁有 Google 帳戶的使用者」也不行），或網址複製不完整。')}
+  say('2/2 檢查密碼…');
+  try{const j=await api({action:'pull'});say(`✅ 連線成功！雲端目前有 ${(j.items||[]).length} 筆資料`);syncErr='';flush();badge()}
+  catch(e){say(e.message==='密碼錯誤'?'❌ 密碼錯誤：這裡的密碼要和 Apps Script 第 11 行 TOKEN 一模一樣（含大小寫），而且改完 TOKEN 要再部署新版本':'❌ '+esc(errMsg(e)))}
 }
 
 /* ================= 匯出 / 備份 ================= */
@@ -513,6 +566,8 @@ function restore(file){if(!file)return;const r=new FileReader();r.onload=()=>{tr
 
 /* ================= 啟動 ================= */
 load();render();
+document.addEventListener('focusin',e=>{if(e.target.matches('input:not([type=date]):not([type=time]),textarea'))document.body.classList.add('typing')});
+document.addEventListener('focusout',()=>setTimeout(()=>{if(!document.activeElement||!document.activeElement.matches('input,textarea'))document.body.classList.remove('typing')},100));
 if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('sw.js').catch(()=>{});
 if(S.local.url)pull(true);
 window.addEventListener('online',()=>{syncErr='';flush()});
