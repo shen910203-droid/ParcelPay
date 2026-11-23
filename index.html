@@ -107,7 +107,7 @@ small.hint{display:block;color:var(--mut);font-size:12px;margin-top:6px;line-hei
 
 <script>
 /* ================= 資料 ================= */
-const APP_VERSION='v3.2';
+const APP_VERSION='v3.3';
 const LS='songhuoben_v1';
 const DEF_SETTINGS={id:'main',rate:2.5,payOffset:13,weeklyFixed:0,fuelPerKm:0,me:'Aiden',partner:'Frankie',
   reasons:['地址錯誤','無人簽收','拒收','包裹損壞','找不到地址','其他'],updatedAt:0};
@@ -176,12 +176,12 @@ function liveDays(){return Object.values(S.days).filter(d=>!d.deleted)}
 function fills(){return Object.values(S.fuel).filter(x=>!x.deleted&&num(x.liters)>0&&num(x.amount)>0).sort((a,b)=>a.date<b.date?-1:a.date>b.date?1:(a.updatedAt||0)-(b.updatedAt||0))}
 /* 長期油耗：每次「加滿且有 A」為一段，該段公升 = 上次加滿後所有加油（含沒加滿的）*/
 function consumption(){
-  let km=0,L=0,n=0,acc=0,started=false;
+  let km=0,L=0,n=0,acc=0;
   for(const x of fills()){
     acc+=Number(x.liters);
     if(x.full!==false){
-      if(started&&num(x.tripA)>0){km+=Number(x.tripA);L+=acc;n++}
-      started=true;acc=0;
+      if(num(x.tripA)>0){km+=Number(x.tripA);L+=acc;n++}
+      acc=0;
     }
   }
   return n&&L>0?{kmPerL:km/L,lPerKm:L/km,km,L,n}:null;
@@ -518,7 +518,7 @@ function vFuel(){
     <div class="chips"><span class="chip pick ${F.full?'sel':''}" onclick="F.full=!F.full;render()">${F.full?'☑':'☐'} 有加滿</span></div>
     <label class="f" style="margin-top:8px">備註</label><input value="${esc(F.note)}" oninput="F.note=this.value">
     <button class="pri" style="width:100%;margin-top:10px" onclick="addFuel()">記錄</button>
-    <small class="hint">加滿 → 填 A，加完把 A 歸零。沒加滿 → 取消勾選，A 不要歸零，這次的公升數會併入下次加滿一起算油耗。第一次用的那次加滿，A 留空就好。</small>
+    <small class="hint">加滿 → 填 A，加完把 A 歸零。沒加滿 → 取消勾選，A 不要歸零，這次的公升數會併入下次加滿一起算油耗。不知道上次加滿後開了多少的（例如補記以前的），A 留空，只算油價。</small>
   </div>
   <div class="card"><h3>加油紀錄</h3>
     ${list.length?list.map(x=>{const a=num(x.tripA);return `<div class="kv"><span style="flex:1">${md(x.date)}${x.full===false?' <span class="warnc">未滿</span>':''} · ${x.liters}L · ${money(x.amount/x.liters)}/L${a?` · ${a}km`:''}${x.note?` · <span class="mut">${esc(x.note)}</span>`:''}</span><b>${money(Number(x.amount))}</b><button class="sm" onclick="delFuel('${x.id}')">✕</button></div>`}).join(''):'<div class="mut">尚無紀錄</div>'}
