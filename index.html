@@ -179,7 +179,7 @@ small.hint{display:block;color:var(--mut);font-size:12px;margin-top:6px;line-hei
 
 <script>
 /* ================= 資料 ================= */
-const APP_VERSION='v4.7';
+const APP_VERSION='v4.8';
 const LS='songhuoben_v1';
 const DEF_SETTINGS={id:'main',rate:2.5,payOffset:13,weeklyFixed:0,fuelPerKm:0,me:'Aiden',partner:'Frankie',
   reasons:['地址錯誤','無人簽收','拒收','包裹損壞','找不到地址','其他'],updatedAt:0};
@@ -650,14 +650,14 @@ function settleText(){const{from,to,rows,all,T}=settleData(),P=S.settings.partne
   all.forEach(({d,c,st})=>L.push(st==='off'?`${md(d.date)}(${wd(d.date)}) 全員休息`:st==='none'?`${md(d.date)}(${wd(d.date)}) 未記錄`:`${md(d.date)}(${wd(d.date)}) 總${c.T??'-'}｜${M} ${st==='meoff'?'休假':c.delivered}｜${P} ${c.fDelivered??'-'}${c.supOn?`｜${c.supName} ${c.sDelivered??'-'}`:''}`));
   L.push(`合計：${M} ${T.me} 件 ${money(T.me*rate)}｜${P} ${T.f} 件${T.supDays?`｜支援 ${T.sup} 件`:''}`);
   if(T.ded)L.push(`扣款：−${money(T.ded)}　${M} 實領 ${money(T.me*rate-T.ded)}`);
-  L.push(`退件 ${T.myRet+T.fRet+T.sRet} 件　缺件 ${T.miss} 件`);
+  L.push(`未送 ${T.myRet+T.fRet+T.sRet+T.miss} 件`);
   return L.join('\n')}
 async function copySettle(){const t=settleText();try{await navigator.clipboard.writeText(t);toast('已複製，可直接貼給會計')}
   catch(e){const a=document.createElement('textarea');a.value=t;document.body.appendChild(a);a.select();try{document.execCommand('copy');toast('已複製')}catch(_){toast('複製失敗')}a.remove()}}
 function csvSettle(){const{from,to,rows,all,T}=settleData(),P=S.settings.partner,M=S.settings.me;
-  const out=[['日期','星期','總件數',M,P,'支援','退件','缺件',M+'扣款']];
-  all.forEach(({d,c,st})=>out.push((st==='off'||st==='none')?[d.date,wd(d.date),st==='off'?'全員休息':'未記錄']:[d.date,wd(d.date),c.T??'',st==='meoff'?'休假':c.delivered,c.fDelivered??'',c.supOn?(c.sDelivered??''):'',c.myRet+c.fRet+c.sRet,c.myMissing+c.otherMissing,c.ded||'']));
-  out.push(['合計','',T.total,T.me,T.f,T.sup,T.myRet+T.fRet+T.sRet,T.miss,T.ded||'']);
+  const out=[['日期','星期','總件數',M,P,'支援','未送',M+'扣款']];
+  all.forEach(({d,c,st})=>out.push((st==='off'||st==='none')?[d.date,wd(d.date),st==='off'?'全員休息':'未記錄']:[d.date,wd(d.date),c.T??'',st==='meoff'?'休假':c.delivered,c.fDelivered??'',c.supOn?(c.sDelivered??''):'',c.myRet+c.fRet+c.sRet+c.myMissing+c.otherMissing,c.ded||'']));
+  out.push(['合計','',T.total,T.me,T.f,T.sup,T.myRet+T.fRet+T.sRet+T.miss,T.ded||'']);
   out.push([M+' 薪資','',(T.pay).toFixed(2)]);if(T.ded)out.push([M+' 實領（扣款後）','',(T.pay-T.ded).toFixed(2)]);
   dl(`ParcelPay結算_${from}_${to}.csv`,csv(out),'text/csv;charset=utf-8')}
 function vSettle(){
@@ -671,9 +671,9 @@ function vSettle(){
       <div><label class="f">到</label><input type="date" value="${to}" onchange="setSettle('to',this.value)"></div></div>
   </div>
   <div class="card"><h3>每日件數</h3>
-    ${all.length?`<div class="tbl"><table><thead><tr><th>日期</th><th>總數</th><th>${M}</th><th>${P}</th>${hasSup?'<th>支援</th>':''}<th>退/缺</th></tr></thead><tbody>
-    ${all.map(({d,c,st})=>(st==='off'||st==='none')?`<tr class="dim" onclick="curDate='${d.date}';go('day')"><td>${md(d.date)}<span class="mut">${wd(d.date)}</span></td><td colspan="${hasSup?5:4}" style="text-align:center">${st==='off'?'全員休息':'<span class="warnc">未記錄</span>'}</td></tr>`:`<tr onclick="curDate='${d.date}';go('day')"><td>${md(d.date)}<span class="mut">${wd(d.date)}</span>${d.locked?'':' <span class="warnc" title="未結算">●</span>'}</td><td>${c.T??'—'}</td><td class="acc">${st==='meoff'?'<span class="warnc">休</span>':c.delivered}</td><td>${c.fDelivered??'—'}</td>${hasSup?`<td>${c.supOn?(c.sDelivered??'—'):''}</td>`:''}<td class="mut">${c.myRet+c.fRet+c.sRet}/${c.myMissing+c.otherMissing}</td></tr>`).join('')}
-    </tbody><tfoot><tr><td>合計</td><td>${T.total}</td><td class="acc">${T.me}</td><td>${T.f}${T.fMissing?'*':''}</td>${hasSup?`<td>${T.sup}</td>`:''}<td>${T.myRet+T.fRet+T.sRet}/${T.miss}</td></tr></tfoot></table></div>
+    ${all.length?`<div class="tbl"><table><thead><tr><th>日期</th><th>總數</th><th>${M}</th><th>${P}</th>${hasSup?'<th>支援</th>':''}<th>未送</th></tr></thead><tbody>
+    ${all.map(({d,c,st})=>(st==='off'||st==='none')?`<tr class="dim" onclick="curDate='${d.date}';go('day')"><td>${md(d.date)}<span class="mut">${wd(d.date)}</span></td><td colspan="${hasSup?5:4}" style="text-align:center">${st==='off'?'全員休息':'<span class="warnc">未記錄</span>'}</td></tr>`:`<tr onclick="curDate='${d.date}';go('day')"><td>${md(d.date)}<span class="mut">${wd(d.date)}</span>${d.locked?'':' <span class="warnc" title="未結算">●</span>'}</td><td>${c.T??'—'}</td><td class="acc">${st==='meoff'?'<span class="warnc">休</span>':c.delivered}</td><td>${c.fDelivered??'—'}</td>${hasSup?`<td>${c.supOn?(c.sDelivered??'—'):''}</td>`:''}<td class="mut">${c.myRet+c.fRet+c.sRet+c.myMissing+c.otherMissing}</td></tr>`).join('')}
+    </tbody><tfoot><tr><td>合計</td><td>${T.total}</td><td class="acc">${T.me}</td><td>${T.f}${T.fMissing?'*':''}</td>${hasSup?`<td>${T.sup}</td>`:''}<td>${T.myRet+T.fRet+T.sRet+T.miss}</td></tr></tfoot></table></div>
     <div class="legend"><span>${T.work} 天上班${T.meoff?` · ${T.meoff} 我休`:''}${T.off?` · ${T.off} 全休`:''}</span>${rows.some(x=>!x.d.locked)?'<span><span class="warnc">●</span> 未結算</span>':''}${T.fMissing?`<span>* ${P} 有天缺數字</span>`:''}</div>`:'<div class="mut">這段期間沒有紀錄</div>'}
   </div>
   <div class="card"><h3>每人合計</h3>
@@ -682,8 +682,7 @@ function vSettle(){
     ${hasSup?`<div class="kv"><span>支援（${T.supDays} 天）</span><b>${T.sup} 件</b></div>`:''}
     ${T.ded?`<div class="kv"><span>${M} 扣款</span><b class="badc">−${moneyH(T.ded)}</b></div><div class="kv"><span>${M} 實領</span><b class="okc">${moneyH(T.me*rate-T.ded)}</b></div>`:''}
     ${T.dedPend?`<div class="kv"><span>待確認扣款（未計入）</span><b class="warnc">${moneyH(T.dedPend)}</b></div>`:''}
-    <div class="kv"><span>退件</span><b>${T.myRet+T.fRet+T.sRet}</b></div>
-    <div class="kv"><span>缺件</span><b>${T.miss}</b></div>
+    <div class="kv"><span>未送（退件＋缺件）</span><b>${T.myRet+T.fRet+T.sRet+T.miss}</b></div>
     ${T.none?`<div class="warnbox">還有 ${T.none} 天未記錄，合計可能不完整</div>`:''}
     <div class="g2" style="margin-top:12px"><button class="pri" onclick="copySettle()">複製給會計</button><button onclick="csvSettle()">匯出 Excel</button></div>
   </div>`;
