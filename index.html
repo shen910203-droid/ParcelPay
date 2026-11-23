@@ -97,6 +97,11 @@ th:first-child,td:first-child{text-align:left}th{color:var(--mut);font-weight:50
 td .mut{margin-left:4px;font-size:12px}tbody tr{cursor:pointer}tfoot td{font-weight:700;border-bottom:0;border-top:2px solid var(--line)}
 @media(max-width:360px){th,td{padding:8px 3px;font-size:13px}td .mut{display:none}}
 .wline{background:rgba(79,140,255,.1);border:1px solid rgba(79,140,255,.3);border-radius:10px;padding:7px 10px;font-size:13px;margin:8px 0 6px;color:var(--tx)}.wline b{color:var(--acc)}
+.lk{border:0;margin:0;padding:0;min-width:0}
+.lk[disabled] .chip .x{display:none}.lk[disabled] input,.lk[disabled] textarea,.lk[disabled] button{opacity:.6}
+.lockbar{display:flex;align-items:center;justify-content:space-between;gap:8px;background:rgba(46,204,113,.1);border:1px solid rgba(46,204,113,.35);color:var(--ok);border-radius:12px;padding:8px 8px 8px 12px;margin-bottom:12px;font-size:14px}
+.lockbar button{flex:0 0 auto;font-size:14px;padding:8px 12px}
+.done{width:100%;padding:16px;font-size:17px;margin-bottom:12px;background:var(--ok);border-color:var(--ok)}
 small.hint{display:block;color:var(--mut);font-size:12px;margin-top:6px;line-height:1.5}
 </style>
 </head>
@@ -109,7 +114,7 @@ small.hint{display:block;color:var(--mut);font-size:12px;margin-top:6px;line-hei
 
 <script>
 /* ================= 資料 ================= */
-const APP_VERSION='v3.4';
+const APP_VERSION='v3.5';
 const LS='songhuoben_v1';
 const DEF_SETTINGS={id:'main',rate:2.5,payOffset:13,weeklyFixed:0,fuelPerKm:0,me:'Aiden',partner:'Frankie',
   reasons:['地址錯誤','無人簽收','拒收','包裹損壞','找不到地址','其他'],updatedAt:0};
@@ -313,7 +318,7 @@ function durHTML(d){const c=calc(d);return `通勤 ${hm(c.commute)} · 理貨 ${
 /* 復原 */
 let undoSnap=null;
 function snap(d){undoSnap={date:d.date,data:JSON.stringify({missing:d.missing,multi:d.multi,returns:d.returns,fReturns:d.fReturns})}}
-function undo(){if(!undoSnap)return;const d=getDay(undoSnap.date);Object.assign(d,JSON.parse(undoSnap.data));touch('days',d);undoSnap=null;hideUndo();refreshDay();toast('已復原')}
+function undo(){if(!undoSnap)return;const d=getDay(undoSnap.date);if(d.locked){toast('這天已鎖定，要先解鎖');return}Object.assign(d,JSON.parse(undoSnap.data));touch('days',d);undoSnap=null;hideUndo();refreshDay();toast('已復原')}
 function showUndo(msg){const u=document.getElementById('undo');u.querySelector('span').textContent=msg;u.classList.add('on');clearTimeout(showUndo.t);showUndo.t=setTimeout(hideUndo,6000)}
 function hideUndo(){document.getElementById('undo').classList.remove('on')}
 
@@ -352,8 +357,9 @@ function vDay(){
   return `
   <div class="datebar"><button onclick="shiftDate(-1)" aria-label="前一天">◀</button><input type="date" value="${curDate}" onchange="setDate(this.value)"><button onclick="shiftDate(1)" aria-label="後一天">▶</button></div>
   <div class="card" id="hero">${heroHTML(d)}</div>
-
-  <div class="card quick">
+  ${d.locked?`<div class="lockbar"><span>🔒 ${md(curDate)} 已結算，內容已鎖定</span><button onclick="unlockDay()">解鎖編輯</button></div>`:''}
+  <fieldset class="lk" ${d.locked?'disabled':''}>
+  ${d.locked?'':`<div class="card quick">
     <input id="qno" class="qin" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" enterkeyhint="done" placeholder="輸入編號">
     <div class="g3 qbtn">
       <button class="ev m" ${keep} onclick="qAct('missing')">缺件</button>
@@ -364,6 +370,7 @@ function vDay(){
     <small class="hint">多件：155 有 2 件就按一次「多件」，3 件按兩次。按錯就點下面紀錄的 ✕，或按「復原」。</small>
   </div>
 
+  </div>`}
   <div class="card"><h3>今天的紀錄</h3><div id="lists">${listsHTML(d)}</div></div>
 
   <div class="card"><h3>編號範圍</h3>
@@ -396,8 +403,15 @@ function vDay(){
     </div><small class="hint">有支援時，${P} 的件數改成他自己說的數字，支援的件數＝總數扣掉其他所有人倒推。</small>`:''}
     <label class="f" style="margin-top:12px">備註</label><textarea rows="2" oninput="setF('note',this.value)">${esc(d.note)}</textarea>
     ${S.days[curDate]&&!S.days[curDate].deleted?`<button class="sm" style="margin-top:10px;color:var(--bad)" onclick="delDay()">刪除這天紀錄</button>`:''}
-  </div>`;
+  </div>
+  </fieldset>
+  ${d.locked||!(S.days[curDate]&&!S.days[curDate].deleted)?'':`<button class="pri done" onclick="lockDay()">✅ 當日結算完成</button>`}`;
 }
+function lockDay(){const d=getDay(curDate),c=calc(d);
+  if(c.warn.length&&!confirm(`這天還有 ${c.warn.length} 個提醒：\n・${c.warn.join('\n・')}\n\n確定要結算鎖定嗎？`))return;
+  d.locked=true;touch('days',d);hideUndo();render();window.scrollTo(0,0);toast(`${md(curDate)} 已結算鎖定`)}
+function unlockDay(){if(!confirm(`確定要解鎖 ${md(curDate)} 嗎？\n\n這天已經結算過，解鎖後可以修改件數，薪資和結算表也會跟著改變。\n改完記得再按一次「當日結算完成」。`))return;
+  const d=getDay(curDate);d.locked=false;touch('days',d);render();toast('已解鎖，可以編輯')}
 function delDay(){if(!confirm(`刪除 ${curDate} 的所有紀錄？`))return;const d=newDay(curDate);d.deleted=true;touch('days',d);render()}
 
 /* ================= 每週 ================= */
@@ -447,10 +461,11 @@ function vSettle(){
   </div>
   <div class="card"><h3>每日件數</h3>
     ${rows.length?`<div class="tbl"><table><thead><tr><th>日期</th><th>總數</th><th>${M}</th><th>${P}</th>${hasSup?'<th>支援</th>':''}<th>退/缺</th></tr></thead><tbody>
-    ${rows.map(({d,c})=>`<tr onclick="curDate='${d.date}';go('day')"><td>${md(d.date)}<span class="mut">${wd(d.date)}</span></td><td>${c.T??'—'}</td><td class="acc">${c.delivered}</td><td>${c.fDelivered??'—'}</td>${hasSup?`<td>${c.supOn?(c.sDelivered??'—'):''}</td>`:''}<td class="mut">${c.myRet+c.fRet+c.sRet}/${c.myMissing+c.otherMissing}</td></tr>`).join('')}
+    ${rows.map(({d,c})=>`<tr onclick="curDate='${d.date}';go('day')"><td>${md(d.date)}<span class="mut">${wd(d.date)}</span>${d.locked?'':' <span class="warnc" title="未結算">●</span>'}</td><td>${c.T??'—'}</td><td class="acc">${c.delivered}</td><td>${c.fDelivered??'—'}</td>${hasSup?`<td>${c.supOn?(c.sDelivered??'—'):''}</td>`:''}<td class="mut">${c.myRet+c.fRet+c.sRet}/${c.myMissing+c.otherMissing}</td></tr>`).join('')}
     </tbody><tfoot><tr><td>合計</td><td>${T.total}</td><td class="acc">${T.me}</td><td>${T.f}${T.fMissing?'*':''}</td>${hasSup?`<td>${T.sup}</td>`:''}<td>${T.myRet+T.fRet+T.sRet}/${T.miss}</td></tr></tfoot></table></div>
     ${T.fMissing?`<small class="hint">* 有幾天缺 ${P} 的數字（沒填總件數，或有支援但沒填他的件數），沒有算進合計</small>`:''}
-    <small class="hint">點任一列可以跳到那天修改。</small>`:'<div class="mut">這段期間沒有紀錄</div>'}
+    ${rows.some(x=>!x.d.locked)?`<small class="hint"><span class="warnc">●</span> 表示那天還沒按「當日結算完成」</small>`:''}
+    <small class="hint">點任一列可以跳到那天查看。</small>`:'<div class="mut">這段期間沒有紀錄</div>'}
   </div>
   <div class="card"><h3>每人合計</h3>
     <div class="kv"><span>${M}</span><b>${T.me} 件 · ${money(T.me*rate)}</b></div>
