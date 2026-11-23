@@ -17,17 +17,17 @@
 :root{--bg:#0f1115;--card:#181b22;--card2:#1f232c;--line:#2a2f3a;--tx:#e8eaf0;--mut:#8a93a6;--acc:#4f8cff;--ok:#2ecc71;--warn:#f5a524;--bad:#ff5d5d}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body,button,input,a,.chip,nav{touch-action:manipulation}
-body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.45 -apple-system,"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;padding-bottom:calc(72px + env(safe-area-inset-bottom))}
+body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.45 -apple-system,"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;padding-bottom:calc(72px + env(safe-area-inset-bottom))}
 header{position:sticky;top:0;z-index:5;padding-top:calc(12px + env(safe-area-inset-top)) !important;background:rgba(15,17,21,.94);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--line);padding-left:max(16px,calc((100% - 640px)/2 + 12px))!important;padding-right:max(16px,calc((100% - 640px)/2 + 12px))!important}
-h1{font-size:18px;margin:0;letter-spacing:.3px;display:flex;align-items:center;gap:8px;white-space:nowrap}h1 .sub{font-size:12px;color:var(--mut);font-weight:500}.logo{width:26px;height:26px;border-radius:7px}
+h1{font-size:20px;margin:0;letter-spacing:.3px;display:flex;align-items:center;gap:8px;white-space:nowrap}h1 .sub{font-size:12px;color:var(--mut);font-weight:500}.logo{width:26px;height:26px;border-radius:7px}
 .badge{font-size:12px;padding:4px 10px;border-radius:99px;background:var(--card2);color:var(--mut);border:0}
 .badge.ok{color:var(--ok)}.badge.warn{color:var(--warn)}.badge.bad{color:var(--bad)}
 main{padding:12px;max-width:640px;margin:0 auto}
 .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
-.card h3{margin:0 0 10px;font-size:13px;color:var(--mut);font-weight:600;letter-spacing:.5px}
-.mut{color:var(--mut);font-size:13px}.acc{color:var(--acc)}.okc{color:var(--ok)}.badc{color:var(--bad)}.warnc{color:var(--warn)}
+.card h3{margin:0 0 10px;font-size:14px;color:var(--mut);font-weight:600;letter-spacing:.5px}
+.mut{color:var(--mut);font-size:14px}.acc{color:var(--acc)}.okc{color:var(--ok)}.badc{color:var(--bad)}.warnc{color:var(--warn)}
 .big{font-size:40px;font-weight:700;line-height:1.1}.big small{font-size:16px;color:var(--mut);font-weight:500}
-.mid{font-size:22px;font-weight:700}
+.mid{font-size:24px;font-weight:700}
 .row{display:flex;gap:8px;align-items:center}.row>*{flex:1}
 .g4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
 .g2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px}.g3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
@@ -35,9 +35,9 @@ label.f{display:block;font-size:12px;color:var(--mut);margin-bottom:4px;white-sp
 input,select,textarea{width:100%;min-width:0;background:var(--card2);color:var(--tx);border:1px solid var(--line);border-radius:10px;padding:10px;font-size:16px;font-family:inherit}
 input:focus,textarea:focus{outline:none;border-color:var(--acc)}
 input[type=checkbox]{width:auto}
-button{font-family:inherit;font-size:15px;border-radius:10px;border:1px solid var(--line);background:var(--card2);color:var(--tx);padding:10px 12px;cursor:pointer}
+button{font-family:inherit;font-size:16px;border-radius:10px;border:1px solid var(--line);background:var(--card2);color:var(--tx);padding:10px 12px;cursor:pointer}
 button.pri{background:var(--acc);border-color:var(--acc);color:#fff;font-weight:600}
-button.sm{padding:6px 10px;font-size:13px}
+button.sm{padding:6px 10px;font-size:14px}
 button.ev{padding:14px 6px;font-weight:600}
 button.ev.m{color:var(--warn)}button.ev.x{color:var(--acc)}button.ev.r{color:var(--bad)}
 .split{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
@@ -49,8 +49,8 @@ button.ev.m{color:var(--warn)}button.ev.x{color:var(--acc)}button.ev.r{color:var
 .chip.sel{border-color:var(--acc);color:var(--acc)}
 .chip.pick{padding:7px 12px;cursor:pointer}
 .sec{margin-top:12px}.sec:first-child{margin-top:0}
-.sech{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--mut)}
-.warnbox{background:rgba(245,165,36,.1);border:1px solid rgba(245,165,36,.4);color:var(--warn);border-radius:10px;padding:8px 10px;font-size:13px;margin-top:10px}
+.sech{display:flex;justify-content:space-between;align-items:center;font-size:14px;color:var(--mut)}
+.warnbox{background:rgba(245,165,36,.1);border:1px solid rgba(245,165,36,.4);color:var(--warn);border-radius:10px;padding:8px 10px;font-size:14px;margin-top:10px}
 .kv{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--line);font-size:14px}.kv:last-child{border:0}
 .kv b{font-weight:600}.kv>:last-child{text-align:right}.kv>:first-child{min-width:0}
 nav{position:fixed;bottom:0;left:0;right:0;display:flex;justify-content:center;background:#12151b;border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom);z-index:6}
@@ -60,15 +60,15 @@ nav button.on{color:var(--acc)}
 #modal{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:flex-end;justify-content:center;z-index:10}
 #modal.on{display:flex}
 .sheet{background:var(--card);width:100%;max-width:640px;border-radius:18px 18px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom));border-top:1px solid var(--line)}
-.sheet h2{margin:0 0 12px;font-size:17px}
+.sheet h2{margin:0 0 12px;font-size:16px}
 .step{display:grid;grid-template-columns:56px 1fr 56px;gap:8px;align-items:center}
-.step div{text-align:center;font-size:26px;font-weight:700}
+.step div{text-align:center;font-size:24px;font-weight:700}
 .toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:#2b3140;color:#fff;padding:9px 16px;border-radius:99px;font-size:14px;z-index:20;opacity:0;transition:opacity .2s;pointer-events:none}
 .toast.on{opacity:1}
 .wk{cursor:default}
 .wkh{display:flex;justify-content:space-between;align-items:baseline}
 .tog{display:flex;flex-wrap:wrap;gap:6px}
-.formula{background:var(--card2);border-radius:10px;padding:10px;font-size:13px;color:var(--mut);margin-top:10px}
+.formula{background:var(--card2);border-radius:10px;padding:10px;font-size:14px;color:var(--mut);margin-top:10px}
 /* iPhone Safari：日期/時間欄位不縮的問題 */
 input[type=date],input[type=time]{-webkit-appearance:none;appearance:none;display:block;min-height:44px;line-height:22px;text-align:left}
 input::-webkit-date-and-time-value{text-align:left;margin:0}
@@ -81,8 +81,8 @@ body.typing nav{display:none}body.typing .undo,body.typing .toast{bottom:12px}
 .fline{display:flex;align-items:baseline;gap:8px;margin-top:10px;background:var(--card2);border-radius:10px;padding:8px 10px}.fline b{font-size:20px}
 .quick{position:relative}
 .qin{font-size:28px!important;font-weight:700;text-align:center;padding:12px!important;letter-spacing:2px}
-.qbtn{margin-top:10px}.qbtn button{padding:16px 4px;font-size:17px}
-.chip .x{min-width:32px;min-height:28px;font-size:17px}
+.qbtn{margin-top:10px}.qbtn button{padding:16px 4px;font-size:16px}
+.chip .x{min-width:32px;min-height:28px;font-size:16px}
 .punch{font-weight:600}
 .trow{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;margin-bottom:8px}
 .frow{display:grid;grid-template-columns:64px minmax(0,1fr);gap:8px;align-items:start}
@@ -96,18 +96,18 @@ table{width:100%;border-collapse:collapse;font-size:14px;font-variant-numeric:ta
 th,td{padding:8px 6px;text-align:right;white-space:nowrap;border-bottom:1px solid var(--line)}
 th:first-child,td:first-child{text-align:left}th{color:var(--mut);font-weight:500;font-size:12px}
 td .mut{margin-left:4px;font-size:12px}tbody tr{cursor:pointer}tfoot td{font-weight:700;border-bottom:0;border-top:2px solid var(--line)}
-@media(max-width:360px){th,td{padding:8px 3px;font-size:13px}td .mut{display:none}}
-.wline{display:flex;justify-content:space-between;gap:8px;white-space:nowrap;background:rgba(79,140,255,.1);border:1px solid rgba(79,140,255,.3);border-radius:10px;padding:7px 10px;font-size:13px;margin:8px 0 6px;color:var(--tx)}.wline b{color:var(--acc)}
+@media(max-width:360px){th,td{padding:8px 3px;font-size:14px}td .mut{display:none}}
+.wline{display:flex;justify-content:space-between;gap:8px;white-space:nowrap;background:rgba(79,140,255,.1);border:1px solid rgba(79,140,255,.3);border-radius:10px;padding:7px 10px;font-size:14px;margin:8px 0 6px;color:var(--tx)}.wline b{color:var(--acc)}
 .lk{border:0;margin:0;padding:0;min-width:0}
 .lk[disabled] .chip .x{display:none}.lk[disabled] input,.lk[disabled] textarea,.lk[disabled] button{opacity:.6}
 .lockbar{display:flex;align-items:center;justify-content:space-between;gap:8px;background:rgba(46,204,113,.1);border:1px solid rgba(46,204,113,.35);color:var(--ok);border-radius:12px;padding:8px 8px 8px 12px;margin-bottom:12px;font-size:14px}
 .lockbar button{flex:0 0 auto;font-size:14px;padding:8px 12px}
-button.done{width:100%;padding:16px;font-size:17px;margin-bottom:12px;background:var(--ok);border-color:var(--ok)}
+button.done{width:100%;padding:16px;font-size:16px;margin-bottom:12px;background:var(--ok);border-color:var(--ok)}
 .dpick{position:relative;display:flex;align-items:center;justify-content:center;background:var(--card2);border:1px solid var(--line);border-radius:10px;font-weight:600;font-size:16px;min-height:44px;overflow:hidden}
 .dpick input{position:absolute;inset:0;opacity:0;width:100%;height:100%;min-height:0;border:0;padding:0}
 .strip{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;margin:-4px 0 12px}
 .strip button{padding:6px 0 4px;display:flex;flex-direction:column;align-items:center;gap:1px;background:var(--card);border-radius:10px}
-.strip small{font-size:11px;color:var(--mut)}.strip b{font-size:17px}.strip .st{font-style:normal;font-size:11px;height:14px;line-height:14px}
+.strip small{font-size:12px;color:var(--mut)}.strip b{font-size:16px}.strip .st{font-style:normal;font-size:12px;height:14px;line-height:14px}
 .strip .st.lock{color:var(--ok)}.strip .st.has{color:var(--acc);font-size:16px}.strip .st.off{color:var(--warn)}.strip .st.all{color:var(--mut)}
 .strip button.on{background:var(--acc);border-color:var(--acc)}.strip button.on small,.strip button.on .st{color:#fff}
 .strip button.td b{text-decoration:underline;text-underline-offset:3px}
@@ -115,17 +115,17 @@ button.done{width:100%;padding:16px;font-size:17px;margin-bottom:12px;background
 .offbtn{width:100%;margin-bottom:12px;padding:12px;color:var(--warn)}
 .offbox{text-align:center;padding:10px 0}.offbox .big{color:var(--warn)}.offbox button{margin-top:12px}
 tr.dim td{color:var(--mut)}
-.runtop{display:flex;align-items:center;gap:10px;margin-bottom:10px}.runtop b{font-size:17px}.runtop .mut{margin-left:auto}
+.runtop{display:flex;align-items:center;gap:10px;margin-bottom:10px}.runtop b{font-size:16px}.runtop .mut{margin-left:auto}
 body.running nav{display:none}body.running{padding-bottom:calc(24px + env(safe-area-inset-bottom))}body.running .undo,body.running .toast{bottom:calc(16px + env(safe-area-inset-bottom))}
 .rangeline{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:12px;font-size:14px}
-.bigbtn{width:100%;padding:16px 8px;font-size:17px;font-weight:600;margin-bottom:12px}button.okbg{background:var(--ok);border-color:var(--ok)}
+.bigbtn{width:100%;padding:16px 8px;font-size:16px;font-weight:600;margin-bottom:12px}button.okbg{background:var(--ok);border-color:var(--ok)}
 .nextcard .bigbtn{margin-bottom:8px}.editbtn{display:block;margin:0 auto}
 .offbtn small{color:var(--mut);font-size:12px}.offbtn{line-height:1.4;margin:0}
 .evlist{display:flex;flex-direction:column;gap:6px}
-.evr{display:grid;grid-template-columns:28px auto minmax(0,1fr) 36px 34px;align-items:center;gap:8px;background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:6px 4px 6px 10px;font-size:15px}
-.evr .tm{color:var(--mut);font-size:12px;font-variant-numeric:tabular-nums}.evr b{font-size:17px;font-variant-numeric:tabular-nums}
+.evr{display:grid;grid-template-columns:28px auto minmax(0,1fr) 36px 34px;align-items:center;gap:8px;background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:6px 4px 6px 10px;font-size:16px}
+.evr .tm{color:var(--mut);font-size:12px;font-variant-numeric:tabular-nums}.evr b{font-size:16px;font-variant-numeric:tabular-nums}
 .evr .sub{color:var(--tx);font-size:14px;line-height:1.3;word-break:break-all}
-.evr .del{background:none;border:0;color:var(--mut);font-size:18px;padding:6px 0;min-height:36px}
+.evr .del{background:none;border:0;color:var(--mut);font-size:20px;padding:6px 0;min-height:36px}
 .tag{font-size:12px;font-weight:600;border-radius:6px;padding:2px 0;text-align:center}
 .tg-m{color:var(--warn);background:rgba(245,165,36,.12)}.tg-x{color:var(--acc);background:rgba(79,140,255,.12)}.tg-r{color:var(--bad);background:rgba(255,93,93,.12)}
 .steps{display:flex;flex-direction:column;gap:6px}
@@ -133,43 +133,45 @@ body.running nav{display:none}body.running{padding-bottom:calc(24px + env(safe-a
 .stp .n{width:24px;height:24px;border-radius:50%;background:var(--card2);color:var(--mut);display:flex;align-items:center;justify-content:center;font-size:12px}
 .stp.ok .n{background:var(--ok);color:#fff}.stp input{min-height:38px;padding:6px 10px}
 .lk[disabled] .evr .del{display:none}
-.evtot{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}.evtot span{font-size:13px;font-weight:600;border-radius:8px;padding:4px 10px}
+.evtot{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}.evtot span{font-size:14px;font-weight:600;border-radius:8px;padding:4px 10px}
 .evr .no{color:var(--mut);font-size:12px;font-variant-numeric:tabular-nums}
 .sec2{border:1px solid var(--line);border-radius:12px;margin-top:8px;overflow:hidden}.sec2:first-child{margin-top:0}
 .sech2{width:100%;display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:10px;background:var(--card2);border:0;border-radius:0;padding:12px;text-align:left}
-.sech2 b{font-size:17px}.sech2 .tag{padding:3px 8px;white-space:nowrap}.chev{color:var(--mut);font-size:12px}
+.sech2 b{font-size:16px}.sech2 .tag{padding:3px 8px;white-space:nowrap}.chev{color:var(--mut);font-size:12px}
 .sec2 .evlist{padding:8px}
 .htab{width:100%;border-collapse:collapse;margin-top:10px;font-variant-numeric:tabular-nums;table-layout:fixed}
 .htab th{font-size:12px;color:var(--mut);font-weight:500;padding:4px 2px;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.htab td{text-align:center;font-size:18px;font-weight:700;padding:6px 2px;border-top:1px solid var(--line)}
+.htab td{text-align:center;font-size:20px;font-weight:600;color:var(--tx);padding:6px 2px;border-top:1px solid var(--line)}
 .htab td:first-child,.htab th:first-child{text-align:left;font-size:12px;color:var(--mut);font-weight:500;width:40px}
-.htab td:last-child{color:var(--mut)}
+
 .htab th:last-child,.htab td:last-child{width:56px}
-.tline{font-size:13px;color:var(--mut);margin-top:6px}.tline b{color:var(--tx)}
+.tline{font-size:14px;color:var(--mut);margin-top:6px}.tline b{color:var(--tx)}
 .dedr{display:grid;grid-template-columns:minmax(0,1fr) auto 34px;align-items:center;gap:8px;background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:6px 4px 6px 10px}
-.dedr .sub{font-size:13px;color:var(--mut);word-break:break-all}.dedr .del,.rsn .del{background:none;border:0;color:var(--mut);font-size:18px;min-height:36px}
+.dedr .sub{font-size:14px;color:var(--mut);word-break:break-all}.dedr .del,.rsn .del{background:none;border:0;color:var(--mut);font-size:20px;min-height:36px}
 .dedadd{display:grid;grid-template-columns:90px minmax(0,1fr) auto;gap:8px}
 .rsn{display:grid;grid-template-columns:minmax(0,1fr) 40px 34px;align-items:center;gap:6px;background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:4px 4px 4px 12px}
 .rsn button[disabled]{opacity:.3}
 .tg-o{color:var(--mut);background:rgba(138,147,166,.15)}
 button.ev.k{color:var(--mut)}.acrow{display:flex;justify-content:space-between;gap:8px;white-space:nowrap}
-.acres{background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:10px;font-size:14px;line-height:1.6}.acres b{font-size:17px}
+.acres{background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:10px;font-size:14px;line-height:1.6}.acres b{font-size:16px}
 .acres.okb{border-color:rgba(46,204,113,.5);background:rgba(46,204,113,.08)}.acres.badb{border-color:rgba(255,93,93,.5);background:rgba(255,93,93,.08)}
 .dur{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin-top:8px}
-.dur div{background:var(--card2);border-radius:8px;padding:6px 4px;text-align:center;font-size:11px;color:var(--mut);white-space:nowrap}
+.dur div{background:var(--card2);border-radius:8px;padding:6px 4px;text-align:center;font-size:12px;color:var(--mut);white-space:nowrap}
 .dur b{display:block;font-size:14px;color:var(--tx);font-variant-numeric:tabular-nums}
-.htab tr.sm td{font-size:15px;font-weight:600;color:var(--mut)}.htab tr td:first-child{font-size:12px!important;font-weight:500!important;color:var(--mut)!important}
-.htab tr.tot td{border-top:2px solid var(--line)}.htab tr.tot td:last-child{color:var(--tx);font-size:20px}.htab td.chk{font-size:12px;font-weight:500}
+.htab tr td:first-child{font-size:12px!important;font-weight:500!important;color:var(--mut)!important}
+.htab tr.tot td{border-top:2px solid var(--line)}.htab td.chk{font-size:12px;font-weight:500}
 .legend{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12px;color:var(--mut);margin-top:8px}
 .fuelr{display:grid;grid-template-columns:minmax(0,1fr) auto 34px;align-items:center;gap:8px;background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:8px 4px 8px 12px}
-.fuelr .del{background:none;border:0;color:var(--mut);font-size:18px;min-height:36px}.fuelr .mut{font-size:12px}
+.fuelr .del{background:none;border:0;color:var(--mut);font-size:20px;min-height:36px}.fuelr .mut{font-size:12px}
 .qbtn button{white-space:nowrap}
-@media(max-width:360px){.evr .tm{display:none}.evr{grid-template-columns:28px auto minmax(0,1fr) 34px}.qbtn button{font-size:15px;padding:16px 2px}}
+@media(max-width:360px){.evr .tm{display:none}.evr{grid-template-columns:28px auto minmax(0,1fr) 34px}.qbtn button{font-size:16px;padding:16px 2px}}
+.hdr-r{display:flex;gap:6px;align-items:center}#eye.on{color:var(--warn)}
+.calcbtn{background:none;border:0;color:var(--mut);font-size:12px;padding:8px 0 0}
 small.hint{display:block;color:var(--mut);font-size:12px;margin-top:6px;line-height:1.5}
 </style>
 </head>
 <body>
-<header><h1><img src="icon.svg" alt="" class="logo">ParcelPay <span class="sub">送貨本</span></h1><button id="badge" class="badge" onclick="manualSync()">—</button></header>
+<header><h1><img src="icon.svg" alt="" class="logo">ParcelPay <span class="sub">送貨本</span></h1><div class="hdr-r"><button id="eye" class="badge" onclick="toggleMoney()" aria-label="隱藏金額">$</button><button id="badge" class="badge" onclick="manualSync()">—</button></div></header>
 <main id="view"></main>
 <nav id="nav"></nav>
 <div class="toast" id="toast"></div>
@@ -177,7 +179,7 @@ small.hint{display:block;color:var(--mut);font-size:12px;margin-top:6px;line-hei
 
 <script>
 /* ================= 資料 ================= */
-const APP_VERSION='v4.6';
+const APP_VERSION='v4.7';
 const LS='songhuoben_v1';
 const DEF_SETTINGS={id:'main',rate:2.5,payOffset:13,weeklyFixed:0,fuelPerKm:0,me:'Aiden',partner:'Frankie',
   reasons:['地址錯誤','無人簽收','拒收','包裹損壞','找不到地址','其他'],updatedAt:0};
@@ -200,6 +202,7 @@ const payday=ws=>addDays(ws,Number(S.settings.payOffset)||13);
 const md=s=>{const d=pd(s);return `${d.getMonth()+1}/${d.getDate()}`};
 const wd=s=>'日一二三四五六'[pd(s).getDay()];
 const money=n=>(n<0?'-':'')+'$'+Math.abs(Math.round(n*100)/100).toFixed(2);
+const moneyH=n=>S.ui.hideMoney?'$ •••':money(n);
 const num=v=>(v===''||v==null||isNaN(Number(v)))?null:Number(v);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const rid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
@@ -330,7 +333,8 @@ async function pull(silent){
   syncing=false;badge();flush();
 }
 const errMsg=e=>/fetch|network|load failed|json|unexpected/i.test(e&&e.message||'')?(navigator.onLine?'連不到雲端':'無網路'):(e&&e.message)||'失敗';
-function badge(){
+function toggleMoney(){S.ui.hideMoney=!S.ui.hideMoney;persist();render();toast(S.ui.hideMoney?'金額已隱藏':'金額已顯示')}
+function badge(){const ey=document.getElementById('eye');if(ey){ey.textContent=S.ui.hideMoney?'$ 隱藏':'$';ey.classList.toggle('on',!!S.ui.hideMoney)}
   const b=document.getElementById('badge');let t,c='';
   if(!S.local.url){t='未連雲端';c='warn'}
   else if(syncing){t='同步中…'}
@@ -379,20 +383,21 @@ function sumTable(c){
   const dSum=cols.every(x=>x[1]!=null)?sum(cols,x=>x[1]==='休'?0:x[1]):null,rSum=sum(cols,x=>x[2]||0),mSum=c.myMissing+c.otherMissing;
   const chk=c.T!=null&&dSum!=null?dSum+rSum+mSum:null,bad=chk!=null&&chk!==c.T;
   return `<table class="htab"><tr><th></th>${cols.map(x=>`<th>${x[0]}</th>`).join('')}<th>合計</th></tr>
-    <tr><td>送達</td>${cols.map((x,i)=>`<td class="${i===0?'acc':''}">${v(x[1])}</td>`).join('')}<td>${v(dSum)}</td></tr>
-    <tr class="sm"><td>退件</td>${cols.map(x=>`<td>${x[2]||0}</td>`).join('')}<td>${rSum}</td></tr>
-    <tr class="sm"><td>缺件</td>${cols.map(x=>`<td>${x[3]==null?'—':x[3]}</td>`).join('')}<td>${mSum}</td></tr>
+    <tr><td>送達</td>${cols.map(x=>`<td>${v(x[1])}</td>`).join('')}<td>${v(dSum)}</td></tr>
+    <tr><td>退件</td>${cols.map(x=>`<td>${x[2]||0}</td>`).join('')}<td>${rSum}</td></tr>
+    <tr><td>缺件</td>${cols.map(x=>`<td>${x[3]==null?'—':x[3]}</td>`).join('')}<td>${mSum}</td></tr>
     <tr class="tot"><td>總件數</td><td colspan="${cols.length}" class="chk">${chk==null?'':bad?`<span class="badc">⚠️ 加總 ${chk} ≠ 總件數</span>`:'<span class="okc">✓ 對得上</span>'}</td><td>${c.T??'—'}</td></tr></table>`}
 function heroHTML(d){
   const c=calc(d),P=esc(S.settings.partner);
   if(c.allOff)return `<div class="offbox"><div class="big">全員休息</div><div class="mut">${md(d.date)}（${wd(d.date)}）沒有貨，不計件數</div></div>`;
   const ws=weekStart(d.date),w=weeksAgg().find(x=>x.ws===ws);
   return `<div class="hrow"><div><div class="mut">${c.meOff?md(d.date):'我送達'}（${wd(d.date)}）</div>${c.meOff?'<div class="big warnc">我休假</div>':`<div class="big">${c.delivered}<small> 件</small></div>`}</div>
-    <div class="hr"><div class="mid ${c.meOff?'':'acc'}">${money(c.pay)}</div><div class="mut">今日</div></div></div>
-  <div class="wline"><span>本週累計 <b>${w?w.me:0} 件 · ${money(w?w.payNet:0)}</b></span><span>${md(payday(ws))}（日）發薪</span></div>
-  ${c.has?`<div class="mut">${c.numbers} 號 + 多件 ${c.extra} − 缺件 ${c.myMissing} − 退件 ${c.myRet}</div>`:''}
-  ${c.ded||c.dedPend?`<div class="warnbox" style="color:var(--bad);border-color:rgba(255,93,93,.4);background:rgba(255,93,93,.08)">${c.ded?`<div>扣款 −${money(c.ded)} → 今日實領 ${money(c.netPay)}</div>`:''}${c.dedPend?`<div class="warnc">待確認扣款 ${money(c.dedPend)}</div>`:''}</div>`:''}
+    <div class="hr"><div class="mid ${c.meOff?'':'acc'}">${moneyH(c.pay)}</div><div class="mut">今日</div></div></div>
+  <div class="wline"><span>本週累計 <b>${w?w.me:0} 件 · ${moneyH(w?w.payNet:0)}</b></span><span>${md(payday(ws))}（日）發薪</span></div>
+  ${c.ded||c.dedPend?`<div class="warnbox" style="color:var(--bad);border-color:rgba(255,93,93,.4);background:rgba(255,93,93,.08)">${c.ded?`<div>扣款 −${moneyH(c.ded)} → 今日實領 ${moneyH(c.netPay)}</div>`:''}${c.dedPend?`<div class="warnc">待確認扣款 ${moneyH(c.dedPend)}</div>`:''}</div>`:''}
   ${sumTable(c)}
+  ${(()=>{const lines=[];if(c.has)lines.push(`我：${c.numbers} 號 + 多件 ${c.extra} − 缺件 ${c.myMissing} − 退件 ${c.myRet} = ${c.delivered}`);const f=formulaHTML(c).replace(/<[^>]+>/g,'');if(f)lines.push(f);
+    return lines.length?`<button class="calcbtn" onclick="S.ui.showCalc=!S.ui.showCalc;persist();refreshDay()">算法 ${S.ui.showCalc?'▲':'▼'}</button>${S.ui.showCalc?`<div class="formula">${lines.join('<br>')}</div>`:''}`:''})()}
   ${c.warn.map(w=>`<div class="warnbox">⚠️ ${esc(w)}</div>`).join('')}`;
 }
 
@@ -419,11 +424,11 @@ function listsHTML(d){
    +secHTML('missing','缺件','m',myMiss,`${sum(myMiss,x=>x.qty)} 件`,x=>`<b>${x.no}</b><span class="sub">${x.qty>1?`×${x.qty}`:''}</span>`)
    +secHTML('multi','多件','x',myMulti,`${myMulti.length} 號 · +${mk} 件${dv?`<span class="mut" style="font-size:12px;font-weight:500"> ＋${dv} 由退/缺推算</span>`:''}`,x=>`<b>${x.no}</b><span class="sub">共 ${x.qty} 件</span>`)
    +(mySkip.length?secHTML('skip','跳號','o',mySkip,`${mySkip.length} 個號`,x=>`<b>${x.no}</b><span class="sub">系統沒有這號</span>`):'')
-   +(oth.length?secHTML('others',`${P} 範圍`,'o',oth,`<span class="mut" style="font-size:13px;font-weight:500">${oth.length} 筆，不算你的</span>`,x=>`<b>${x.no}</b><span class="sub">${x._k==='multi'?`多件 共 ${x.qty} 件`:x._k==='skip'?'跳號':`缺件${x.qty>1?` ×${x.qty}`:''}`}</span>`):'');
+   +(oth.length?secHTML('others',`${P} 範圍`,'o',oth,`<span class="mut" style="font-size:14px;font-weight:500">${oth.length} 筆</span>`,x=>`<b>${x.no}</b><span class="sub">${x._k==='multi'?`多件 共 ${x.qty} 件`:x._k==='skip'?'跳號':`缺件${x.qty>1?` ×${x.qty}`:''}`}</span>`):'');
 }
 function fListHTML(d){return d.fReturns.length?secHTML('fReturns',`${esc(S.settings.partner)} 退件`,'r',d.fReturns,`${sum(d.fReturns,x=>x.qty)} 件`,x=>`<b>${x.qty} 件</b><span class="sub">${esc(x.reason)}</span>`):''}
 function runHeadHTML(d){const c=calc(d);
-  return `<div class="hrow"><div><div class="big">${c.delivered}<small> 件</small></div></div><div class="hr"><div class="mid acc">${money(c.pay)}</div></div></div>
+  return `<div class="hrow"><div><div class="big">${c.delivered}<small> 件</small></div></div><div class="hr"><div class="mid acc">${moneyH(c.pay)}</div></div></div>
   <div class="mut">${c.has?`範圍 ${c.numbers} 號 · 多件 +${c.extra} · 缺件 −${c.myMissing} · 退件 −${c.myRet}`:'先填編號範圍'}</div>
   ${c.has?`<div class="mut" style="margin-top:2px">${esc(S.settings.partner)} ${c.fDelivered??'—'} 件 · 總件數 ${c.T??'—'}</div>`:''}
   ${c.warn.map(w=>`<div class="warnbox">⚠️ ${esc(w)}</div>`).join('')}`}
@@ -599,7 +604,7 @@ function vDay(){
 }
 function dedHTML(d){const L=(d.ded||[]).slice().sort((a,b)=>(b.at||0)-(a.at||0));
   return `<div class="card"><h3>扣款 / 賠償</h3>
-    ${L.length?`<div class="evlist" style="margin-bottom:10px">${L.map(x=>`<div class="dedr"><div><b class="badc">−${money(Number(x.amount)||0)}</b><div class="sub">${esc(x.note)||'（沒寫原因）'}</div></div><button class="chip pick ${x.confirmed?'sel':''}" onclick="dedToggle('${x.id}')">${x.confirmed?'已扣':'待確認'}</button><button class="del" onclick="dedDel('${x.id}')" aria-label="刪除">✕</button></div>`).join('')}</div>`:''}
+    ${L.length?`<div class="evlist" style="margin-bottom:10px">${L.map(x=>`<div class="dedr"><div><b class="badc">−${moneyH(Number(x.amount)||0)}</b><div class="sub">${esc(x.note)||'（沒寫原因）'}</div></div><button class="chip pick ${x.confirmed?'sel':''}" onclick="dedToggle('${x.id}')">${x.confirmed?'已扣':'待確認'}</button><button class="del" onclick="dedDel('${x.id}')" aria-label="刪除">✕</button></div>`).join('')}</div>`:''}
     <div class="dedadd"><input id="dedAmt" inputmode="decimal" placeholder="金額 $"><input id="dedNote" placeholder="原因（例：包裹損壞賠償）"><button onclick="dedAdd()">新增</button></div>
     <small class="hint">待確認不扣錢；確定被扣再點成「已扣」</small></div>`}
 function dedAdd(){const a=num(document.getElementById('dedAmt').value);if(!(a>0)){toast('請輸入金額');return}
@@ -672,11 +677,11 @@ function vSettle(){
     <div class="legend"><span>${T.work} 天上班${T.meoff?` · ${T.meoff} 我休`:''}${T.off?` · ${T.off} 全休`:''}</span>${rows.some(x=>!x.d.locked)?'<span><span class="warnc">●</span> 未結算</span>':''}${T.fMissing?`<span>* ${P} 有天缺數字</span>`:''}</div>`:'<div class="mut">這段期間沒有紀錄</div>'}
   </div>
   <div class="card"><h3>每人合計</h3>
-    <div class="kv"><span>${M}</span><b>${T.me} 件 · ${money(T.me*rate)}</b></div>
-    <div class="kv"><span>${P}</span><b>${T.f} 件 · ${money(T.f*rate)}</b></div>
+    <div class="kv"><span>${M}</span><b>${T.me} 件 · ${moneyH(T.me*rate)}</b></div>
+    <div class="kv"><span>${P}</span><b>${T.f} 件 · ${moneyH(T.f*rate)}</b></div>
     ${hasSup?`<div class="kv"><span>支援（${T.supDays} 天）</span><b>${T.sup} 件</b></div>`:''}
-    ${T.ded?`<div class="kv"><span>${M} 扣款</span><b class="badc">−${money(T.ded)}</b></div><div class="kv"><span>${M} 實領</span><b class="okc">${money(T.me*rate-T.ded)}</b></div>`:''}
-    ${T.dedPend?`<div class="kv"><span>待確認扣款（未計入）</span><b class="warnc">${money(T.dedPend)}</b></div>`:''}
+    ${T.ded?`<div class="kv"><span>${M} 扣款</span><b class="badc">−${moneyH(T.ded)}</b></div><div class="kv"><span>${M} 實領</span><b class="okc">${moneyH(T.me*rate-T.ded)}</b></div>`:''}
+    ${T.dedPend?`<div class="kv"><span>待確認扣款（未計入）</span><b class="warnc">${moneyH(T.dedPend)}</b></div>`:''}
     <div class="kv"><span>退件</span><b>${T.myRet+T.fRet+T.sRet}</b></div>
     <div class="kv"><span>缺件</span><b>${T.miss}</b></div>
     ${T.none?`<div class="warnbox">還有 ${T.none} 天未記錄，合計可能不完整</div>`:''}
@@ -695,24 +700,24 @@ function vPay(){
   const owed=W.filter(w=>w.pd<=t&&!(w.rec&&num(w.rec.received)!=null));
   return `
   <div class="card"><div class="g2">
-    <div><div class="mut">下一個發薪日</div><div class="mid">${next?md(next.pd)+'（'+wd(next.pd)+'）':'—'}</div><div class="acc">${next?money(next.payNet):''}</div></div>
-    <div><div class="mut">已過發薪日未入帳</div><div class="mid ${owed.length?'badc':'okc'}">${money(sum(owed,w=>w.payNet))}</div><div class="mut">${owed.length} 週</div></div>
+    <div><div class="mut">下一個發薪日</div><div class="mid">${next?md(next.pd)+'（'+wd(next.pd)+'）':'—'}</div><div class="acc">${next?moneyH(next.payNet):''}</div></div>
+    <div><div class="mut">已過發薪日未入帳</div><div class="mid ${owed.length?'badc':'okc'}">${moneyH(sum(owed,w=>w.payNet))}</div><div class="mut">${owed.length} 週</div></div>
   </div>
-  <div class="g2" style="margin-top:12px"><button onclick="csvDays()">匯出每日 Excel</button><button onclick="csvWeeks()">匯出每週 Excel</button></div></div>
+  <div class="g2" style="margin-top:12px"><button onclick="csvDays()">每日 Excel</button><button onclick="csvWeeks()">每週 Excel</button></div></div>
   ${W.length?W.map(w=>{const r=w.rec||{};const rv=num(r.received);const diff=rv==null?null:rv-w.payNet;
   return `<div class="card wk">
     <div class="wkh"><b>${md(w.ws)} – ${md(addDays(w.ws,6))}</b><span class="mut">發薪 ${md(w.pd)}（${wd(w.pd)}）</span></div>
     <div class="g3" style="margin-top:10px">
-      <div><div class="mut">我送達</div><div class="mid">${w.me}</div><div class="acc">${money(w.payNet)}</div>${w.ded?`<div class="badc" style="font-size:12px">已扣 ${money(w.ded)}</div>`:''}</div>
+      <div><div class="mut">我送達</div><div class="mid">${w.me}</div><div class="acc">${moneyH(w.payNet)}</div>${w.ded?`<div class="badc" style="font-size:12px">已扣 ${moneyH(w.ded)}</div>`:''}</div>
       <div><div class="mut">${P}</div><div class="mid">${w.fKnown?w.f:'—'}</div><div class="mut">${w.fKnown?(w.sup?`支援 ${w.sup}`:''):'有天缺總數'}</div></div>
       <div><div class="mut">退件</div><div class="mid">${w.myRet+w.fRet}</div><div class="mut">${w.days} 天</div></div>
     </div>
-    <div class="dur"><div>里程<b>${w.km} km</b></div><div>油錢<b>${money(w.fuel)}</b></div><div>固定成本<b>${money(w.fixed)}</b></div><div>天數<b>${w.days}</b></div></div>
-    ${w.dedPend?`<div class="kv"><span class="mut">待確認扣款（未計入）</span><b class="warnc">${money(w.dedPend)}</b></div>`:''}
-    <div class="kv"><span class="mut">扣油錢、成本後實收</span><b>${money(w.net)}</b></div>
+    <div class="dur"><div>里程<b>${w.km} km</b></div><div>油錢<b>${moneyH(w.fuel)}</b></div><div>固定成本<b>${moneyH(w.fixed)}</b></div><div>天數<b>${w.days}</b></div></div>
+    ${w.dedPend?`<div class="kv"><span class="mut">待確認扣款（未計入）</span><b class="warnc">${moneyH(w.dedPend)}</b></div>`:''}
+    <div class="kv"><span class="mut">扣油錢、成本後實收</span><b>${moneyH(w.net)}</b></div>
     <div class="g2" style="margin-top:8px">
       <div><label class="f">實際入帳</label><input inputmode="decimal" value="${esc(r.received||'')}" onchange="setRec('${w.ws}','received',this.value)"></div>
-      <div><label class="f">差額</label><div class="mid ${diff==null?'':Math.abs(diff)<0.005?'okc':'badc'}" style="padding-top:4px">${diff==null?'—':money(diff)}</div></div>
+      <div><label class="f">差額</label><div class="mid ${diff==null?'':Math.abs(diff)<0.005?'okc':'badc'}" style="padding-top:4px">${diff==null?'—':moneyH(diff)}</div></div>
     </div>
   </div>`}).join(''):'<div class="card mut">還沒有紀錄</div>'}`;
 }
@@ -729,7 +734,7 @@ function vFuel(){
   const c=consumption(),k=costPerKmOn(today()),list=fills().slice().reverse();
   return `
   <div class="card"><h3>目前每公里油錢</h3>
-    <div class="mid">${money(k.v)} <span class="mut" style="font-size:13px">/ km</span></div>
+    <div class="mid">${money(k.v)} <span class="mut" style="font-size:14px">/ km</span></div>
     ${k.src==='auto'?`<div class="dur"><div>km/L<b>${c.kmPerL.toFixed(2)}</b></div><div>L/100km<b>${(100/c.kmPerL).toFixed(1)}</b></div><div>油價/L<b>${money(k.price)}</b></div><div>加滿次數<b>${c.n}</b></div></div>`
       :'<div class="mut">還沒有含 A 里程的加油紀錄，暫用設定裡的手動值</div>'}
     <small class="hint">每日油錢 = B 里程 × 長期油耗 × 當時油價</small>
@@ -784,18 +789,18 @@ function vStat(){
   </div>
   <div class="card"><h3>收入</h3>
     <div class="kv"><span>送達件數</span><b>${tot.me} 件${tot.n?`（日均 ${(tot.me/tot.n).toFixed(1)}）`:''}</b></div>
-    <div class="kv"><span>薪資（稅前）</span><b>${money(tot.pay)}</b></div>
+    <div class="kv"><span>薪資（稅前）</span><b>${moneyH(tot.pay)}</b></div>
     <div class="kv"><span>里程</span><b>${tot.km} km${tot.n?`（日均 ${(tot.km/tot.n).toFixed(0)}）`:''}</b></div>
-    ${tot.ded?`<div class="kv"><span>扣款 / 賠償</span><b>− ${money(tot.ded)}</b></div>`:''}
-    <div class="kv"><span>工作油錢</span><b>− ${money(tot.fuel)}</b></div>
-    <div class="kv"><span>固定成本</span><b>− ${money(tot.fixed)}</b></div>
-    <div class="kv"><span>實際收入</span><b class="okc">${money(tot.net)}</b></div>
+    ${tot.ded?`<div class="kv"><span>扣款 / 賠償</span><b>− ${moneyH(tot.ded)}</b></div>`:''}
+    <div class="kv"><span>工作油錢</span><b>− ${moneyH(tot.fuel)}</b></div>
+    <div class="kv"><span>固定成本</span><b>− ${moneyH(tot.fixed)}</b></div>
+    <div class="kv"><span>實際收入</span><b class="okc">${moneyH(tot.net)}</b></div>
   </div>
   <div class="card"><h3>時薪計算器</h3>
     <div class="mut">分子：薪資</div><div class="tog" style="margin:6px 0 10px">${tg('num.ded',N.ded!==false,'扣賠償')}${tg('num.fuel',N.fuel,'扣油錢')}${tg('num.fixed',N.fixed,'扣固定成本')}</div>
     <div class="mut">分母：時間包含</div><div class="tog" style="margin:6px 0">${tg('den.commute',D.commute,'通勤')}${tg('den.sort',D.sort,'理貨')}${tg('den.deliver',D.deliver,'送貨')}</div>
-    <div class="big" style="margin-top:12px">${hourly==null?'—':money(hourly)} <small>/ 小時</small></div>
-    <div class="formula">${segs.length?`${money(numer)} ÷ ${hm(den)}，用 ${ok.length} 天計算`:'至少勾一種時間'}
+    <div class="big" style="margin-top:12px">${hourly==null?'—':moneyH(hourly)} <small>/ 小時</small></div>
+    <div class="formula">${segs.length?`${moneyH(numer)} ÷ ${hm(den)}，用 ${ok.length} 天計算`:'至少勾一種時間'}
     ${days.length-ok.length>0&&segs.length?`<br>⚠️ ${days.length-ok.length} 天時間沒填完整，已排除（分子分母都不算）`:''}
     ${noKm?`<br>⚠️ ${noKm} 天沒填里程，那幾天沒扣到油錢`:''}</div>
   </div>`;
