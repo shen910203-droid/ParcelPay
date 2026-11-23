@@ -107,6 +107,7 @@ small.hint{display:block;color:var(--mut);font-size:12px;margin-top:6px;line-hei
 
 <script>
 /* ================= 資料 ================= */
+const APP_VERSION='v3.1';
 const LS='songhuoben_v1';
 const DEF_SETTINGS={id:'main',rate:2.5,payOffset:13,weeklyFixed:0,fuelPerKm:0,me:'Aiden',partner:'Frankie',
   reasons:['地址錯誤','無人簽收','拒收','包裹損壞','找不到地址','其他'],updatedAt:0};
@@ -600,7 +601,8 @@ function vSet(){
     <small class="hint">每次修改會先存在手機，有網路時自動上傳；沒訊號也能照常記錄。換手機時填同樣的網址和密碼，按「從雲端下載」。</small>
   </div>
   <div class="card"><h3>備份</h3><div class="g2"><button onclick="backup()">下載 JSON 備份</button><button onclick="document.getElementById('imp').click()">匯入 JSON</button></div>
-    <input type="file" id="imp" accept=".json" style="display:none" onchange="restore(this.files[0])"></div>`;
+    <input type="file" id="imp" accept=".json" style="display:none" onchange="restore(this.files[0])"></div>
+  <div class="mut" style="text-align:center;margin:4px 0 12px">ParcelPay ${APP_VERSION}</div>`;
 }
 
 async function testConn(){
