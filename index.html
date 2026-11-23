@@ -87,7 +87,7 @@ body.typing nav{display:none}body.typing .undo,body.typing .toast{bottom:12px}
 .frow{display:grid;grid-template-columns:64px minmax(0,1fr);gap:8px;align-items:start}
 .undo{position:fixed;left:50%;bottom:calc(76px + env(safe-area-inset-bottom));transform:translateX(-50%);background:#2b3140;color:#fff;border-radius:12px;padding:6px 6px 6px 14px;display:none;align-items:center;gap:12px;z-index:21;max-width:92vw;font-size:14px;box-shadow:0 6px 20px rgba(0,0,0,.4)}
 .undo.on{display:flex}.undo span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.undo button{background:var(--acc);border:0;color:#fff;font-weight:600;padding:8px 12px}
+.undo button{white-space:nowrap;flex:0 0 auto;background:var(--acc);border:0;color:#fff;font-weight:600;padding:8px 12px}
 .seg{display:grid;grid-template-columns:1fr 1fr;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:4px;margin-bottom:12px}
 .seg button{border:0;background:none;color:var(--mut);padding:9px}.seg button.on{background:var(--card2);color:var(--tx);font-weight:600}
 .tbl{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:0 -4px}
@@ -149,6 +149,9 @@ body.running nav{display:none}body.running{padding-bottom:calc(24px + env(safe-a
 .dedadd{display:grid;grid-template-columns:90px minmax(0,1fr) auto;gap:8px}
 .rsn{display:grid;grid-template-columns:minmax(0,1fr) 40px 34px;align-items:center;gap:6px;background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:4px 4px 4px 12px}
 .rsn button[disabled]{opacity:.3}
+.tg-o{color:var(--mut);background:rgba(138,147,166,.15)}
+.acres{background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:10px;font-size:14px;line-height:1.6}.acres b{font-size:17px}
+.acres.okb{border-color:rgba(46,204,113,.5);background:rgba(46,204,113,.08)}.acres.badb{border-color:rgba(255,93,93,.5);background:rgba(255,93,93,.08)}
 small.hint{display:block;color:var(--mut);font-size:12px;margin-top:6px;line-height:1.5}
 </style>
 </head>
@@ -161,7 +164,7 @@ small.hint{display:block;color:var(--mut);font-size:12px;margin-top:6px;line-hei
 
 <script>
 /* ================= 資料 ================= */
-const APP_VERSION='v4.4';
+const APP_VERSION='v4.5';
 const LS='songhuoben_v1';
 const DEF_SETTINGS={id:'main',rate:2.5,payOffset:13,weeklyFixed:0,fuelPerKm:0,me:'Aiden',partner:'Frankie',
   reasons:['地址錯誤','無人簽收','拒收','包裹損壞','找不到地址','其他'],updatedAt:0};
@@ -194,7 +197,7 @@ function toast(t){const e=document.getElementById('toast');e.textContent=t;e.cla
 
 /* ================= 計算 ================= */
 function newDay(date){return{id:date,date,total:'',start:'',end:'',missing:[],multi:[],returns:[],fReturns:[],sup:{on:false,name:'',fDel:'',sRet:''},
-  t:{leave:'',arrive:'',start:'',end:'',home:''},kmB:'',offType:'',offMiss:'',ded:[],note:'',updatedAt:0,deleted:false}}
+  t:{leave:'',arrive:'',start:'',end:'',home:''},kmB:'',offType:'',offMiss:'',ded:[],acStart:'',acEnd:'',note:'',updatedAt:0,deleted:false}}
 function getDay(date){const d=S.days[date];return d&&!d.deleted?d:newDay(date)}
 function calc(d){
   const s=num(d.start),e=num(d.end),T=num(d.total),rate=Number(S.settings.rate)||0;
@@ -222,7 +225,6 @@ function calc(d){
   const km=num(d.kmB);
   const warn=[];
   if(s!=null&&e!=null&&e<s)warn.push('結束編號小於起始編號');
-  d.multi.filter(m=>has&&!inR(m.no)).forEach(m=>warn.push(`多件 ${m.no} 不在你的範圍，沒有計入`));
   d.returns.filter(r=>has&&!inR(r.no)).forEach(r=>warn.push(`退件 ${r.no} 不在你的範圍`));
   d.returns.filter(r=>d.missing.some(m=>m.no===r.no)).forEach(r=>warn.push(`${r.no} 同時記了缺件和退件，會被扣兩次`));
   if(!supOn&&fDelivered!=null&&fDelivered<0)warn.push(`${S.settings.partner} 算出負數：總件數或範圍可能填錯`);
@@ -390,12 +392,17 @@ function toggleSec(k){S.ui.sec=S.ui.sec||{};S.ui.sec[k]=!S.ui.sec[k];persist();r
 function secHTML(key,title,cls,items,count,rowFn){
   const open=secState(key),list=items.slice().sort((a,b)=>(a.at||0)-(b.at||0)).map((x,i)=>({x,n:i+1})).reverse();
   return `<div class="sec2 ${open?'open':''}"><button class="sech2" onclick="toggleSec('${key}')"><span class="tag tg-${cls}">${title}</span><b>${count}</b><span class="chev">${items.length?(open?'收起 ▲':'展開 ▼'):''}</span></button>
-    ${open&&list.length?`<div class="evlist">${list.map(({x,n})=>`<div class="evr"><span class="no">#${n}</span>${rowFn(x)}<span class="tm">${tmStr(x.at)}</span><button class="del" onclick="rmEv('${key}','${x.id}')" aria-label="刪除">✕</button></div>`).join('')}</div>`:''}</div>`}
+    ${open&&list.length?`<div class="evlist">${list.map(({x,n})=>`<div class="evr"><span class="no">#${n}</span>${rowFn(x)}<span class="tm">${tmStr(x.at)}</span><button class="del" onclick="rmEv('${x._k||key}','${x.id}')" aria-label="刪除">✕</button></div>`).join('')}</div>`:''}</div>`}
 function listsHTML(d){
   const c=calc(d),s=num(d.start),e=num(d.end),P=esc(S.settings.partner);
+  const mine=x=>!c.has||(x.no>=s&&x.no<=e);
+  const myMiss=d.missing.filter(mine),myMulti=d.multi.filter(mine);
+  const oth=[...d.missing.filter(x=>!mine(x)).map(x=>({...x,_k:'missing'})),...d.multi.filter(x=>!mine(x)).map(x=>({...x,_k:'multi'}))];
+  const mk=sum(myMulti,m=>m.qty-1),dv=Math.max(0,c.extra-mk);
   return secHTML('returns','退件','r',d.returns,`${sum(d.returns,x=>x.qty)} 件`,x=>`<b>${x.no}</b><span class="sub">${x.qty>1?`×${x.qty} `:''}${esc(x.reason)}</span>`)
-   +secHTML('missing','缺件','m',d.missing,`${sum(d.missing,x=>x.qty)} 件`,x=>`<b>${x.no}</b><span class="sub">${x.qty>1?`×${x.qty}`:''}${c.has&&(x.no<s||x.no>e)?` <span class="mut">${P}</span>`:''}</span>`)
-   +secHTML('multi','多件','x',d.multi,(()=>{const mk=sum(d.multi.filter(m=>c.has&&m.no>=s&&m.no<=e),m=>m.qty-1),dv=Math.max(0,c.extra-mk);return `${d.multi.length} 號 · +${mk} 件${dv?`<span class="mut" style="font-size:12px;font-weight:500"> ＋${dv} 由退/缺推算</span>`:''}`})(),x=>`<b>${x.no}</b><span class="sub">共 ${x.qty} 件</span>`);
+   +secHTML('missing','缺件','m',myMiss,`${sum(myMiss,x=>x.qty)} 件`,x=>`<b>${x.no}</b><span class="sub">${x.qty>1?`×${x.qty}`:''}</span>`)
+   +secHTML('multi','多件','x',myMulti,`${myMulti.length} 號 · +${mk} 件${dv?`<span class="mut" style="font-size:12px;font-weight:500"> ＋${dv} 由退/缺推算</span>`:''}`,x=>`<b>${x.no}</b><span class="sub">共 ${x.qty} 件</span>`)
+   +(oth.length?secHTML('others',`${P} 範圍`,'o',oth,`<span class="mut" style="font-size:13px;font-weight:500">${oth.filter(x=>x._k==='multi').length} 多件 · ${sum(oth.filter(x=>x._k==='missing'),x=>x.qty)} 缺件（不算你的）</span>`,x=>`<b>${x.no}</b><span class="sub">${x._k==='multi'?`多件 共 ${x.qty} 件`:`缺件${x.qty>1?` ×${x.qty}`:''}`}</span>`):'');
 }
 function fListHTML(d){return d.fReturns.length?secHTML('fReturns',`${esc(S.settings.partner)} 退件`,'r',d.fReturns,`${sum(d.fReturns,x=>x.qty)} 件`,x=>`<b>${x.qty} 件</b><span class="sub">${esc(x.reason)}</span>`):''}
 function runHeadHTML(d){const c=calc(d);
@@ -405,7 +412,7 @@ function runHeadHTML(d){const c=calc(d);
   ${c.warn.map(w=>`<div class="warnbox">⚠️ ${esc(w)}</div>`).join('')}`}
 function refreshDay(){const d=getDay(curDate);
   const set=(id,h)=>{const el=document.getElementById(id);if(el)el.innerHTML=h};
-  set('hero',heroHTML(d));set('lists',listsHTML(d));set('flist',fListHTML(d));set('runhead',runHeadHTML(d))}
+  set('hero',heroHTML(d));set('lists',listsHTML(d));acRefresh();set('flist',fListHTML(d));set('runhead',runHeadHTML(d))}
 
 function setF(k,v){const d=getDay(curDate);d[k]=v;touch('days',d);refreshDay()}
 function setSup(k,v){const d=getDay(curDate);d.sup={...(d.sup||{on:false,name:'',fDel:'',sRet:''}),[k]:v};touch('days',d);if(k==='on')render();else refreshDay()}
@@ -462,10 +469,21 @@ function addFRet(i){const q=num(document.getElementById('fq').value)||1;const d=
   d.fReturns.push({id:rid(),qty:q,reason:S.settings.reasons[i],at:Date.now()});touch('days',d);refreshDay();showUndo(`${S.settings.partner} 退件 ${q} 件 · ${S.settings.reasons[i]}`)}
 
 /* ---- 共用區塊 ---- */
-function rangeHTML(d){return `<div class="card"><h3>編號範圍</h3><div class="g3">
+function acHTML(d){
+  const a=num(d.acStart)??1,b=num(d.acEnd),T=num(d.total);
+  let res='<div class="mut">填帳號的編號範圍和總件數，就能核對多件有沒有標齊</div>';
+  if(b!=null&&b>=a&&T!=null){const n=b-a+1,need=T-n,marked=sum(d.multi.filter(m=>m.no>=a&&m.no<=b),m=>m.qty-1),left=need-marked;
+    res=`<div class="acres ${left===0?'okb':left<0?'badb':''}"><div>${n} 號、總 ${T} 件 → 多件應有 <b>${need}</b> 件</div><div>已標 <b>${marked}</b> 件　${left===0?'✅ 全部標齊':left>0?`還差 <b>${left}</b> 件`:`⚠️ 多標了 ${-left} 件`}</div></div>`}
+  return `<div class="card"><h3>全帳號核對（前一晚預標用）</h3><div class="g3">
+    <div><label class="f">帳號編號從</label><input inputmode="numeric" pattern="[0-9]*" placeholder="1" value="${esc(d.acStart)}" oninput="setF('acStart',this.value);acRefresh()"></div>
+    <div><label class="f">到</label><input inputmode="numeric" pattern="[0-9]*" value="${esc(d.acEnd)}" oninput="setF('acEnd',this.value);acRefresh()"></div>
+    <div><label class="f">帳號總件數</label><input inputmode="numeric" pattern="[0-9]*" value="${esc(d.total)}" oninput="setF('total',this.value);acRefresh()"></div></div>
+    <div id="acres" style="margin-top:10px">${res}</div></div>`}
+function acRefresh(){const el=document.getElementById('acres');if(el){const t=document.createElement('div');t.innerHTML=acHTML(getDay(curDate));el.innerHTML=t.querySelector('#acres').innerHTML}}
+function rangeHTML(d,noTotal){return `<div class="card"><h3>編號範圍</h3><div class="${noTotal?'g2':'g3'}">
   <div><label class="f">我從</label><input inputmode="numeric" pattern="[0-9]*" value="${esc(d.start)}" oninput="setF('start',this.value)"></div>
   <div><label class="f">到</label><input inputmode="numeric" pattern="[0-9]*" value="${esc(d.end)}" oninput="setF('end',this.value)"></div>
-  <div><label class="f">帳號總件數</label><input inputmode="numeric" pattern="[0-9]*" value="${esc(d.total)}" oninput="setF('total',this.value)"></div></div></div>`}
+  ${noTotal?'':`<div><label class="f">帳號總件數</label><input inputmode="numeric" pattern="[0-9]*" value="${esc(d.total)}" oninput="setF('total',this.value)"></div>`}</div></div>`}
 function quickHTML(){const dv=S.ui.qdraft&&S.ui.qdraft.date===curDate?S.ui.qdraft.v:'';
   return `<div class="card quick">
     <input id="qno" class="qin" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" enterkeyhint="done" placeholder="輸入編號" value="${esc(dv)}" oninput="qDraft(this.value)">
@@ -497,7 +515,8 @@ function vRun(){
   return `<div class="runtop"><button class="sm" onclick="exitRun()">← 首頁</button><b>${head}</b><span class="mut">${md(curDate)}（${wd(curDate)}）</span></div>
   <div class="card" id="runhead">${runHeadHTML(d)}</div>
   ${isToday&&delivering?`<div class="rangeline" onclick="S.ui.editRange=!S.ui.editRange;persist();render()">範圍 ${esc(d.start)||'?'}–${esc(d.end)||'?'} · 總 ${esc(d.total)||'—'}　<span class="acc">${S.ui.editRange?'收起':'修改'}</span></div>`:''}
-  ${showRange?rangeHTML(d):''}
+  ${!(isToday&&delivering)||S.ui.editRange?acHTML(d):''}
+  ${showRange?rangeHTML(d,!(isToday&&delivering)||S.ui.editRange):''}
   ${quickHTML()}
   ${isToday&&!delivering?`<button class="pri bigbtn" onclick="step('start')">▶ 點完了，開始送貨</button>`:''}
   <div class="card"><h3>紀錄</h3><div id="lists">${listsHTML(d)}</div></div>
