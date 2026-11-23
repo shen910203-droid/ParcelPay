@@ -107,7 +107,7 @@ small.hint{display:block;color:var(--mut);font-size:12px;margin-top:6px;line-hei
 
 <script>
 /* ================= 資料 ================= */
-const APP_VERSION='v3.1';
+const APP_VERSION='v3.2';
 const LS='songhuoben_v1';
 const DEF_SETTINGS={id:'main',rate:2.5,payOffset:13,weeklyFixed:0,fuelPerKm:0,me:'Aiden',partner:'Frankie',
   reasons:['地址錯誤','無人簽收','拒收','包裹損壞','找不到地址','其他'],updatedAt:0};
@@ -602,7 +602,7 @@ function vSet(){
   </div>
   <div class="card"><h3>備份</h3><div class="g2"><button onclick="backup()">下載 JSON 備份</button><button onclick="document.getElementById('imp').click()">匯入 JSON</button></div>
     <input type="file" id="imp" accept=".json" style="display:none" onchange="restore(this.files[0])"></div>
-  <div class="mut" style="text-align:center;margin:4px 0 12px">ParcelPay ${APP_VERSION}</div>`;
+  <div class="mut" style="text-align:center;margin:4px 0 12px">ParcelPay ${APP_VERSION} · <a href="#" style="color:var(--acc)" onclick="event.preventDefault();forceUpdate()">強制更新</a></div>`;
 }
 
 async function testConn(){
@@ -649,7 +649,12 @@ function restore(file){if(!file)return;const r=new FileReader();r.onload=()=>{tr
 load();render();
 document.addEventListener('focusin',e=>{if(e.target.matches('input:not([type=date]):not([type=time]),textarea'))document.body.classList.add('typing')});
 document.addEventListener('focusout',()=>setTimeout(()=>{if(!document.activeElement||!document.activeElement.matches('input,textarea'))document.body.classList.remove('typing')},100));
-if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('sw.js').catch(()=>{});
+if('serviceWorker' in navigator&&location.protocol.startsWith('http')){
+  const hadCtrl=!!navigator.serviceWorker.controller;let reloaded=false;
+  navigator.serviceWorker.addEventListener('controllerchange',()=>{if(hadCtrl&&!reloaded){reloaded=true;location.reload()}});
+  navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).then(r=>{r.update();document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')r.update()})}).catch(()=>{});
+}
+async function forceUpdate(){toast('更新中…');try{const rs=await navigator.serviceWorker.getRegistrations();await Promise.all(rs.map(r=>r.unregister()));const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)))}catch(e){}location.replace(location.pathname+'?v='+Date.now())}
 if(S.local.url)pull(true);
 window.addEventListener('online',()=>{syncErr='';flush()});
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){if(tab==='day'&&!document.activeElement.matches('input,textarea'))render();flush()}});
