@@ -16,6 +16,7 @@
 <style>
 :root{--bg:#0f1115;--card:#181b22;--card2:#1f232c;--line:#2a2f3a;--tx:#e8eaf0;--mut:#8a93a6;--acc:#4f8cff;--ok:#2ecc71;--warn:#f5a524;--bad:#ff5d5d}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body,button,input,a,.chip,nav{touch-action:manipulation}
 body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.45 -apple-system,"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;padding-bottom:calc(72px + env(safe-area-inset-bottom))}
 header{position:sticky;top:0;z-index:5;padding-top:calc(12px + env(safe-area-inset-top)) !important;background:rgba(15,17,21,.94);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--line);padding-left:max(16px,calc((100% - 640px)/2 + 12px))!important;padding-right:max(16px,calc((100% - 640px)/2 + 12px))!important}
 h1{font-size:18px;margin:0;letter-spacing:.3px;display:flex;align-items:center;gap:8px;white-space:nowrap}h1 .sub{font-size:12px;color:var(--mut);font-weight:500}.logo{width:26px;height:26px;border-radius:7px}
@@ -95,6 +96,7 @@ th,td{padding:8px 6px;text-align:right;white-space:nowrap;border-bottom:1px soli
 th:first-child,td:first-child{text-align:left}th{color:var(--mut);font-weight:500;font-size:12px}
 td .mut{margin-left:4px;font-size:12px}tbody tr{cursor:pointer}tfoot td{font-weight:700;border-bottom:0;border-top:2px solid var(--line)}
 @media(max-width:360px){th,td{padding:8px 3px;font-size:13px}td .mut{display:none}}
+.wline{background:rgba(79,140,255,.1);border:1px solid rgba(79,140,255,.3);border-radius:10px;padding:7px 10px;font-size:13px;margin:8px 0 6px;color:var(--tx)}.wline b{color:var(--acc)}
 small.hint{display:block;color:var(--mut);font-size:12px;margin-top:6px;line-height:1.5}
 </style>
 </head>
@@ -107,7 +109,7 @@ small.hint{display:block;color:var(--mut);font-size:12px;margin-top:6px;line-hei
 
 <script>
 /* ================= 資料 ================= */
-const APP_VERSION='v3.3';
+const APP_VERSION='v3.4';
 const LS='songhuoben_v1';
 const DEF_SETTINGS={id:'main',rate:2.5,payOffset:13,weeklyFixed:0,fuelPerKm:0,me:'Aiden',partner:'Frankie',
   reasons:['地址錯誤','無人簽收','拒收','包裹損壞','找不到地址','其他'],updatedAt:0};
@@ -283,7 +285,8 @@ function setDate(v){if(v){curDate=v;render()}}
 function heroHTML(d){
   const c=calc(d),P=esc(S.settings.partner);
   return `<div class="hrow"><div><div class="mut">我送達（${wd(d.date)}）</div><div class="big">${c.delivered}<small> 件</small></div></div>
-    <div class="hr"><div class="mid acc">${money(c.pay)}</div><div class="mut">發薪 ${md(payday(weekStart(d.date)))}</div></div></div>
+    <div class="hr"><div class="mid acc">${money(c.pay)}</div><div class="mut">今日</div></div></div>
+  <div class="wline">${(()=>{const ws=weekStart(d.date),w=weeksAgg().find(x=>x.ws===ws);return `本週 ${md(ws)}–${md(addDays(ws,6))} 累計 <b>${w?w.me:0} 件 · ${money(w?w.pay:0)}</b> → ${md(payday(ws))}（日）一起發`})()}</div>
   <div class="mut">${c.has?`${c.numbers} 號 + 多件 ${c.extra} − 缺件 ${c.myMissing} − 退件 ${c.myRet}`:'先填下面的編號範圍'}</div>
   <div class="fline"><span>${P}</span><b>${c.fDelivered??'—'}</b><span class="mut">${c.fDelivered==null?(c.supOn?'問他送了幾件':(c.T==null?'填帳號總件數後算出':'')):`件 · 退 ${c.fRet}${c.supOn?' · 他說的':''}`}</span></div>
   ${c.supOn?`<div class="fline"><span>${esc(c.supName)}</span><b>${c.sDelivered??'—'}</b><span class="mut">件${c.sRet?` · 退 ${c.sRet}`:''}</span></div>`:''}
