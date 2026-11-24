@@ -203,7 +203,7 @@ small.hint{display:block;color:var(--mut);font-size:12px;margin-top:6px;line-hei
 
 <script>
 /* ================= 資料 ================= */
-const APP_VERSION='v5.2';
+const APP_VERSION='v5.3';
 const LS='songhuoben_v1';
 const autoOn=()=>S.local.autoSync!==false;
 const DEF_SETTINGS={id:'main',rate:2.5,payOffset:13,weeklyFixed:0,fuelPerKm:0,me:'Aiden',partner:'Frankie',
@@ -568,7 +568,7 @@ function partnerHTML(d,c){const P=esc(S.settings.partner);
     </div><small class="hint">支援件數＝總件數扣掉其他人倒推</small>`:''}`}
 function stepsHTML(d){
   const L=stepsOf(d),ev=d.mode==='evening';
-  return `<div class="steps">${L.map(([k,l],i)=>`${ev&&i===0?`<div class="stg">🌙 前一晚（${md(addDays(d.date,-1))}）</div>`:''}${ev&&k==='leave'?`<div class="stg">☀️ 當天（${md(d.date)}）</div>`:''}<div class="stp ${d.t[k]?'ok':''}"><span class="n">${d.t[k]?'✓':i+1}</span><span class="l">${l}</span><input type="time" value="${esc(d.t[k])}" onchange="setT('${k}',this.value)" aria-label="${l}時間"></div>`).join('')}</div>
+  return `<div class="steps">${L.map(([k,l],i)=>`${ev&&i===0?`<div class="stg">🌙 前一晚（${md(addDays(d.date,-1))}）</div>`:''}${ev&&k==='leave'?`<div class="stg">☀️ 當天（${md(d.date)}）</div>`:''}<div class="stp ${d.t[k]?'ok':''}"><span class="n">${d.t[k]?'✓':i+1}</span><span class="l">${l}</span><input type="time" value="${esc(d.t[k])}" onblur="if(this.value!==(getDay(curDate).t['${k}']||''))setT('${k}',this.value)" aria-label="${l}時間"></div>`).join('')}</div>
   <div id="dur">${durHTML(d)}</div>`}
 
 /* ---- 送貨模式（全螢幕，跳出 app 回來也會留在這裡） ---- */
@@ -707,7 +707,7 @@ async function purgePhotos(){try{const all=await PDB.all(),cut=Date.now()-PH_DAY
 /* ---- 首頁 ---- */
 function vDay(){
   const d=getDay(curDate),c=calc(d),isToday=curDate===today(),P=esc(S.settings.partner),nx=nextStep(d),tmr=addDays(today(),1);
-  const dateBar=`<div class="datebar"><button onclick="shiftDate(-7)" aria-label="上一週">◀</button><label class="dpick"><span>📅 ${md(curDate)}（${wd(curDate)}）${isToday?' 今天':''}</span><input type="date" value="${curDate}" onchange="setDate(this.value)"></label><button onclick="shiftDate(7)" aria-label="下一週">▶</button></div>
+  const dateBar=`<div class="datebar"><button onclick="shiftDate(-7)" aria-label="上一週">◀</button><label class="dpick"><span>📅 ${md(curDate)}（${wd(curDate)}）${isToday?' 今天':''}</span><input type="date" value="${curDate}" onblur="if(this.value&&this.value!==curDate)setDate(this.value)"></label><button onclick="shiftDate(7)" aria-label="下一週">▶</button></div>
   <div class="strip">${[0,1,2,3,4,5,6].map(i=>{const x=addDays(weekStart(curDate),i),dd=S.days[x],live=dd&&!dd.deleted,cc=live?calc(dd):null,stt=!live?'':cc.allOff?'all':cc.meOff?'off':dd.locked?'lock':cc.has?'has':'';
     return `<button class="${x===curDate?'on':''} ${x===today()?'td':''}" onclick="setDate('${x}')"><small>${wd(x)}</small><b>${pd(x).getDate()}</b><i class="st ${stt}">${stt==='all'?'休':stt==='off'?'我休':stt==='lock'?'✓':stt==='has'?'•':''}</i></button>`}).join('')}</div>
   ${!isToday?`<button class="sm totoday" onclick="setDate(today())">回到今天</button>`:''}
@@ -826,8 +826,8 @@ function vSettle(){
   <div class="card"><div class="chips" style="margin:0">
       <span class="chip pick ${from===tw&&to===addDays(tw,6)?'sel':''}" onclick="setSettle('this')">本週</span>
       <span class="chip pick ${from===lw&&to===addDays(lw,6)?'sel':''}" onclick="setSettle('last')">上週</span></div>
-    <div class="g2" style="margin-top:10px"><div><label class="f">從</label><input type="date" value="${from}" onchange="setSettle('from',this.value)"></div>
-      <div><label class="f">到</label><input type="date" value="${to}" onchange="setSettle('to',this.value)"></div></div>
+    <div class="g2" style="margin-top:10px"><div><label class="f">從</label><input type="date" value="${from}" onblur="if(this.value&&this.value!=='${from}')setSettle('from',this.value)"></div>
+      <div><label class="f">到</label><input type="date" value="${to}" onblur="if(this.value&&this.value!=='${to}')setSettle('to',this.value)"></div></div>
   </div>
   <div class="card"><h3>每日件數</h3>
     ${all.length?`<div class="tbl"><table><thead><tr><th>日期</th><th>總數</th><th>${M}</th><th>${P}</th>${hasSup?'<th>支援</th>':''}<th>未送</th></tr></thead><tbody>
@@ -942,7 +942,7 @@ function vStat(){
   const tg=(path,on,label)=>`<span class="chip pick ${on?'sel':''}" onclick="setUI('${path}',${!on})">${on?'☑':'☐'} ${label}</span>`;
   return `
   <div class="card"><div class="chips" style="margin:0">${P.map(([k,l])=>`<span class="chip pick ${S.ui.period===k?'sel':''}" onclick="setUI('period','${k}')">${l}</span>`).join('')}</div>
-    ${S.ui.period==='custom'?`<div class="g2" style="margin-top:10px"><input type="date" value="${S.ui.from}" onchange="setUI('from',this.value)"><input type="date" value="${S.ui.to}" onchange="setUI('to',this.value)"></div>`:''}
+    ${S.ui.period==='custom'?`<div class="g2" style="margin-top:10px"><input type="date" value="${S.ui.from}" onblur="if(this.value!==S.ui.from)setUI('from',this.value)"><input type="date" value="${S.ui.to}" onblur="if(this.value!==S.ui.to)setUI('to',this.value)"></div>`:''}
     <div class="mut" style="margin-top:8px">${from.startsWith('0000')?'全部期間':md(from)+' – '+md(to)} · ${tot.n} 個工作天</div>
   </div>
   <div class="card"><h3>收入</h3>
