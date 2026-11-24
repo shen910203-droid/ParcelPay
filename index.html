@@ -167,6 +167,25 @@ button.ev.k{color:var(--mut)}.acrow{display:flex;justify-content:space-between;g
 @media(max-width:360px){.evr .tm{display:none}.evr{grid-template-columns:28px auto minmax(0,1fr) 34px}.qbtn button{font-size:16px;padding:16px 2px}}
 .hdr-r{display:flex;gap:6px;align-items:center}#eye.on{color:var(--warn)}
 .calcbtn{background:none;border:0;color:var(--mut);font-size:12px;padding:8px 0 0}
+.plstat{display:flex;gap:12px;flex-wrap:wrap;font-size:14px;color:var(--mut);margin-bottom:8px}.plstat b{color:var(--tx)}
+.lastbar{display:flex;justify-content:space-between;align-items:center;gap:8px;background:rgba(46,204,113,.08);border:1px solid rgba(46,204,113,.35);border-radius:10px;padding:6px 6px 6px 12px;font-size:14px;margin-bottom:8px}
+.pl{display:flex;flex-direction:column;gap:4px}
+.pr{display:grid;grid-template-columns:32px auto minmax(0,1fr) 44px;align-items:center;gap:10px;background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:4px 0 4px 10px;min-height:48px;cursor:pointer;user-select:none;-webkit-user-select:none}
+.pr b{font-size:20px;font-variant-numeric:tabular-nums}
+.pr .ck{width:28px;height:28px;border-radius:50%;border:2px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700}
+.pr .pi{display:flex;gap:6px;align-items:center;justify-content:flex-end;font-size:14px;min-width:0}.pr .rs{color:var(--bad);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pr .more{background:none;border:0;color:var(--mut);font-size:22px;height:44px;padding:0}
+.pr.s-ok{opacity:.55}.pr.s-ok .ck{background:var(--ok);border-color:var(--ok);color:#fff}
+.pr.s-ret .ck{background:var(--bad);border-color:var(--bad);color:#fff}.pr.s-miss .ck{background:var(--warn);border-color:var(--warn);color:#fff}
+.pldiv{font-size:12px;color:var(--mut);margin:8px 0 2px;text-align:center}
+.topsheet{position:fixed;left:0;right:0;top:0;z-index:30;background:var(--card);border-bottom:1px solid var(--line);border-radius:0 0 18px 18px;padding:calc(14px + env(safe-area-inset-top)) 16px 16px;transform:translateY(-105%);transition:transform .2s;max-height:85vh;overflow:auto;box-shadow:0 10px 30px rgba(0,0,0,.5)}
+.topsheet.on{transform:none}body.sheeton::after{content:'';position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:29}
+.shead{display:flex;align-items:center;gap:10px}.shead b{font-size:24px}.shead .mut{flex:1}
+.topsheet .g4 button{padding:12px 2px;font-size:14px}
+.thumbs{display:flex;gap:8px;flex-wrap:wrap}.th{width:96px}.th img{width:96px;height:96px;object-fit:cover;border-radius:8px;display:block}
+.thb{display:flex;gap:4px;margin-top:4px}.thb button{flex:1;padding:4px 0;font-size:12px}.thx{width:96px;height:96px;border-radius:8px;background:var(--card2);font-size:12px;color:var(--mut);display:flex;align-items:center;text-align:center;padding:6px}
+.photobtn{display:block;margin-top:10px;text-align:center;background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:12px;font-weight:600}.photobtn input{display:none}
+.pview{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:40;display:none;align-items:center;justify-content:center}.pview.on{display:flex}.pview img{max-width:100%;max-height:100%}
 small.hint{display:block;color:var(--mut);font-size:12px;margin-top:6px;line-height:1.5}
 </style>
 </head>
@@ -175,11 +194,13 @@ small.hint{display:block;color:var(--mut);font-size:12px;margin-top:6px;line-hei
 <main id="view"></main>
 <nav id="nav"></nav>
 <div class="toast" id="toast"></div>
+<div id="sheet2" class="topsheet"></div>
+<div id="pview" class="pview" onclick="this.classList.remove('on');this.innerHTML=''"></div>
 <div class="undo" id="undo"><span></span><button onclick="undo()">復原</button></div>
 
 <script>
 /* ================= 資料 ================= */
-const APP_VERSION='v4.8';
+const APP_VERSION='v5.0';
 const LS='songhuoben_v1';
 const DEF_SETTINGS={id:'main',rate:2.5,payOffset:13,weeklyFixed:0,fuelPerKm:0,me:'Aiden',partner:'Frankie',
   reasons:['地址錯誤','無人簽收','拒收','包裹損壞','找不到地址','其他'],updatedAt:0};
@@ -213,7 +234,7 @@ function toast(t){const e=document.getElementById('toast');e.textContent=t;e.cla
 
 /* ================= 計算 ================= */
 function newDay(date){return{id:date,date,total:'',start:'',end:'',missing:[],multi:[],returns:[],fReturns:[],sup:{on:false,name:'',fDel:'',sRet:''},
-  t:{leave:'',arrive:'',start:'',end:'',home:''},kmB:'',offType:'',offMiss:'',ded:[],acStart:'',acEnd:'',skip:[],note:'',updatedAt:0,deleted:false}}
+  t:{leave:'',arrive:'',start:'',end:'',home:''},kmB:'',offType:'',offMiss:'',ded:[],acStart:'',acEnd:'',skip:[],pk:{},note:'',updatedAt:0,deleted:false}}
 function getDay(date){const d=S.days[date];return d&&!d.deleted?d:newDay(date)}
 function calc(d){
   const s=num(d.start),e=num(d.end),T=num(d.total),rate=Number(S.settings.rate)||0;
@@ -428,13 +449,13 @@ function listsHTML(d){
 }
 function fListHTML(d){return d.fReturns.length?secHTML('fReturns',`${esc(S.settings.partner)} 退件`,'r',d.fReturns,`${sum(d.fReturns,x=>x.qty)} 件`,x=>`<b>${x.qty} 件</b><span class="sub">${esc(x.reason)}</span>`):''}
 function runHeadHTML(d){const c=calc(d);
-  return `<div class="hrow"><div><div class="big">${c.delivered}<small> 件</small></div></div><div class="hr"><div class="mid acc">${moneyH(c.pay)}</div></div></div>
+  return `<div class="hrow"><div>${c.has?`<div class="mut">今日拿貨 <b style="color:var(--tx)">${c.assigned}</b> 件 · 送達</div>`:''}<div class="big">${c.delivered}<small> 件</small></div></div><div class="hr"><div class="mid acc">${moneyH(c.pay)}</div></div></div>
   <div class="mut">${c.has?`範圍 ${c.numbers} 號 · 多件 +${c.extra} · 缺件 −${c.myMissing} · 退件 −${c.myRet}`:'先填編號範圍'}</div>
   ${c.has?`<div class="mut" style="margin-top:2px">${esc(S.settings.partner)} ${c.fDelivered??'—'} 件 · 總件數 ${c.T??'—'}</div>`:''}
   ${c.warn.map(w=>`<div class="warnbox">⚠️ ${esc(w)}</div>`).join('')}`}
 function refreshDay(){const d=getDay(curDate);
   const set=(id,h)=>{const el=document.getElementById(id);if(el)el.innerHTML=h};
-  set('hero',heroHTML(d));set('lists',listsHTML(d));acRefresh();set('flist',fListHTML(d));set('runhead',runHeadHTML(d))}
+  set('hero',heroHTML(d));set('lists',listsHTML(d));acRefresh();set('plist',plHTML(d));set('flist',fListHTML(d));set('runhead',runHeadHTML(d))}
 
 function setF(k,v){const d=getDay(curDate);d[k]=v;touch('days',d);refreshDay()}
 function setSup(k,v){const d=getDay(curDate);d.sup={...(d.sup||{on:false,name:'',fDel:'',sRet:''}),[k]:v};touch('days',d);if(k==='on')render();else refreshDay()}
@@ -444,7 +465,7 @@ function durHTML(d){const c=calc(d),ph=c.deliver&&c.has?(c.delivered/(c.deliver/
 /* ---- 流程按鈕 ---- */
 function step(k){
   const d=getDay(curDate),label=STEPS.find(x=>x[0]===k)[1];
-  if(k==='end'&&!confirm('確定送完了嗎？\n會記下送完時間並回到首頁。'))return;
+  if(k==='end'){const rows=pkRows(d),un=rows.filter(r=>!r.st).length;if(!confirm(un?`還有 ${un} 件沒打勾！\n（沒打勾的仍會算成送達）\n\n確定送完了嗎？`:'確定送完了嗎？\n會記下送完時間並回到首頁。'))return}
   if(d.t[k]&&!confirm(`${label} 已經記過 ${d.t[k]}，要改成現在 ${nowHM()} 嗎？`))return;
   d.t={...d.t,[k]:nowHM()};touch('days',d);
   if(k==='arrive'||k==='start')openRun();
@@ -456,7 +477,7 @@ function exitRun(silent){S.ui.run=null;persist();render();window.scrollTo(0,0)}
 
 /* ---- 復原 ---- */
 let undoSnap=null;
-function snap(d){undoSnap={date:d.date,data:JSON.stringify({missing:d.missing,multi:d.multi,returns:d.returns,fReturns:d.fReturns,skip:d.skip||[]})}}
+function snap(d){undoSnap={date:d.date,data:JSON.stringify({missing:d.missing,multi:d.multi,returns:d.returns,fReturns:d.fReturns,skip:d.skip||[],pk:d.pk||{}})}}
 function undo(){if(!undoSnap)return;const d=getDay(undoSnap.date);if(d.locked){toast('這天已鎖定，要先解鎖');return}Object.assign(d,JSON.parse(undoSnap.data));touch('days',d);undoSnap=null;hideUndo();refreshDay();toast('已復原')}
 function showUndo(msg){const u=document.getElementById('undo');u.querySelector('span').textContent=msg;u.classList.add('on');clearTimeout(showUndo.t);showUndo.t=setTimeout(hideUndo,6000)}
 function hideUndo(){document.getElementById('undo').classList.remove('on')}
@@ -466,7 +487,7 @@ let qRet=null;
 const keep='onpointerdown="event.preventDefault()" onmousedown="event.preventDefault()"';
 function qno(){return document.getElementById('qno')}
 function qDraft(v){S.ui.qdraft={date:curDate,v};persist()}
-function qClear(){const i=qno();i.value='';qDraft('')}
+function qClear(){const i=qno();if(i)i.value='';qDraft('')}
 function qAct(kind){
   const inp=qno(),no=num(inp.value&&inp.value.trim());
   if(no==null){toast('先輸入編號');inp.focus();return}
@@ -475,7 +496,7 @@ function qAct(kind){
   snap(d);let msg;
   if(kind==='skip'){d.skip=d.skip||[];if(d.skip.some(x=>x.no===no)){toast(`${no} 已經記過跳號`);qClear();inp.focus();return}d.skip.push({id:rid(),no,at:now});msg=`跳號 ${no}（系統沒有這個號）`}
   if(kind==='missing'){const x=d.missing.find(m=>m.no===no);if(x){x.qty++;x.at=now;msg=`缺件 ${no} ×${x.qty}`}else{d.missing.push({id:rid(),no,qty:1,at:now});msg=`缺件 ${no}${inR||s==null?'':`（${S.settings.partner} 的）`}`}}
-  if(kind==='multi'){let x=d.multi.find(m=>m.no===no);if(x){x.qty++;x.at=now}else{x={id:rid(),no,qty:2,at:now};d.multi.push(x)}msg=`${no} 共 ${x.qty} 件（再按一次 +1）`}
+  if(kind==='multi'){if(pkQ(d,no)===1)pkRename(d,`${no}`,`${no}-1`);let x=d.multi.find(m=>m.no===no);if(x){x.qty++;x.at=now}else{x={id:rid(),no,qty:2,at:now};d.multi.push(x)}msg=`${no} 共 ${x.qty} 件（再按一次 +1）`}
   touch('days',d);refreshDay();showUndo(msg);
   if(kind==='multi'&&s!=null&&!inR)toast(`⚠️ ${no} 不在你的範圍`);
   if(kind==='multi'){inp.focus();inp.select()}else{qClear();inp.focus()}
@@ -510,7 +531,7 @@ function rangeHTML(d,noTotal){return `<div class="card"><h3>編號範圍</h3><di
   ${noTotal?'':`<div><label class="f">總件數</label><input inputmode="numeric" pattern="[0-9]*" value="${esc(d.total)}" oninput="setF('total',this.value)"></div>`}</div></div>`}
 function quickHTML(){const dv=S.ui.qdraft&&S.ui.qdraft.date===curDate?S.ui.qdraft.v:'';
   return `<div class="card quick">
-    <input id="qno" class="qin" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" enterkeyhint="done" placeholder="輸入編號" value="${esc(dv)}" oninput="qDraft(this.value)">
+    <input id="qno" class="qin" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" enterkeyhint="done" placeholder="輸入編號" value="${esc(dv)}" oninput="qDraft(this.value);plRefresh()">
     <div class="g4 qbtn">
       <button class="ev m" ${keep} onclick="qAct('missing')">缺件</button>
       <button class="ev x" ${keep} onclick="qAct('multi')">多件 +1</button>
@@ -544,10 +565,121 @@ function vRun(){
   ${showRange?rangeHTML(d,!(isToday&&delivering)||S.ui.editRange):''}
   ${quickHTML()}
   ${isToday&&!delivering?`<button class="pri bigbtn" onclick="step('start')">▶ 點完了，開始送貨</button>`:''}
-  <div class="card"><h3>紀錄</h3><div id="lists">${listsHTML(d)}</div></div>
+  ${calc(d).has?`<div class="card"><h3>逐件清單</h3><div id="plist">${plHTML(d)}</div></div>`:`<div class="card"><h3>紀錄</h3><div id="lists">${listsHTML(d)}</div></div>`}
   ${isToday&&delivering?`<button class="pri bigbtn okbg" onclick="step('end')">✓ 送完</button>`:''}
   ${!isToday?`<button class="pri bigbtn" onclick="exitRun()">完成</button>`:''}`;
 }
+
+/* ================= 逐件清單（勾選、退件、缺件、+1、備註、照片） ================= */
+function pkUsed(d){const u={};d.missing.forEach(m=>u[m.no]=(u[m.no]||0)+m.qty);d.returns.forEach(r=>u[r.no]=(u[r.no]||0)+r.qty);return u}
+function pkQ(d,n){const m=d.multi.find(x=>x.no===n);return Math.max(m?m.qty:1,pkUsed(d)[n]||0,1)}
+const pkKey=(n,i,q)=>q>1?`${n}-${i}`:`${n}`;
+function pkRows(d){
+  const c=calc(d);if(!c.has)return[];
+  const s=num(d.start),e=num(d.end),skip=new Set((d.skip||[]).map(x=>x.no)),pk=d.pk||{},used=pkUsed(d);
+  const mq={};d.multi.forEach(m=>mq[m.no]=Math.max(mq[m.no]||1,m.qty));
+  const retBy={},missBy={},retFree={},missFree={};
+  d.returns.forEach(r=>{if(r.pk)retBy[r.pk]=r;else retFree[r.no]=(retFree[r.no]||0)+r.qty});
+  d.missing.forEach(m=>{if(m.pk)missBy[m.pk]=m;else missFree[m.no]=(missFree[m.no]||0)+m.qty});
+  const rows=[];
+  for(let n=s;n<=e;n++){if(skip.has(n))continue;
+    const q=Math.max(mq[n]||1,used[n]||0,1),mine=[];
+    for(let i=1;i<=q;i++){const key=pkKey(n,i,q),alt=q>1&&i===1?`${n}`:q===1?`${n}-1`:null,p=pk[key]||(alt&&pk[alt])||{},rr=retBy[key]||(alt&&retBy[alt]),mm=missBy[key]||(alt&&missBy[alt]);
+      mine.push({n,i,q,key,p,ref:rr||mm||null,st:rr?'ret':mm?'miss':p.st==='ok'?'ok':''})}
+    let rf=retFree[n]||0,mf=missFree[n]||0;
+    mine.filter(r=>!r.st).forEach(r=>{if(mf>0){r.st='miss';r.free=1;mf--}else if(rf>0){r.st='ret';r.free=1;r.ref=d.returns.find(x=>x.no===n&&!x.pk);rf--}});
+    rows.push(...mine)}
+  return rows}
+function pkSet(d,key,o){d.pk={...(d.pk||{})};const v={...(d.pk[key]||{}),...o};Object.keys(v).forEach(k=>{if(v[k]===undefined||v[k]===''||(Array.isArray(v[k])&&!v[k].length))delete v[k]});if(Object.keys(v).length)d.pk[key]=v;else delete d.pk[key]}
+function pkRename(d,from,to){if(from===to)return;if(d.pk&&d.pk[from]){d.pk[to]=d.pk[from];delete d.pk[from]}
+  d.returns.forEach(r=>{if(r.pk===from)r.pk=to});d.missing.forEach(m=>{if(m.pk===from)m.pk=to})}
+function pkRow(d,key){return pkRows(d).find(r=>r.key===key)}
+
+function pkTap(key){const d=getDay(curDate);if(d.locked)return;const r=pkRow(d,key);if(!r)return;
+  if(r.st==='ret'||r.st==='miss'){pkMenu(key);return}
+  pkSet(d,key,r.st==='ok'?{st:undefined,at:undefined}:{st:'ok',at:Date.now()});touch('days',d);plRefresh();refreshDay()}
+function pkClear(d,r){
+  if(r.ref&&r.ref.pk===r.key){d.returns=d.returns.filter(x=>x!==r.ref);d.missing=d.missing.filter(x=>x!==r.ref)}
+  else if(r.free){const arr=r.st==='ret'?'returns':'missing',x=d[arr].find(y=>y.no===r.n&&!y.pk);if(x){if(x.qty>1)x.qty--;else d[arr]=d[arr].filter(y=>y!==x)}}
+  pkSet(d,r.key,{st:undefined,at:undefined})}
+function pkDo(key,act,arg){
+  const d=getDay(curDate);if(d.locked){toast('這天已鎖定');return}let r=pkRow(d,key);if(!r)return;snap(d);const now=Date.now();
+  if(act==='ok'){pkClear(d,r);pkSet(d,key,{st:'ok',at:now})}
+  if(act==='clear'){pkClear(d,r)}
+  if(act==='ret'){pkClear(d,r);d.returns.push({id:rid(),no:r.n,qty:1,reason:S.settings.reasons[arg],at:now,pk:key})}
+  if(act==='miss'){pkClear(d,r);d.missing.push({id:rid(),no:r.n,qty:1,at:now,pk:key})}
+  if(act==='plus'){const q=pkQ(d,r.n);if(q===1)pkRename(d,`${r.n}`,`${r.n}-1`);
+    const m=d.multi.find(x=>x.no===r.n);if(m){m.qty=q+1;m.at=now}else d.multi.push({id:rid(),no:r.n,qty:q+1,at:now});key=`${r.n}-${q+1}`}
+  if(act==='minus'){const q=pkQ(d,r.n);const last=`${r.n}-${q}`;const lr=pkRow(d,last);
+    if(q<2||!lr||lr.st||lr.p.note||(lr.p.ph&&lr.p.ph.length)){toast('最後一件有狀態或備註，不能移除');return}
+    const m=d.multi.find(x=>x.no===r.n);if(m){if(q-1<=1)d.multi=d.multi.filter(x=>x!==m);else m.qty=q-1}
+    delete (d.pk||{})[last];if(q===2)pkRename(d,`${r.n}-1`,`${r.n}`);key=q===2?`${r.n}`:`${r.n}-1`}
+  touch('days',d);plRefresh();refreshDay();
+  const msg={ok:`${key} 送達`,clear:`${key} 已清除狀態`,ret:`${key} 退件`,miss:`${key} 缺件`,plus:`${r.n} 加一件 → ${key}`,minus:`${r.n} 移除一件`}[act];
+  showUndo(msg);if(act==='plus'||act==='minus'||act==='ret'||act==='miss'||act==='clear'||act==='ok')closeSheet();
+}
+function pkNote(key){const d=getDay(curDate);const v=document.getElementById('pknote').value.trim();pkSet(d,key,{note:v||undefined});touch('days',d);plRefresh();toast(v?'備註已儲存':'備註已清除')}
+
+/* ---- 清單畫面 ---- */
+function plFilterVal(){const i=qno();return i?i.value.trim():''}
+function plHTML(d){
+  const rows=pkRows(d);if(!rows.length)return '<div class="mut">填好編號範圍就會產生清單</div>';
+  const f=plFilterVal(),c=calc(d);
+  const todo=rows.filter(r=>!r.st),done=rows.filter(r=>r.st).sort((a,b)=>((b.p.at||b.ref&&b.ref.at||0)-(a.p.at||a.ref&&a.ref.at||0)));
+  const ok=rows.filter(r=>r.st==='ok').length,rt=rows.filter(r=>r.st==='ret').length,ms=rows.filter(r=>r.st==='miss').length;
+  const last=rows.filter(r=>r.st==='ok').sort((a,b)=>(b.p.at||0)-(a.p.at||0))[0];
+  const match=r=>!f||String(r.n).startsWith(f);
+  const row=r=>`<div class="pr s-${r.st||'todo'}" onclick="pkTap('${r.key}')"><span class="ck">${r.st==='ok'?'✓':r.st==='ret'?'退':r.st==='miss'?'缺':''}</span><b>${r.key}</b><span class="pi">${r.st==='ret'&&r.ref?`<span class="rs">${esc(r.ref.reason||'')}</span>`:''}${r.p.note?'📝':''}${r.p.ph&&r.p.ph.length?'📷':''}</span><button class="more" onclick="event.stopPropagation();pkMenu('${r.key}')" aria-label="更多">⋯</button></div>`;
+  const T=todo.filter(match),D=done.filter(match);
+  return `<div class="plstat"><span>未送 <b>${todo.length}</b></span><span>✓ <b>${ok}</b></span><span>退 <b>${rt}</b></span><span>缺 <b>${ms}</b></span><span class="${ok===c.delivered?'okc':'warnc'}">${ok===c.delivered?'✓ 對齊':`勾 ${ok}/${c.delivered}`}</span></div>
+  ${last?`<div class="lastbar"><span>最近送達 <b>${last.key}</b>　${tmStr(last.p.at)}</span><button class="sm" onclick="pkTap('${last.key}')">取消</button></div>`:''}
+  ${f?`<div class="mut" style="margin:6px 0">篩選：${esc(f)}…　<a href="#" class="acc" onclick="event.preventDefault();qClear();plRefresh()">清除</a></div>`:''}
+  <div class="pl">${T.map(row).join('')}${T.length&&D.length?'<div class="pldiv">已處理</div>':''}${D.map(row).join('')}${!T.length&&!D.length?'<div class="mut" style="padding:10px">沒有符合的號碼</div>':''}</div>`}
+function plRefresh(){const el=document.getElementById('plist');if(el)el.innerHTML=plHTML(getDay(curDate))}
+
+/* ---- ⋯ 選單（從上方滑出，不會被鍵盤蓋住） ---- */
+function closeSheet(){const s=document.getElementById('sheet2');s.classList.remove('on');s.innerHTML='';document.body.classList.remove('sheeton')}
+function pkMenu(key){
+  const d=getDay(curDate),r=pkRow(d,key);if(!r)return;const L=d.locked;
+  const s=document.getElementById('sheet2');
+  s.innerHTML=`<div class="shead"><b>${key}</b><span class="mut">${r.st==='ok'?'已送達':r.st==='ret'?'退件'+(r.ref&&r.ref.reason?'：'+esc(r.ref.reason):''):r.st==='miss'?'缺件':'未送'}</span><button class="sm" onclick="closeSheet()">關閉</button></div>
+  ${L?'<div class="mut">這天已鎖定，只能看</div>':`<div class="g4" style="margin-top:10px">
+    <button onclick="pkDo('${key}','ok')">✓ 送達</button><button onclick="document.getElementById('rsel').style.display='flex'">退件</button>
+    <button onclick="pkDo('${key}','miss')">缺件</button><button onclick="pkDo('${key}','plus')">＋1 件</button></div>
+  <div id="rsel" class="chips" style="display:none;margin-top:8px">${S.settings.reasons.map((x,i)=>`<button class="chip pick" onclick="pkDo('${key}','ret',${i})">${esc(x)}</button>`).join('')}</div>
+  <div class="row" style="margin-top:8px">${r.st?`<button class="sm" onclick="pkDo('${key}','clear')">清除狀態（變回未送）</button>`:''}${r.q>1&&r.i===r.q?`<button class="sm" onclick="pkDo('${key}','minus')">移除這件</button>`:''}</div>`}
+  <label class="f" style="margin-top:12px">📝 備註</label>
+  <div class="dedadd" style="grid-template-columns:minmax(0,1fr) auto"><input id="pknote" value="${esc(r.p.note||'')}" placeholder="例：放後門、不確定門牌" ${L?'disabled':''}><button onclick="pkNote('${key}')" ${L?'disabled':''}>儲存</button></div>
+  <label class="f" style="margin-top:12px">📷 照片（存在這支手機，14 天後自動刪除）</label>
+  <div class="thumbs" id="thumbs"></div>
+  ${L?'':`<label class="photobtn">📷 拍照<input type="file" accept="image/*" capture="environment" onchange="addPhoto('${key}',this.files[0]);this.value=''"></label>`}`;
+  s.classList.add('on');document.body.classList.add('sheeton');loadThumbs(key);
+}
+
+/* ---- 照片：IndexedDB，壓縮後存手機，14 天自動刪除 ---- */
+const PH_DAYS=14;
+const PDB={db:null,
+  open(){return this.db?Promise.resolve(this.db):new Promise((res,rej)=>{const r=indexedDB.open('parcelpay-photos',1);r.onupgradeneeded=()=>r.result.createObjectStore('p',{keyPath:'id'});r.onsuccess=()=>{this.db=r.result;res(this.db)};r.onerror=()=>rej(r.error)})},
+  tx(mode,fn){return this.open().then(db=>new Promise((res,rej)=>{const t=db.transaction('p',mode),st=t.objectStore('p');let out;const q=fn(st);if(q)q.onsuccess=()=>out=q.result;t.oncomplete=()=>res(out);t.onerror=()=>rej(t.error)}))},
+  put(o){return this.tx('readwrite',st=>st.put(o))},get(id){return this.tx('readonly',st=>st.get(id))},del(id){return this.tx('readwrite',st=>st.delete(id))},all(){return this.tx('readonly',st=>st.getAll())}};
+function compress(file){return new Promise((res,rej)=>{const img=new Image(),u=URL.createObjectURL(file);img.onload=()=>{const m=1280,k=Math.min(1,m/Math.max(img.width,img.height)),cv=document.createElement('canvas');
+  cv.width=Math.round(img.width*k);cv.height=Math.round(img.height*k);cv.getContext('2d').drawImage(img,0,0,cv.width,cv.height);URL.revokeObjectURL(u);cv.toBlob(b=>b?res(b):rej(new Error('壓縮失敗')),'image/jpeg',.72)};img.onerror=()=>rej(new Error('讀不到照片'));img.src=u})}
+async function addPhoto(key,file){if(!file)return;toast('處理照片中…');
+  try{const blob=await compress(file),id=rid();await PDB.put({id,date:curDate,key,blob,at:Date.now()});
+    const d=getDay(curDate);pkSet(d,key,{ph:[...((d.pk||{})[key]&&d.pk[key].ph||[]),id]});touch('days',d);plRefresh();loadThumbs(key);toast(`照片已存（${Math.round(blob.size/1024)}KB）`)}
+  catch(e){toast('照片儲存失敗：'+(e.message||e))}}
+async function loadThumbs(key){const box=document.getElementById('thumbs');if(!box)return;const d=getDay(curDate),ids=((d.pk||{})[key]||{}).ph||[];
+  if(!ids.length){box.innerHTML='<div class="mut">還沒有照片</div>';return}box.innerHTML='';
+  for(const id of ids){let rec=null;try{rec=await PDB.get(id)}catch(e){}
+    const el=document.createElement('div');el.className='th';
+    if(rec&&rec.blob){const u=URL.createObjectURL(rec.blob);el.innerHTML=`<img src="${u}" onclick="viewPhoto('${id}')"><div class="thb"><button class="sm" onclick="sharePhoto('${id}')">存相簿</button><button class="sm" onclick="delPhoto('${key}','${id}')">刪除</button></div>`}
+    else el.innerHTML=`<div class="thx">照片已過期或在另一支手機</div><div class="thb"><button class="sm" onclick="delPhoto('${key}','${id}')">移除</button></div>`;
+    box.appendChild(el)}}
+async function viewPhoto(id){const r=await PDB.get(id);if(!r)return;const v=document.getElementById('pview');v.innerHTML=`<img src="${URL.createObjectURL(r.blob)}">`;v.classList.add('on')}
+async function sharePhoto(id){const r=await PDB.get(id);if(!r)return;const f=new File([r.blob],`ParcelPay_${r.date}_${r.key}.jpg`,{type:'image/jpeg'});
+  if(navigator.canShare&&navigator.canShare({files:[f]})){try{await navigator.share({files:[f]})}catch(e){}}else{const a=document.createElement('a');a.href=URL.createObjectURL(f);a.download=f.name;a.click()}}
+async function delPhoto(key,id){if(!confirm('刪除這張照片？'))return;try{await PDB.del(id)}catch(e){}const d=getDay(curDate);pkSet(d,key,{ph:(((d.pk||{})[key]||{}).ph||[]).filter(x=>x!==id)});touch('days',d);plRefresh();loadThumbs(key)}
+async function purgePhotos(){try{const all=await PDB.all(),cut=Date.now()-PH_DAYS*864e5;for(const r of all||[])if(r.at<cut)await PDB.del(r.id)}catch(e){}}
 
 /* ---- 首頁 ---- */
 function vDay(){
@@ -882,7 +1014,7 @@ function restore(file){if(!file)return;const r=new FileReader();r.onload=()=>{tr
   persist();render();flush();toast(`匯入 ${n} 筆`)}catch(e){toast('檔案格式錯誤')}};r.readAsText(file)}
 
 /* ================= 啟動 ================= */
-load();render();
+load();render();purgePhotos();
 document.addEventListener('focusin',e=>{if(e.target.matches('input:not([type=date]):not([type=time]),textarea'))document.body.classList.add('typing')});
 document.addEventListener('focusout',()=>setTimeout(()=>{if(!document.activeElement||!document.activeElement.matches('input,textarea'))document.body.classList.remove('typing')},100));
 if('serviceWorker' in navigator&&location.protocol.startsWith('http')){
