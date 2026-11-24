@@ -187,6 +187,8 @@ button.ev.k{color:var(--mut)}.acrow{display:flex;justify-content:space-between;g
 .photobtn{display:block;margin-top:10px;text-align:center;background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:12px;font-weight:600}.photobtn input{display:none}
 .pview{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:40;display:none;align-items:center;justify-content:center}.pview.on{display:flex}.pview img{max-width:100%;max-height:100%}
 .sacts{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}.sacts:empty{display:none}
+.stg{font-size:12px;color:var(--mut);margin:6px 0 2px}.stg:first-child{margin-top:0}
+.modesw{display:flex;justify-content:space-between;font-size:12px;color:var(--mut);margin-top:10px}.modesw a{color:var(--acc)}
 small.hint{display:block;color:var(--mut);font-size:12px;margin-top:6px;line-height:1.5}
 </style>
 </head>
@@ -201,7 +203,7 @@ small.hint{display:block;color:var(--mut);font-size:12px;margin-top:6px;line-hei
 
 <script>
 /* ================= 資料 ================= */
-const APP_VERSION='v5.1';
+const APP_VERSION='v5.2';
 const LS='songhuoben_v1';
 const autoOn=()=>S.local.autoSync!==false;
 const DEF_SETTINGS={id:'main',rate:2.5,payOffset:13,weeklyFixed:0,fuelPerKm:0,me:'Aiden',partner:'Frankie',
@@ -276,7 +278,9 @@ function calc(d){
   const ded=sum((d.ded||[]).filter(x=>x.confirmed),x=>Number(x.amount)||0),dedPend=sum((d.ded||[]).filter(x=>!x.confirmed),x=>Number(x.amount)||0);
   return{skipIn,ded,dedPend,netPay:delivered*rate-ded,has,meOff,allOff,offType,counts,numbers,extra,assigned,myMissing,otherMissing,myRet,fRet,delivered,fDelivered,supOn,sDelivered,sRet,supName,
     pay:delivered*rate,fPay:fDelivered==null?null:fDelivered*rate,km,
-    commute:(()=>{const a=mins(d.t.leave,d.t.arrive),b=mins(d.t.end,d.t.home);return a==null&&b==null?null:(a||0)+(b||0)})(),sort:mins(d.t.arrive,d.t.start),deliver:mins(d.t.start,d.t.end),warn,T};
+    ...(()=>{const t=d.t||{},add=(...xs)=>{const v=xs.filter(x=>x!=null);return v.length?v.reduce((a,b)=>a+b,0):null};
+      if(d.mode==='evening')return{commute:add(mins(t.eLeave,t.eArrive),mins(t.eDone,t.eHome),mins(t.leave,t.start),mins(t.end,t.home)),sort:mins(t.eArrive,t.eDone),deliver:mins(t.start,t.end)};
+      return{commute:add(mins(t.leave,t.arrive),mins(t.end,t.home)),sort:mins(t.arrive,t.start),deliver:mins(t.start,t.end)}})(),warn,T};
 }
 function liveDays(){return Object.values(S.days).filter(d=>!d.deleted)}
 function fills(){return Object.values(S.fuel).filter(x=>!x.deleted&&num(x.liters)>0&&num(x.amount)>0).sort((a,b)=>a.date<b.date?-1:a.date>b.date?1:(a.updatedAt||0)-(b.updatedAt||0))}
@@ -388,8 +392,18 @@ function render(){
 }
 
 /* ================= 今日 ================= */
-const STEPS=[['leave','出門'],['arrive','到倉庫'],['start','開始送貨'],['end','送完'],['home','到家']];
-function stageOf(d){const t=d.t||{};return t.home?5:t.end?4:t.start?3:t.arrive?2:t.leave?1:0}
+const STEPS_M=[['leave','出門'],['arrive','到倉庫'],['start','開始送貨'],['end','送完'],['home','到家']];
+const STEPS_E=[['eLeave','出門領貨'],['eArrive','到倉庫'],['eDone','點完離開'],['eHome','領完到家'],['leave','出門送貨'],['start','開始送貨'],['end','送完'],['home','到家']];
+const EVE=new Set(['eLeave','eArrive','eDone','eHome']);
+const stepsOf=d=>d.mode==='evening'?STEPS_E:STEPS_M;
+const stepLabel=k=>[...STEPS_M,...STEPS_E].find(x=>x[0]===k)[1];
+function nextStep(d){const L=stepsOf(d),t=d.t||{};for(let i=L.length-1;i>=0;i--)if(t[L[i][0]])return L[i+1]?L[i+1][0]:null;return L[0][0]}
+function pk_(d){return picking(d)}
+function anyTime(d){return Object.values(d.t||{}).some(Boolean)}
+function picking(d){const t=d.t||{};return d.mode==='evening'?!!t.eArrive&&!t.eDone:!!t.arrive&&!t.start}
+function delivering(d){const t=d.t||{};return !!t.start&&!t.end}
+function setMode(m){const d=getDay(curDate);if(anyTime(d)&&!confirm('切換領貨方式會清除今天已記的時間，確定？'))return;d.mode=m;d.t={leave:'',arrive:'',start:'',end:'',home:''};touch('days',d);render();toast(m==='evening'?'改成前一晚領貨':'改成早上領貨')}
+function eveningFor(){const tm=addDays(today(),1);curDate=tm;const d=getDay(tm);if(!anyTime(d)){d.mode='evening';touch('days',d)}render();window.scrollTo(0,0);toast(`切到 ${md(tm)}：前一晚領貨`)}
 function shiftDate(n){curDate=addDays(curDate,n);render()}
 function setDate(v){if(v){curDate=v;render()}}
 const tmStr=ms=>{if(!ms)return '';const t=new Date(ms);return `${pad(t.getHours())}:${pad(t.getMinutes())}`};
@@ -467,12 +481,12 @@ function durHTML(d){const c=calc(d),ph=c.deliver&&c.has?(c.delivered/(c.deliver/
 
 /* ---- 流程按鈕 ---- */
 function step(k){
-  const d=getDay(curDate),label=STEPS.find(x=>x[0]===k)[1];
+  const d=getDay(curDate),label=stepLabel(k);
   if(k==='end'){const rows=pkRows(d),un=rows.filter(r=>!r.st).length;if(!confirm(un?`還有 ${un} 件沒打勾！\n（沒打勾的仍會算成送達）\n\n確定送完了嗎？`:'確定送完了嗎？\n會記下送完時間並回到首頁。'))return}
   if(d.t[k]&&!confirm(`${label} 已經記過 ${d.t[k]}，要改成現在 ${nowHM()} 嗎？`))return;
   d.t={...d.t,[k]:nowHM()};touch('days',d);
-  if(k==='arrive'||k==='start')openRun();
-  else{if(k==='end')exitRun(true);else render()}
+  if(k==='arrive'||k==='start'||k==='eArrive')openRun();
+  else{if(k==='end'||k==='eDone')exitRun(true);else render()}
   toast(`${label} ${d.t[k]}`);
 }
 function openRun(){S.ui.run=curDate;S.ui.editRange=false;persist();render();window.scrollTo(0,0)}
@@ -553,24 +567,27 @@ function partnerHTML(d,c){const P=esc(S.settings.partner);
       <div><label class="f">支援名字</label><input value="${esc(d.sup.name)}" placeholder="支援" oninput="setSup('name',this.value)"></div>
     </div><small class="hint">支援件數＝總件數扣掉其他人倒推</small>`:''}`}
 function stepsHTML(d){
-  return `<div class="steps">${STEPS.map(([k,l],i)=>`<div class="stp ${d.t[k]?'ok':''}"><span class="n">${d.t[k]?'✓':i+1}</span><span class="l">${l}</span><input type="time" value="${esc(d.t[k])}" onchange="setT('${k}',this.value)" aria-label="${l}時間"></div>`).join('')}</div>
+  const L=stepsOf(d),ev=d.mode==='evening';
+  return `<div class="steps">${L.map(([k,l],i)=>`${ev&&i===0?`<div class="stg">🌙 前一晚（${md(addDays(d.date,-1))}）</div>`:''}${ev&&k==='leave'?`<div class="stg">☀️ 當天（${md(d.date)}）</div>`:''}<div class="stp ${d.t[k]?'ok':''}"><span class="n">${d.t[k]?'✓':i+1}</span><span class="l">${l}</span><input type="time" value="${esc(d.t[k])}" onchange="setT('${k}',this.value)" aria-label="${l}時間"></div>`).join('')}</div>
   <div id="dur">${durHTML(d)}</div>`}
 
 /* ---- 送貨模式（全螢幕，跳出 app 回來也會留在這裡） ---- */
 function vRun(){
-  curDate=S.ui.run;const d=getDay(curDate),st=stageOf(d),isToday=curDate===today(),delivering=st>=3;
-  const head=isToday?(delivering?'送貨中':'點貨中'):'補登件數';
-  const showRange=!isToday||!delivering||S.ui.editRange;
+  curDate=S.ui.run;const d=getDay(curDate),dv=delivering(d),pk=picking(d),eve=d.mode==='evening';
+  const isToday=dv||pk,delivering_=dv;
+  const head=dv?'送貨中':pk?(eve?'點貨中（前一晚）':'點貨中'):'補登件數';
+  const showRange=!dv||S.ui.editRange;
   return `<div class="runtop"><button class="sm" onclick="exitRun()">← 首頁</button><b>${head}</b><span class="mut">${md(curDate)}（${wd(curDate)}）</span></div>
   <div class="card" id="runhead">${runHeadHTML(d)}</div>
-  ${isToday&&delivering?`<div class="rangeline" onclick="S.ui.editRange=!S.ui.editRange;persist();render()">範圍 ${esc(d.start)||'?'}–${esc(d.end)||'?'} · 總 ${esc(d.total)||'—'}　<span class="acc">${S.ui.editRange?'收起':'修改'}</span></div>`:''}
-  ${!(isToday&&delivering)||S.ui.editRange?acHTML(d):''}
-  ${showRange?rangeHTML(d,!(isToday&&delivering)||S.ui.editRange):''}
+  ${dv?`<div class="rangeline" onclick="S.ui.editRange=!S.ui.editRange;persist();render()">範圍 ${esc(d.start)||'?'}–${esc(d.end)||'?'} · 總 ${esc(d.total)||'—'}　<span class="acc">${S.ui.editRange?'收起':'修改'}</span></div>`:''}
+  ${!(dv)||S.ui.editRange?acHTML(d):''}
+  ${showRange?rangeHTML(d,!(dv)||S.ui.editRange):''}
   ${quickHTML()}
-  ${isToday&&!delivering?`<button class="pri bigbtn" onclick="step('start')">▶ 點完了，開始送貨</button>`:''}
+  ${pk&&!eve?`<button class="pri bigbtn" onclick="step('start')">▶ 點完了，開始送貨</button>`:''}
   ${calc(d).has?`<div class="card"><h3>逐件清單</h3><div id="plist">${plHTML(d)}</div></div>`:`<div class="card"><h3>紀錄</h3><div id="lists">${listsHTML(d)}</div></div>`}
-  ${isToday&&delivering?`<button class="pri bigbtn okbg" onclick="step('end')">✓ 送完</button>`:''}
-  ${!isToday?`<button class="pri bigbtn" onclick="exitRun()">完成</button>`:''}`;
+  ${dv?`<button class="pri bigbtn okbg" onclick="step('end')">✓ 送完</button>`:''}
+  ${pk&&eve?`<button class="pri bigbtn okbg" onclick="step('eDone')">✓ 點完，離開倉庫</button>`:''}
+  ${!dv&&!pk?`<button class="pri bigbtn" onclick="exitRun()">完成</button>`:''}`;
 }
 
 /* ================= 逐件清單（勾選、退件、缺件、+1、備註、照片） ================= */
@@ -689,7 +706,7 @@ async function purgePhotos(){try{const all=await PDB.all(),cut=Date.now()-PH_DAY
 
 /* ---- 首頁 ---- */
 function vDay(){
-  const d=getDay(curDate),c=calc(d),st=stageOf(d),isToday=curDate===today(),P=esc(S.settings.partner);
+  const d=getDay(curDate),c=calc(d),isToday=curDate===today(),P=esc(S.settings.partner),nx=nextStep(d),tmr=addDays(today(),1);
   const dateBar=`<div class="datebar"><button onclick="shiftDate(-7)" aria-label="上一週">◀</button><label class="dpick"><span>📅 ${md(curDate)}（${wd(curDate)}）${isToday?' 今天':''}</span><input type="date" value="${curDate}" onchange="setDate(this.value)"></label><button onclick="shiftDate(7)" aria-label="下一週">▶</button></div>
   <div class="strip">${[0,1,2,3,4,5,6].map(i=>{const x=addDays(weekStart(curDate),i),dd=S.days[x],live=dd&&!dd.deleted,cc=live?calc(dd):null,stt=!live?'':cc.allOff?'all':cc.meOff?'off':dd.locked?'lock':cc.has?'has':'';
     return `<button class="${x===curDate?'on':''} ${x===today()?'td':''}" onclick="setDate('${x}')"><small>${wd(x)}</small><b>${pd(x).getDate()}</b><i class="st ${stt}">${stt==='all'?'休':stt==='off'?'我休':stt==='lock'?'✓':stt==='has'?'•':''}</i></button>`}).join('')}</div>
@@ -709,23 +726,27 @@ function vDay(){
       <div class="row" style="margin-top:10px"><button class="sm" onclick="setOff('')">取消休假</button>${delBtn.replace('margin-top:10px;','')}</div>
     </div></fieldset>${lockBtn}${dedHTML(d)}`;
 
-  const nothing=!c.has&&!d.missing.length&&!d.multi.length&&!d.returns.length&&st===0;
+  const nothing=!c.has&&!d.missing.length&&!d.multi.length&&!d.returns.length&&!anyTime(d);
   let next='';
   if(!d.locked){
-    if(isToday){
-      if(st===0)next=`<div class="g2"><button class="pri bigbtn" onclick="step('leave')">🚗 出門</button><button class="bigbtn" onclick="step('arrive')">直接到倉庫</button></div>`;
-      else if(st===1)next=`<button class="pri bigbtn" onclick="step('arrive')">📦 到倉庫，開始點貨</button>`;
-      else if(st===2)next=`<button class="pri bigbtn" onclick="openRun()">回到點貨畫面</button>`;
-      else if(st===3)next=`<button class="pri bigbtn" onclick="openRun()">🚚 回到送貨模式</button>`;
-      else if(st===4)next=`<button class="pri bigbtn" onclick="step('home')">🏠 到家（下班打卡）</button>`;
+    const eve=d.mode==='evening',can=isToday||(eve&&curDate===tmr);
+    if(can&&nx){
+      const B=(k,l,extra='')=>`<button class="pri bigbtn" onclick="step('${k}')">${l}</button>${extra}`;
+      if(pk_(d))next=`<button class="pri bigbtn" onclick="openRun()">回到點貨畫面</button>`;
+      else if(delivering(d))next=`<button class="pri bigbtn" onclick="openRun()">🚚 回到送貨模式</button>`;
+      else next={leave:eve?B('leave','🚗 出門送貨'):`<div class="g2">${B('leave','🚗 出門')}<button class="bigbtn" onclick="step('arrive')">直接到倉庫</button></div>`,
+        arrive:B('arrive','📦 到倉庫，開始點貨'),start:B('start','▶ 開始送貨'),home:B('home','🏠 到家（下班打卡）'),
+        eLeave:`<div class="g2">${B('eLeave','🌙 出門領貨')}<button class="bigbtn" onclick="step('eArrive')">直接到倉庫</button></div>`,
+        eArrive:B('eArrive','📦 到倉庫，開始點貨'),eHome:B('eHome','🏠 領完到家')}[nx]||'';
     }
+    if(isToday&&!eve&&!anyTime(d)&&!anyTime(getDay(tmr)))next+=`<button class="sm editbtn" style="margin-bottom:8px" onclick="eveningFor()">🌙 今晚先領明天（${md(tmr)}）的貨</button>`;
     next+=`<button class="sm editbtn" onclick="openRun()">✏️ ${isToday?'輸入 / 修改件數':'補登 / 修改件數'}</button>`;
   }
   return dateBar+lockBar+`
   ${nothing&&!d.locked?`<div class="g2" style="margin-bottom:12px"><button class="offbtn" onclick="setOff('me')">🏖 我休假<br><small>同事有上班</small></button><button class="offbtn" onclick="setOff('all')">😴 全員休息<br><small>沒有貨</small></button></div>`:''}
   ${next?`<div class="card nextcard">${next}</div>`:''}
   <fieldset class="lk" ${d.locked?'disabled':''}>
-  <div class="card"><h3>今天進度</h3>${stepsHTML(d)}<small class="hint">大按鈕會自動記時間，點時間可修改</small></div>
+  <div class="card"><h3>今天進度</h3>${stepsHTML(d)}<div class="modesw">${d.mode==='evening'?`<span>前一晚領貨</span><a href="#" onclick="event.preventDefault();setMode('')">改成早上領</a>`:`<span>早上領貨</span><a href="#" onclick="event.preventDefault();setMode('evening')">改成前一晚領</a>`}</div><small class="hint">大按鈕會自動記時間，點時間可修改</small></div>
   <div class="card"><h3>紀錄</h3><div id="lists">${listsHTML(d)}</div></div>
   <div class="card"><h3>收工後</h3>
     <label class="f">今日工作里程（Trip B km）</label>
