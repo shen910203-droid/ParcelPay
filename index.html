@@ -186,6 +186,7 @@ button.ev.k{color:var(--mut)}.acrow{display:flex;justify-content:space-between;g
 .thb{display:flex;gap:4px;margin-top:4px}.thb button{flex:1;padding:4px 0;font-size:12px}.thx{width:96px;height:96px;border-radius:8px;background:var(--card2);font-size:12px;color:var(--mut);display:flex;align-items:center;text-align:center;padding:6px}
 .photobtn{display:block;margin-top:10px;text-align:center;background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:12px;font-weight:600}.photobtn input{display:none}
 .pview{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:40;display:none;align-items:center;justify-content:center}.pview.on{display:flex}.pview img{max-width:100%;max-height:100%}
+.sacts{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}.sacts:empty{display:none}
 small.hint{display:block;color:var(--mut);font-size:12px;margin-top:6px;line-height:1.5}
 </style>
 </head>
@@ -200,8 +201,9 @@ small.hint{display:block;color:var(--mut);font-size:12px;margin-top:6px;line-hei
 
 <script>
 /* ================= 資料 ================= */
-const APP_VERSION='v5.0';
+const APP_VERSION='v5.1';
 const LS='songhuoben_v1';
+const autoOn=()=>S.local.autoSync!==false;
 const DEF_SETTINGS={id:'main',rate:2.5,payOffset:13,weeklyFixed:0,fuelPerKm:0,me:'Aiden',partner:'Frankie',
   reasons:['地址錯誤','無人簽收','拒收','包裹損壞','找不到地址','其他'],updatedAt:0};
 let S={days:{},fuel:{},weeks:{},settings:{...DEF_SETTINGS},pending:[],local:{url:'',token:''},ui:{num:{fuel:true,fixed:false},den:{commute:false,sort:true,deliver:true},period:'thisweek',from:'',to:''}};
@@ -308,7 +310,7 @@ function weekWorkDays(){const m={};liveDays().forEach(d=>{if(calc(d).has){const 
 /* ================= 存檔 / 同步 ================= */
 function touch(type,rec){rec.updatedAt=Date.now();S[type][rec.id]=rec;persist();queue(type,rec.id)}
 function touchSettings(){S.settings.updatedAt=Date.now();persist();queue('settings','main')}
-function queue(type,id){S.pending=S.pending.filter(p=>!(p.type===type&&p.id===id));S.pending.push({type,id});persist();badge();clearTimeout(queue.t);queue.t=setTimeout(flush,1500)}
+function queue(type,id){S.pending=S.pending.filter(p=>!(p.type===type&&p.id===id));S.pending.push({type,id});persist();badge();clearTimeout(queue.t);if(autoOn())queue.t=setTimeout(flush,1500)}
 let syncing=false,syncErr='';
 function recOf(type,id){return type==='settings'?S.settings:S[type][id]}
 function summaryOf(type,r){
@@ -360,7 +362,8 @@ function badge(){const ey=document.getElementById('eye');if(ey){ey.textContent=S
   if(!S.local.url){t='未連雲端';c='warn'}
   else if(syncing){t='同步中…'}
   else if(syncErr){t=S.pending.length?`待同步 ${S.pending.length} · ${syncErr}`:syncErr;c=syncErr==='無網路'?'warn':'bad'}
-  else if(S.pending.length){t=`待同步 ${S.pending.length}`;c='warn'}
+  else if(S.pending.length){t=autoOn()?`待同步 ${S.pending.length}`:`未同步 ${S.pending.length}（手動）`;c='warn'}
+  else if(!autoOn()){t='已同步（手動）';c='ok'}
   else{t='已同步';c='ok'}
   b.textContent=t;b.className='badge '+c;
 }
@@ -608,6 +611,9 @@ function pkDo(key,act,arg){
   if(act==='clear'){pkClear(d,r)}
   if(act==='ret'){pkClear(d,r);d.returns.push({id:rid(),no:r.n,qty:1,reason:S.settings.reasons[arg],at:now,pk:key})}
   if(act==='miss'){pkClear(d,r);d.missing.push({id:rid(),no:r.n,qty:1,at:now,pk:key})}
+  if(act==='skip'){const rs=pkRows(d).filter(x=>x.n===r.n);
+    if(rs.length>1||rs.some(x=>x.st)||rs.some(x=>x.p.note||(x.p.ph&&x.p.ph.length))){undoSnap=null;toast(`${r.n} 有多件或已有狀態，先清除再記跳號`);return}
+    d.skip=[...(d.skip||[]),{id:rid(),no:r.n,at:now}];if(d.pk)delete d.pk[`${r.n}`];}
   if(act==='plus'){const q=pkQ(d,r.n);if(q===1)pkRename(d,`${r.n}`,`${r.n}-1`);
     const m=d.multi.find(x=>x.no===r.n);if(m){m.qty=q+1;m.at=now}else d.multi.push({id:rid(),no:r.n,qty:q+1,at:now});key=`${r.n}-${q+1}`}
   if(act==='minus'){const q=pkQ(d,r.n);const last=`${r.n}-${q}`;const lr=pkRow(d,last);
@@ -615,8 +621,8 @@ function pkDo(key,act,arg){
     const m=d.multi.find(x=>x.no===r.n);if(m){if(q-1<=1)d.multi=d.multi.filter(x=>x!==m);else m.qty=q-1}
     delete (d.pk||{})[last];if(q===2)pkRename(d,`${r.n}-1`,`${r.n}`);key=q===2?`${r.n}`:`${r.n}-1`}
   touch('days',d);plRefresh();refreshDay();
-  const msg={ok:`${key} 送達`,clear:`${key} 已清除狀態`,ret:`${key} 退件`,miss:`${key} 缺件`,plus:`${r.n} 加一件 → ${key}`,minus:`${r.n} 移除一件`}[act];
-  showUndo(msg);if(act==='plus'||act==='minus'||act==='ret'||act==='miss'||act==='clear'||act==='ok')closeSheet();
+  const msg={skip:`${r.n} 記為跳號（系統沒有這號）`,ok:`${key} 送達`,clear:`${key} 已清除狀態`,ret:`${key} 退件`,miss:`${key} 缺件`,plus:`${r.n} 加一件 → ${key}`,minus:`${r.n} 移除一件`}[act];
+  showUndo(msg);closeSheet();
 }
 function pkNote(key){const d=getDay(curDate);const v=document.getElementById('pknote').value.trim();pkSet(d,key,{note:v||undefined});touch('days',d);plRefresh();toast(v?'備註已儲存':'備註已清除')}
 
@@ -647,7 +653,7 @@ function pkMenu(key){
     <button onclick="pkDo('${key}','ok')">✓ 送達</button><button onclick="document.getElementById('rsel').style.display='flex'">退件</button>
     <button onclick="pkDo('${key}','miss')">缺件</button><button onclick="pkDo('${key}','plus')">＋1 件</button></div>
   <div id="rsel" class="chips" style="display:none;margin-top:8px">${S.settings.reasons.map((x,i)=>`<button class="chip pick" onclick="pkDo('${key}','ret',${i})">${esc(x)}</button>`).join('')}</div>
-  <div class="row" style="margin-top:8px">${r.st?`<button class="sm" onclick="pkDo('${key}','clear')">清除狀態（變回未送）</button>`:''}${r.q>1&&r.i===r.q?`<button class="sm" onclick="pkDo('${key}','minus')">移除這件</button>`:''}</div>`}
+  <div class="sacts">${r.st?`<button class="sm" onclick="pkDo('${key}','clear')">清除狀態</button>`:''}${r.q>1&&r.i===r.q?`<button class="sm" onclick="pkDo('${key}','minus')">移除這件</button>`:''}${r.q===1&&!r.st?`<button class="sm" onclick="if(confirm('${r.n} 記為跳號？（系統沒有這個號碼，會從清單移除、不計件數）'))pkDo('${key}','skip')">跳號（沒這號）</button>`:''}</div>`}
   <label class="f" style="margin-top:12px">📝 備註</label>
   <div class="dedadd" style="grid-template-columns:minmax(0,1fr) auto"><input id="pknote" value="${esc(r.p.note||'')}" placeholder="例：放後門、不確定門牌" ${L?'disabled':''}><button onclick="pkNote('${key}')" ${L?'disabled':''}>儲存</button></div>
   <label class="f" style="margin-top:12px">📷 照片（存在這支手機，14 天後自動刪除）</label>
@@ -963,6 +969,8 @@ function vSet(){
   <div class="card"><h3>Google Sheets 同步</h3>
     <label class="f">Apps Script 網址</label><input value="${esc(S.local.url)}" placeholder="https://script.google.com/macros/s/.../exec" onchange="setLocal('url',this.value)">
     <label class="f" style="margin-top:8px">密碼（同 Apps Script TOKEN）</label><input value="${esc(S.local.token)}" onchange="setLocal('token',this.value)">
+    <div class="chips" style="margin-top:10px"><span class="chip pick ${autoOn()?'sel':''}" onclick="S.local.autoSync=!autoOn();persist();render();toast(autoOn()?'自動同步：開':'自動同步：關，記得回家按「立即同步」')">${autoOn()?'☑':'☐'} 自動同步</span></div>
+    ${autoOn()?'':`<small class="hint warnc">關閉中：資料只存在手機，按「立即同步」才會上傳${S.pending.length?`（目前 ${S.pending.length} 筆未同步）`:''}</small>`}
     <button class="pri" style="width:100%;margin-top:10px" onclick="testConn()">測試連線</button>
     <div id="conn" class="formula" style="display:none"></div>
     <div class="g2" style="margin-top:8px"><button onclick="manualSync()">立即同步</button><button onclick="pull(false)">從雲端下載</button></div>
@@ -1024,9 +1032,9 @@ if('serviceWorker' in navigator&&location.protocol.startsWith('http')){
 }
 async function forceUpdate(){toast('更新中…');try{const rs=await navigator.serviceWorker.getRegistrations();await Promise.all(rs.map(r=>r.unregister()));const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)))}catch(e){}location.replace(location.pathname+'?v='+Date.now())}
 if(S.local.url)pull(true);
-window.addEventListener('online',()=>{syncErr='';flush()});
-document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){if(tab==='day'&&!document.activeElement.matches('input,textarea'))render();flush()}});
-setInterval(()=>{if(S.pending.length&&!syncing)flush()},30000);
+window.addEventListener('online',()=>{syncErr='';if(autoOn())flush()});
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){if(tab==='day'&&!document.activeElement.matches('input,textarea'))render();if(autoOn())flush()}});
+setInterval(()=>{if(autoOn()&&S.pending.length&&!syncing)flush()},30000);
 </script>
 </body>
 </html>
