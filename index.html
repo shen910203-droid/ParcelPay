@@ -203,7 +203,7 @@ small.hint{display:block;color:var(--mut);font-size:12px;margin-top:6px;line-hei
 
 <script>
 /* ================= 資料 ================= */
-const APP_VERSION='v5.3';
+const APP_VERSION='v5.5';
 const LS='songhuoben_v1';
 const autoOn=()=>S.local.autoSync!==false;
 const DEF_SETTINGS={id:'main',rate:2.5,payOffset:13,weeklyFixed:0,fuelPerKm:0,me:'Aiden',partner:'Frankie',
@@ -562,7 +562,7 @@ function partnerHTML(d,c){const P=esc(S.settings.partner);
     <div id="flist" style="margin-top:10px">${fListHTML(d)}</div>
     <div class="chips" style="margin-top:12px"><span class="chip pick ${c.supOn?'sel':''}" onclick="setSup('on',${!c.supOn})">${c.supOn?'☑':'☐'} 今天有支援人員</span></div>
     ${c.supOn?`<div class="g3" style="margin-top:8px">
-      <div><label class="f">${P} 件數</label><input inputmode="numeric" pattern="[0-9]*" value="${esc(d.sup.fDel)}" oninput="setSup('fDel',this.value)"></div>
+      <div><label class="f">${P} 實際送達件數</label><input inputmode="numeric" pattern="[0-9]*" value="${esc(d.sup.fDel)}" oninput="setSup('fDel',this.value)"></div>
       <div><label class="f">支援退件數</label><input inputmode="numeric" pattern="[0-9]*" value="${esc(d.sup.sRet)}" oninput="setSup('sRet',this.value)"></div>
       <div><label class="f">支援名字</label><input value="${esc(d.sup.name)}" placeholder="支援" oninput="setSup('name',this.value)"></div>
     </div><small class="hint">支援件數＝總件數扣掉其他人倒推</small>`:''}`}
