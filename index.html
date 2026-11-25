@@ -203,7 +203,7 @@ small.hint{display:block;color:var(--mut);font-size:12px;margin-top:6px;line-hei
 
 <script>
 /* ================= 資料 ================= */
-const APP_VERSION='v5.4';
+const APP_VERSION='v5.3';
 const LS='songhuoben_v1';
 const autoOn=()=>S.local.autoSync!==false;
 const DEF_SETTINGS={id:'main',rate:2.5,payOffset:13,weeklyFixed:0,fuelPerKm:0,me:'Aiden',partner:'Frankie',
@@ -262,7 +262,7 @@ function calc(d){
   const sup=d.sup||{},supOn=!allOff&&!!sup.on,sRet=supOn?(num(sup.sRet)||0):0,supName=(sup.name||'').trim()||'支援';
   let fDelivered,sDelivered=null;
   if(allOff){fDelivered=null}
-  else if(supOn){const fTot=num(sup.fDel);fDelivered=fTot==null?null:fTot-fRet;sDelivered=(counts&&T!=null&&fTot!=null)?T-assigned-otherMissing-fTot-sRet:null}
+  else if(supOn){fDelivered=num(sup.fDel);sDelivered=(counts&&T!=null&&fDelivered!=null)?T-assigned-otherMissing-fDelivered-fRet-sRet:null}
   else fDelivered=(counts&&T!=null)?T-assigned-otherMissing-fRet:null;
   const km=num(d.kmB);
   const warn=[];
@@ -412,8 +412,7 @@ const nowHM=()=>{const n=new Date();return `${pad(n.getHours())}:${pad(n.getMinu
 function formulaHTML(c){const P=esc(S.settings.partner),N=esc(c.supName);if(!c.counts||c.T==null)return'';
   const mine=c.meOff?'':` − 我範圍 ${c.assigned}`,ml=c.meOff?'缺件':`${P}範圍缺件`;
   if(!c.supOn&&c.fDelivered!=null)return `<div class="formula">${P} = 總 ${c.T}${mine} − ${ml} ${c.otherMissing} − ${P}退件 ${c.fRet}</div>`;
-  if(c.supOn&&c.fDelivered!=null&&c.sDelivered!=null)return `<div class="formula">${P} = 他的總件數 ${c.fDelivered+c.fRet} − 退件 ${c.fRet} = ${c.fDelivered}<br>${N} = 總 ${c.T}${mine} − ${ml} ${c.otherMissing} − ${P}總 ${c.fDelivered+c.fRet} − ${N}退 ${c.sRet}</div>`;
-  if(c.supOn&&c.sDelivered!=null)return `<div class="formula">${N} = 總 ${c.T}${mine} − ${ml} ${c.otherMissing} − ${P}總 ${c.fDelivered+c.fRet} − ${N}退 ${c.sRet}</div>`;
+  if(c.supOn&&c.sDelivered!=null)return `<div class="formula">${N} = 總 ${c.T}${mine} − ${ml} ${c.otherMissing} − ${P} ${c.fDelivered} − ${P}退 ${c.fRet} − ${N}退 ${c.sRet}</div>`;
   return ''}
 function sumTable(c){
   const P=esc(S.settings.partner),v=x=>x==null?'—':x;
@@ -435,7 +434,7 @@ function heroHTML(d){
   <div class="wline"><span>本週累計 <b>${w?w.me:0} 件 · ${moneyH(w?w.payNet:0)}</b></span><span>${md(payday(ws))}（日）發薪</span></div>
   ${c.ded||c.dedPend?`<div class="warnbox" style="color:var(--bad);border-color:rgba(255,93,93,.4);background:rgba(255,93,93,.08)">${c.ded?`<div>扣款 −${moneyH(c.ded)} → 今日實領 ${moneyH(c.netPay)}</div>`:''}${c.dedPend?`<div class="warnc">待確認扣款 ${moneyH(c.dedPend)}</div>`:''}</div>`:''}
   ${sumTable(c)}
-  ${(()=>{const lines=[];if(c.has)lines.push(`我：${c.numbers} 號 + 多件 ${c.extra} − 缺件 ${c.myMissing} − 退件 ${c.myRet} = ${c.delivered}`);const f=formulaHTML(c).replace(/<br>/g,'\u0001').replace(/<[^>]+>/g,'');if(f)lines.push(...f.split('\u0001'));
+  ${(()=>{const lines=[];if(c.has)lines.push(`我：${c.numbers} 號 + 多件 ${c.extra} − 缺件 ${c.myMissing} − 退件 ${c.myRet} = ${c.delivered}`);const f=formulaHTML(c).replace(/<[^>]+>/g,'');if(f)lines.push(f);
     return lines.length?`<button class="calcbtn" onclick="S.ui.showCalc=!S.ui.showCalc;persist();refreshDay()">算法 ${S.ui.showCalc?'▲':'▼'}</button>${S.ui.showCalc?`<div class="formula">${lines.join('<br>')}</div>`:''}`:''})()}
   ${c.warn.map(w=>`<div class="warnbox">⚠️ ${esc(w)}</div>`).join('')}`;
 }
@@ -563,10 +562,10 @@ function partnerHTML(d,c){const P=esc(S.settings.partner);
     <div id="flist" style="margin-top:10px">${fListHTML(d)}</div>
     <div class="chips" style="margin-top:12px"><span class="chip pick ${c.supOn?'sel':''}" onclick="setSup('on',${!c.supOn})">${c.supOn?'☑':'☐'} 今天有支援人員</span></div>
     ${c.supOn?`<div class="g3" style="margin-top:8px">
-      <div><label class="f">${P} 總件數（含退件）</label><input inputmode="numeric" pattern="[0-9]*" value="${esc(d.sup.fDel)}" oninput="setSup('fDel',this.value)"></div>
+      <div><label class="f">${P} 件數</label><input inputmode="numeric" pattern="[0-9]*" value="${esc(d.sup.fDel)}" oninput="setSup('fDel',this.value)"></div>
       <div><label class="f">支援退件數</label><input inputmode="numeric" pattern="[0-9]*" value="${esc(d.sup.sRet)}" oninput="setSup('sRet',this.value)"></div>
       <div><label class="f">支援名字</label><input value="${esc(d.sup.name)}" placeholder="支援" oninput="setSup('name',this.value)"></div>
-    </div><small class="hint">問 Frankie 他總共拿幾件（含退件），他的退件記在上面</small>`:''}`}
+    </div><small class="hint">支援件數＝總件數扣掉其他人倒推</small>`:''}`}
 function stepsHTML(d){
   const L=stepsOf(d),ev=d.mode==='evening';
   return `<div class="steps">${L.map(([k,l],i)=>`${ev&&i===0?`<div class="stg">🌙 前一晚（${md(addDays(d.date,-1))}）</div>`:''}${ev&&k==='leave'?`<div class="stg">☀️ 當天（${md(d.date)}）</div>`:''}<div class="stp ${d.t[k]?'ok':''}"><span class="n">${d.t[k]?'✓':i+1}</span><span class="l">${l}</span><input type="time" value="${esc(d.t[k])}" onblur="if(this.value!==(getDay(curDate).t['${k}']||''))setT('${k}',this.value)" aria-label="${l}時間"></div>`).join('')}</div>
