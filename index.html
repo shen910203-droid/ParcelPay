@@ -178,8 +178,8 @@ button.ev.k{color:var(--mut)}.acrow{display:flex;justify-content:space-between;g
 .pr.s-ok{opacity:.55}.pr.s-ok .ck{background:var(--ok);border-color:var(--ok);color:#fff}
 .pr.s-ret .ck{background:var(--bad);border-color:var(--bad);color:#fff}.pr.s-miss .ck{background:var(--warn);border-color:var(--warn);color:#fff}
 .pldiv{font-size:12px;color:var(--mut);margin:8px 0 2px;text-align:center}
-.topsheet{position:fixed;left:0;right:0;top:0;z-index:30;background:var(--card);border-bottom:1px solid var(--line);border-radius:0 0 18px 18px;padding:calc(14px + env(safe-area-inset-top)) 16px 16px;transform:translateY(-105%);transition:transform .2s;max-height:85vh;overflow:auto;box-shadow:0 10px 30px rgba(0,0,0,.5)}
-.topsheet.on{transform:none}body.sheeton::after{content:'';position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:29}
+.topsheet{position:fixed;left:0;right:0;top:0;z-index:30;background:var(--card);border-bottom:1px solid var(--line);border-radius:0 0 18px 18px;padding:calc(14px + env(safe-area-inset-top)) 16px 16px;transform:translateY(-105%);transition:transform .2s,visibility .2s;max-height:85vh;overflow:auto;visibility:hidden}
+.topsheet.on{transform:none;visibility:visible;box-shadow:0 10px 30px rgba(0,0,0,.5)}body.sheeton::after{content:'';position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:29}
 .shead{display:flex;align-items:center;gap:10px}.shead b{font-size:24px}.shead .mut{flex:1}
 .topsheet .g4 button{padding:12px 2px;font-size:14px}
 .thumbs{display:flex;gap:8px;flex-wrap:wrap}.th{width:96px}.th img{width:96px;height:96px;object-fit:cover;border-radius:8px;display:block}
@@ -203,7 +203,7 @@ small.hint{display:block;color:var(--mut);font-size:12px;margin-top:6px;line-hei
 
 <script>
 /* ================= 資料 ================= */
-const APP_VERSION='v5.6';
+const APP_VERSION='v5.7';
 const LS='songhuoben_v1';
 const autoOn=()=>S.local.autoSync!==false;
 const DEF_SETTINGS={id:'main',rate:2.5,payOffset:13,weeklyFixed:0,fuelPerKm:0,me:'Aiden',partner:'Frankie',
@@ -360,6 +360,7 @@ async function pull(silent){
   syncing=false;badge();flush();
 }
 const errMsg=e=>/fetch|network|load failed|json|unexpected/i.test(e&&e.message||'')?(navigator.onLine?'連不到雲端':'無網路'):(e&&e.message)||'失敗';
+function clearTyping(){const a=document.activeElement;if(!a||!a.matches('input:not([type=date]):not([type=time]),textarea'))document.body.classList.remove('typing')}
 function toggleMoney(){S.ui.hideMoney=!S.ui.hideMoney;persist();render();toast(S.ui.hideMoney?'金額已隱藏':'金額已顯示')}
 function badge(){const ey=document.getElementById('eye');if(ey){ey.textContent=S.ui.hideMoney?'$ 隱藏':'$';ey.classList.toggle('on',!!S.ui.hideMoney)}
   const b=document.getElementById('badge');let t,c='';
@@ -387,6 +388,7 @@ function render(){
   document.getElementById('nav').innerHTML=TABS.map(([k,l])=>`<button class="${tab===k?'on':''}" onclick="go('${k}')"><svg viewBox="0 0 24 24">${IC[k]}</svg>${l}</button>`).join('');
   if(S.ui.run){const rd=S.days[S.ui.run];if(rd&&(rd.locked||rd.deleted||rd.offType))S.ui.run=null}
   document.body.classList.toggle('running',!!S.ui.run);
+  setTimeout(clearTyping,0);
   const v=S.ui.run?vRun():{day:vDay,week:vWeek,fuel:vFuel,stat:vStat,set:vSet}[tab]();
   document.getElementById('view').innerHTML=v;badge();
 }
@@ -1051,6 +1053,8 @@ function restore(file){if(!file)return;const r=new FileReader();r.onload=()=>{tr
 /* ================= 啟動 ================= */
 load();render();purgePhotos();
 document.addEventListener('focusin',e=>{if(e.target.matches('input:not([type=date]):not([type=time]),textarea'))document.body.classList.add('typing')});
+if(window.visualViewport)visualViewport.addEventListener('resize',()=>setTimeout(clearTyping,50));
+document.addEventListener('touchend',()=>setTimeout(clearTyping,300),{passive:true});
 document.addEventListener('focusout',()=>setTimeout(()=>{if(!document.activeElement||!document.activeElement.matches('input,textarea'))document.body.classList.remove('typing')},100));
 if('serviceWorker' in navigator&&location.protocol.startsWith('http')){
   const hadCtrl=!!navigator.serviceWorker.controller;let reloaded=false;
