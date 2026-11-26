@@ -203,7 +203,7 @@ small.hint{display:block;color:var(--mut);font-size:12px;margin-top:6px;line-hei
 
 <script>
 /* ================= 資料 ================= */
-const APP_VERSION='v5.5';
+const APP_VERSION='v5.6';
 const LS='songhuoben_v1';
 const autoOn=()=>S.local.autoSync!==false;
 const DEF_SETTINGS={id:'main',rate:2.5,payOffset:13,weeklyFixed:0,fuelPerKm:0,me:'Aiden',partner:'Frankie',
@@ -264,7 +264,7 @@ function calc(d){
   if(allOff){fDelivered=null}
   else if(supOn){fDelivered=num(sup.fDel);sDelivered=(counts&&T!=null&&fDelivered!=null)?T-assigned-otherMissing-fDelivered-fRet-sRet:null}
   else fDelivered=(counts&&T!=null)?T-assigned-otherMissing-fRet:null;
-  const km=num(d.kmB);
+  const km=(()=>{const a=num(d.kmB),b=d.mode==='evening'?num(d.kmBe):null;return a==null&&b==null?null:(a||0)+(b||0)})();
   const warn=[];
   if(s!=null&&e!=null&&e<s)warn.push('結束編號小於起始編號');
   d.returns.filter(r=>has&&!inR(r.no)).forEach(r=>warn.push(`退件 ${r.no} 不在你的範圍`));
@@ -484,7 +484,11 @@ function step(k){
   const d=getDay(curDate),label=stepLabel(k);
   if(k==='end'){const rows=pkRows(d),un=rows.filter(r=>!r.st).length;if(!confirm(un?`還有 ${un} 件沒打勾！\n（沒打勾的仍會算成送達）\n\n確定送完了嗎？`:'確定送完了嗎？\n會記下送完時間並回到首頁。'))return}
   if(d.t[k]&&!confirm(`${label} 已經記過 ${d.t[k]}，要改成現在 ${nowHM()} 嗎？`))return;
-  d.t={...d.t,[k]:nowHM()};touch('days',d);
+  const departing=k==='leave'||k==='eLeave'||(k==='arrive'&&!d.t.leave)||(k==='eArrive'&&!d.t.eLeave);
+  if(departing&&!d.t[k]&&!confirm('🚗 出發前提醒\n\nTrip B 歸零了嗎？\n\n按「確定」記下時間；還沒歸零就按「取消」，歸零後再按一次。'))return;
+  d.t={...d.t,[k]:nowHM()};
+  if(k==='home'||k==='eHome'){const f=k==='eHome'?'kmBe':'kmB',v=prompt(`🏠 ${k==='eHome'?'領完到家':'到家了'}！\n\n現在 Trip B 是幾公里？`,d[f]||'');if(v!=null&&v.trim()!==''&&num(v.trim())!=null)d[f]=v.trim()}
+  touch('days',d);
   if(k==='arrive'||k==='start'||k==='eArrive')openRun();
   else{if(k==='end'||k==='eDone')exitRun(true);else render()}
   toast(`${label} ${d.t[k]}`);
@@ -749,8 +753,10 @@ function vDay(){
   <div class="card"><h3>今天進度</h3>${stepsHTML(d)}<div class="modesw">${d.mode==='evening'?`<span>前一晚領貨</span><a href="#" onclick="event.preventDefault();setMode('')">改成早上領</a>`:`<span>早上領貨</span><a href="#" onclick="event.preventDefault();setMode('evening')">改成前一晚領</a>`}</div><small class="hint">大按鈕會自動記時間，點時間可修改</small></div>
   <div class="card"><h3>紀錄</h3><div id="lists">${listsHTML(d)}</div></div>
   <div class="card"><h3>收工後</h3>
-    <label class="f">今日工作里程（Trip B km）</label>
-    <input inputmode="decimal" placeholder="出門前歸零，回家看 B" value="${esc(d.kmB)}" oninput="setF('kmB',this.value)" onchange="render()">
+    ${d.mode==='evening'?`<div class="g2"><div><label class="f">前一晚領貨 Trip B km</label><input inputmode="decimal" value="${esc(d.kmBe)}" oninput="setF('kmBe',this.value)" onchange="render()"></div>
+    <div><label class="f">當天送貨 Trip B km</label><input inputmode="decimal" value="${esc(d.kmB)}" oninput="setF('kmB',this.value)" onchange="render()"></div></div>`
+    :`<label class="f">今日工作里程（Trip B km）</label>
+    <input inputmode="decimal" placeholder="出門前歸零，回家看 B" value="${esc(d.kmB)}" oninput="setF('kmB',this.value)" onchange="render()">`}
     <div class="mut" style="margin-top:6px">${(()=>{if(c.km==null)return '';const k=costPerKmOn(d.date);
       return `<div>${c.km} km · 油錢約 <b>${money(c.km*k.v)}</b></div><div style="font-size:12px">${k.src==='auto'?`油價 ${money(k.price)}/L · 油耗 ${k.kmPerL.toFixed(2)} km/L`:'暫用備用每公里油錢'}</div>`})()}</div>
     ${partnerHTML(d,c)}
