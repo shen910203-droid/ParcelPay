@@ -6,6 +6,8 @@ SEED="""()=>{const t=today(),mk=(dt,o)=>{const d=getDay(dt);Object.assign(d,o);t
   returns:[{id:'d',no:166,qty:1,reason:'找不到地址',at:n-3e6}],fReturns:[{id:'f',qty:5,reason:'無人簽收',at:n-1e6}],ded:[{id:'x',amount:45.5,note:'包裹損壞賠償',confirmed:true,at:n},{id:'y',amount:20,note:'可能要賠',confirmed:false,at:n}]});
  mk(addDays(t,-1),{offType:'me',total:'280',offMiss:'2',sup:{on:true,name:'Tom',fDel:'150',sRet:'1'}});
  mk(addDays(t,-2),{offType:'all'});mk(addDays(t,-7),{total:'296',start:'1',end:'150',locked:true});
+ mk(t,{fSay:'147',fSayRet:'5'});mk(addDays(t,-3),{total:'150',start:'1',end:'148',fOff:true,t:{leave:'05:00',arrive:'05:30',start:'09:30',end:'15:00',home:'15:30'}});
+ S.settings.rates=[{id:'r1',from:addDays(t,-20),rate:2.8}];S.settings.fixed=[{id:'h',label:'房租',amt:200,per:'w',from:''},{id:'c',label:'車租',amt:800,per:'m',from:addDays(t,-30)}];
  touch('fuel',{id:'f1',date:addDays(t,-3),amount:41.8,liters:20.3,tripA:177,full:true});touch('fuel',{id:'f2',date:addDays(t,-1),amount:22,liters:10,tripA:'',full:false,note:'只加一半'});
  S.ui.sec={returns:true,missing:true,multi:true,skip:true,others:true,fReturns:true};render()}"""
 WRAP="""()=>{const out=[];const w=document.createTreeWalker(document.getElementById('view'),NodeFilter.SHOW_TEXT);let nd;
@@ -14,7 +16,7 @@ WRAP="""()=>{const out=[];const w=document.createTreeWalker(document.getElementB
   if(tops.size>1)out.push((el.className||el.tagName)+' :: '+t.slice(0,40))}
  document.querySelectorAll('#view *').forEach(e=>{if(e.offsetParent&&e.scrollWidth>e.clientWidth+1&&getComputedStyle(e).overflow!=='visible'&&!e.matches('input,textarea,.tbl'))out.push('CLIP '+(e.className||e.tagName)+' :: '+e.textContent.trim().slice(0,30))});
  return [...new Set(out)]}"""
-screens=[('home',"go('day');exitRun();setDate(today())"),('run',"openRun()"),('runList',"S.ui.run=today();render()"),('menu',"pkMenu('130')"),('menuClose',"closeSheet()"),('runDeliv',"exitRun();openRun()"),('meoff',"exitRun();setDate(addDays(today(),-1))"),('alloff',"setDate(addDays(today(),-2))"),
+screens=[('home',"go('day');exitRun();setDate(today())"),('run',"openRun()"),('runList',"S.ui.run=today();render()"),('menu',"pkMenu('130')"),('menuClose',"closeSheet()"),('runDeliv',"exitRun();openRun()"),('meoff',"exitRun();setDate(addDays(today(),-1))"),('fOff',"setDate(addDays(today(),-3))"),('alloff',"setDate(addDays(today(),-2))"),
  ('locked',"setDate(addDays(today(),-7))"),('prep',"setDate(addDays(today(),1));openRun()"),('settle',"exitRun();S.ui.wv='settle';setSettle('this');go('week')"),('settleLast',"setSettle('last')"),('pay',"S.ui.wv='pay';render()"),
  ('fuel',"go('fuel')"),('stat',"go('stat')"),('set',"go('set')")]
 with sync_playwright() as p:

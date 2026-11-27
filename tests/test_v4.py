@@ -35,7 +35,8 @@ with sync_playwright() as p:
     g=pg.locator('.card:has(h3:text("同區統計")) input'); g.nth(0).fill('280'); g.nth(1).fill('2')
     pg.fill('#fq','3'); pg.tap('.frow >> text=拒收')
     c=json.loads(pg.evaluate("JSON.stringify(calc(getDay(addDays(today(),-1))))")); print('meOff F',c['fDelivered'],'(280-2-3=275)')
-    pg.tap('text=今天有支援人員'); s=pg.locator('.card:has(h3:text("同區統計")) .g3 input'); s.nth(0).fill('150'); s.nth(1).fill('1')
+    pg.tap('text=今天有支援人員'); pg.locator('.card:has(h3:text("同區統計")) .g2 input').nth(2).fill('150')  # v5.9：Frankie 說他送達 移到「Frankie 說他」那一列
+    s=pg.locator('.card:has(h3:text("同區統計")) .g3 input'); s.nth(1).fill('1')
     c=json.loads(pg.evaluate("JSON.stringify(calc(getDay(addDays(today(),-1))))")); print('meOff+sup F',c['fDelivered'],'S',c['sDelivered'],'(280-2-150-3-1=124)')
     pg.screenshot(path='/tmp/pp_v4_off.png',full_page=True)
     pg.evaluate("setDate(addDays(today(),-2))"); pg.tap('text=😴 全員休息')

@@ -23,7 +23,7 @@
   1. `index.html` 裡 `const APP_VERSION='vX.Y'` 加一版。
   2. `sw.js` 裡 `const CACHE='parcelpay-vX.Y'` 同步改。
   3. commit 訊息用中文寫「vX.Y：做了什麼」。
-- 目前版本：**v5.8**（可改單週發薪日、分批入帳／待核准、補貼獎金；修正里程小數過長擠版）。
+- 目前版本：**v5.9**（真正的件數核對、同事休假、單價依生效日期、固定成本項目、時間提醒、發薪日當天不標紅、輸入框多件 +1 修正）。
 - 手機更新：關掉 App 重開；卡住就按「設定 → 最下面 → 強制更新」（只清程式快取，不刪資料）。
 
 ## 檔案
@@ -43,6 +43,8 @@
 - 使用者已接通 Google Sheets（畫面顯示「已同步」）。
 
 ### Day 紀錄主要欄位
+v5.9 新增：`fSay`（Frankie 說他送達，沒支援時用；有支援時用 `sup.fDel`）、`fSayRet`（Frankie 說他退件）、`fOff`（Frankie 休假）、`sup.sDel`（支援說他送達）。
+
 `date, total(總件數), start, end(我的範圍), missing[{no,qty,pk?}], multi[{no,qty}], returns[{no,qty,reason,pk?}], fReturns[{qty,reason}], skip[{no}], pk{ "100" | "100-2": {st:'ok',at,note,ph[]} }, t{leave,arrive,start,end,home,eLeave,eArrive,eDone,eHome}, mode(''|'evening'), kmB, kmBe, sup{on,name,fDel,sRet}, offType(''|'me'|'all'), offMiss, ded[{amount,note,confirmed}], acStart, acEnd, locked, note`
 
 ### Week 紀錄（`S.weeks[週一日期]`，v5.8 起）
@@ -53,13 +55,21 @@
 ## 計算規則（`calc(d)`，改之前一定要理解）
 - **每個號碼的件數** = max(標記的多件數, 該號缺件數 + 退件數)。所以同一號直接退 2 件會自動當 2 件。
 - 範圍號碼數 = `end − start + 1 − 範圍內跳號數`；`extra` = 範圍內每號 (件數−1) 的加總；`assigned`(今日拿貨) = 號碼數 + extra。
-- **我送達** = assigned − 我範圍缺件 − 我退件；薪資 = 送達 × `settings.rate`（$2.5）。
+- **我送達** = assigned − 我範圍缺件 − 我退件；薪資 = 送達 × `rateOn(date)`。
+- **單價依生效日期**（v5.9）：`settings.rate` = 起始單價（$2.5），`settings.rates=[{id,from,rate}]` = 從某天開始的新單價。一律用 `rateOn(date)`，**不要直接用 `settings.rate`**，否則改單價會改到舊帳。Frankie 單價跟我一樣。
+- **三個人**：我、Frankie、支援。組合：我+Frankie（平常）／Frankie 休（`fOff`，只有我，可加支援）／我休（`offType:'me'`，Frankie+支援）／全休（`'all'`）。
+- **Frankie 休假**（`fOff`）：Frankie = 0、退件 = 0；沒支援時「剩下 = 總件數 − 我 assigned − 範圍外缺件」應該是 0；有支援時支援 = 總件數 − 我 assigned − 範圍外缺件 − 支援退件。
+- **核對**（v5.9，`calc().chk` = ok / diff / none / na）：Frankie 和支援每天會**親口說**送達、退件數，拿來跟倒推結果比。舊版「送達+退件+缺件 = 總件數」是恆等式、永遠成立，**不能拿來當核對**。沒支援比 `fSay` vs Frankie 倒推；有支援比 `sup.sDel` vs 支援倒推；`fSayRet` vs 記錄的 Frankie 退件；Frankie 休假沒支援比「剩下 = 0」。沒填 → 「未核對」，結算鎖定時提醒。
+- **同事平均提醒**（`dayWarn`）：Frankie 倒推件數比他最近 14 天平均多或少一半以上 → 提醒。放在 `calc` 外面，因為要讀其他天（避免 calc 互相呼叫）。
+- **時間提醒**：理貨 > 3h、送貨 > 14h、單趟通勤 > 2h → 提醒「時間對嗎？」，**只提醒、照算**，使用者確認過真的這麼久就不管。
 - **Frankie 送達**（無支援）= 總件數 − 我的 assigned − 範圍外缺件 − Frankie 退件。
 - **有支援**：`sup.fDel` 是 **Frankie 實際送達件數（不含退件）**，支援 = 總件數 − 我 assigned − 範圍外缺件 − Frankie 送達 − Frankie 退件 − 支援退件。⚠️ v5.4 曾改成「含退件」，使用者表示錯，已還原，**不要再改**。
 - **我休假**（`offType:'me'`）：我 = 0，其他人照上面倒推，缺件用 `offMiss` 數字。**全員休息**（`'all'`）：不計。
 - **跳號** = 系統根本沒有這個號碼（不同於缺件 = 有派單但倉庫點不到）。
-- 首頁總件數核對：送達合計 + 退件合計 + 缺件合計 = 總件數。
+- 同一號在**輸入框**記了缺件又記退件（沒有 `pk`）→ 系統當成該號 2 件，提醒使用者。逐件清單裡 100-1 缺、100-2 退（有 `pk`）是正常的，不提醒。使用者平常在逐件清單操作。
+- **固定成本**（v5.9）：`settings.fixed=[{id,label,amt,per:'w'|'m',from}]`（房租按週、車租按月；每月 ×12÷52 換成每週）。**每週都扣，沒上班也扣**；按天攤（`fixedOnDay`）。同名項目以最近開始的為準（漲價 = 新增同名新金額；停付 = 同名 $0）。舊的 `weeklyFixed` 自動當成一個項目。發薪/入帳頁從第一筆紀錄那週起每週都列（有固定成本時）；統計頁按天數比例；時薪計算器把當週成本平均分到當週上班日。
 - **扣款** `ded`：「待確認」不扣錢，「已扣」才從當週應領扣掉。
+- 「已過發薪日未入帳」從發薪日**隔天**才算（當天顯示「今天發薪」，不標紅）。
 - **一週 = 週一～週日**，發薪日預設 = 週一 + 13 天（下週日，`settings.payOffset`），整週一起發；結算頁點「發薪 ✎」可只改單一週的發薪日。
 - **應領合計** = 件數薪資 − 已扣款 + 補貼獎金（`extras`）。**已入帳** = `pays` 裡 `st:'in'` 加總；**待核准** = `st:'wait'` 加總（會計還沒核准的先記這個，錢進來點一下改成已入帳）。**差額** = 已入帳 + 待核准 − 應領合計。「已過發薪日未入帳」= 發薪日已過且 應領 − 已入帳 > 0 的週。
 - **時間**：早上領貨 → 理貨 = 到倉庫→開始送貨；前一晚領貨（`mode:'evening'`，紀錄存在「送貨那天」）→ 理貨 = 晚上到倉庫→點完離開；通勤 = 所有往返加總；送貨 = 開始送貨→送完。`件/時` = 送達 ÷ 送貨時間。
@@ -81,10 +91,13 @@
 - 字級只用 12 / 14 / 16 / 20 / 24 / 40（輸入編號框 28）。
 
 ## 測試（改完一定要跑）
-```bash
-pip install playwright pillow && python -m playwright install chromium
-bash tests/run_all.sh
+使用者的電腦是 **Windows**（Claude Code 在本機跑，不是雲端）。Python 3.12 在 `%LOCALAPPDATA%\Programs\Python\Python312\python.exe`（`python` 指令是 Microsoft Store 空殼，不能用），Playwright + Chromium 已裝好。git 在 `C:\Program Files\Git\cmd\git.exe`。
+```powershell
+powershell -ExecutionPolicy Bypass -File tests\run_all.ps1
 ```
+（Linux / Mac：`bash tests/run_all.sh`）
+- `test_v59.py`：v5.9 的核對、同事休假、單價、固定成本、多件 +1、時間提醒、發薪日當天，每項應該印 OK。
+- 已知舊問題：320 寬時送貨模式那行「範圍 139 號 · 多件 +2 · 缺件 −1 · 退件 −1」會換行（v5.8 就有）。
 - 測試會在 8765 埠起本機伺服器，用 Playwright 模擬手機（320 / 390 寬）。
 - `test_wrap.py`：掃全部畫面找**換行或被截斷的文字**、超出畫面、元素重疊 —— 使用者很在意版面整齊，輸出應該是空的。
 - `test_pk.py`：逐件清單、+1/−1、退件、照片；`test_eve.py`：前一晚領貨時間；`test_sup2.py`：支援計算（應為 106 / 130 / 129 / 373）。
