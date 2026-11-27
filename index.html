@@ -18,7 +18,7 @@
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body,button,input,a,.chip,nav{touch-action:manipulation}
 body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.45 -apple-system,"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;padding-bottom:calc(72px + env(safe-area-inset-bottom))}
-header{position:sticky;top:0;z-index:5;padding-top:calc(12px + env(safe-area-inset-top)) !important;background:rgba(15,17,21,.94);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--line);padding-left:max(16px,calc((100% - 640px)/2 + 12px))!important;padding-right:max(16px,calc((100% - 640px)/2 + 12px))!important}
+header{position:sticky;top:0;z-index:5;padding-top:calc(12px + env(safe-area-inset-top)) !important;background:var(--bg);display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--line);padding-left:max(16px,calc((100% - 640px)/2 + 12px))!important;padding-right:max(16px,calc((100% - 640px)/2 + 12px))!important}
 h1{font-size:20px;margin:0;letter-spacing:.3px;display:flex;align-items:center;gap:8px;white-space:nowrap}h1 .sub{font-size:12px;color:var(--mut);font-weight:500}.logo{width:26px;height:26px;border-radius:7px}
 .badge{font-size:12px;padding:4px 10px;border-radius:99px;background:var(--card2);color:var(--mut);border:0}
 .badge.ok{color:var(--ok)}.badge.warn{color:var(--warn)}.badge.bad{color:var(--bad)}
@@ -54,6 +54,9 @@ button.ev.m{color:var(--warn)}button.ev.x{color:var(--acc)}button.ev.r{color:var
 .kv{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--line);font-size:14px}.kv:last-child{border:0}
 .kv b{font-weight:600}.kv>:last-child{text-align:right}.kv>:first-child{min-width:0}
 nav{position:fixed;bottom:0;left:0;right:0;display:flex;justify-content:center;background:#12151b;border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom);z-index:6}
+/* iPhone 主畫面模式：選單下面偶爾會多一段，用選單的顏色往下補滿 */
+nav::after{content:'';position:absolute;left:0;right:0;top:100%;height:200px;background:#12151b}
+html{background:var(--bg)}
 nav button{flex:1;max-width:128px;background:none;border:0;border-radius:0;color:var(--mut);padding:9px 0 10px;font-size:12px}
 nav button svg{display:block;margin:0 auto 3px;width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 nav button.on{color:var(--acc)}
@@ -191,6 +194,8 @@ button.ev.k{color:var(--mut)}.acrow{display:flex;justify-content:space-between;g
 .sacts{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}.sacts:empty{display:none}
 .stg{font-size:12px;color:var(--mut);margin:6px 0 2px}.stg:first-child{margin-top:0}
 .modesw{display:flex;justify-content:space-between;font-size:12px;color:var(--mut);margin-top:10px}.modesw a{color:var(--acc)}
+/* 小螢幕（iPhone SE 等 ≤360 寬）避免擠成兩行 */
+@media(max-width:360px){.runsum{font-size:12px}.paybig{font-size:20px}}
 small.hint{display:block;color:var(--mut);font-size:12px;margin-top:6px;line-height:1.5}
 </style>
 </head>
@@ -205,7 +210,7 @@ small.hint{display:block;color:var(--mut);font-size:12px;margin-top:6px;line-hei
 
 <script>
 /* ================= 資料 ================= */
-const APP_VERSION='v5.9';
+const APP_VERSION='v5.10';
 const LS='songhuoben_v1';
 const autoOn=()=>S.local.autoSync!==false;
 const DEF_SETTINGS={id:'main',rate:2.5,payOffset:13,weeklyFixed:0,fuelPerKm:0,me:'Aiden',partner:'Frankie',
@@ -517,7 +522,7 @@ function listsHTML(d){
 function fListHTML(d){return d.fReturns.length?secHTML('fReturns',`${esc(S.settings.partner)} 退件`,'r',d.fReturns,`${sum(d.fReturns,x=>x.qty)} 件`,x=>`<b>${x.qty} 件</b><span class="sub">${esc(x.reason)}</span>`):''}
 function runHeadHTML(d){const c=calc(d);
   return `<div class="hrow"><div>${c.has?`<div class="mut">今日拿貨 <b style="color:var(--tx)">${c.assigned}</b> 件 · 送達</div>`:''}<div class="big">${c.delivered}<small> 件</small></div></div><div class="hr"><div class="mid acc">${moneyH(c.pay)}</div></div></div>
-  <div class="mut">${c.has?`範圍 ${c.numbers} 號 · 多件 +${c.extra} · 缺件 −${c.myMissing} · 退件 −${c.myRet}`:'先填編號範圍'}</div>
+  <div class="mut runsum">${c.has?`範圍 ${c.numbers} 號 · 多件 +${c.extra} · 缺件 −${c.myMissing} · 退件 −${c.myRet}`:'先填編號範圍'}</div>
   ${c.has?`<div class="mut" style="margin-top:2px">${esc(S.settings.partner)} ${c.fDelivered??'—'} 件 · 總件數 ${c.T??'—'}</div>`:''}
   ${c.warn.map(w=>`<div class="warnbox">⚠️ ${esc(w)}</div>`).join('')}`}
 function refreshDay(){const d=getDay(curDate);
@@ -961,7 +966,7 @@ function vPay(){
   const waitT=sum(W,w=>w.rwait);
   return `
   <div class="card"><div class="g2">
-    <div><div class="mut">下一個發薪日</div><div class="mid">${next?(next.pd===t?'今天發薪':md(next.pd)+'（'+wd(next.pd)+'）'):'—'}</div><div class="acc">${next?moneyH(next.exp):''}</div></div>
+    <div><div class="mut">下一個發薪日</div><div class="mid paybig">${next?(next.pd===t?'今天發薪':md(next.pd)+'（'+wd(next.pd)+'）'):'—'}</div><div class="acc">${next?moneyH(next.exp):''}</div></div>
     <div><div class="mut">已過發薪日未入帳</div><div class="mid ${owed.length?'badc':'okc'}">${moneyH(sum(owed,w=>w.exp-w.rin))}</div><div class="mut">${owed.length} 週${waitT?` · <span class="warnc">待核准 ${moneyH(waitT)}</span>`:''}</div></div>
   </div>
   <div class="g2" style="margin-top:12px"><button onclick="csvDays()">每日 Excel</button><button onclick="csvWeeks()">每週 Excel</button></div></div>
@@ -1129,9 +1134,15 @@ function vSet(){
   </div>
   <div class="card"><h3>備份</h3><div class="g2"><button onclick="backup()">下載備份</button><button onclick="document.getElementById('imp').click()">匯入備份</button></div>
     <input type="file" id="imp" accept=".json" style="display:none" onchange="restore(this.files[0])"></div>
-  <div class="mut" style="text-align:center;margin:4px 0 12px">ParcelPay ${APP_VERSION} · <a href="#" style="color:var(--acc)" onclick="event.preventDefault();forceUpdate()">強制更新</a></div>`;
+  <div class="mut" style="text-align:center;margin:4px 0 4px">ParcelPay ${APP_VERSION} · <a href="#" style="color:var(--acc)" onclick="event.preventDefault();forceUpdate()">強制更新</a></div>
+  <div id="scrinfo" class="mut" style="text-align:center;font-size:12px;margin:0 0 12px;line-height:1.6">${scrInfo()}</div>`;
 }
 
+/* 螢幕資訊：排查 iPhone 主畫面模式底部 / 頂部顯示問題用 */
+function scrInfo(){const p=document.createElement('div');p.style.cssText='position:fixed;visibility:hidden;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)';document.body.appendChild(p);
+  const cs=getComputedStyle(p),st=parseFloat(cs.paddingTop)||0,sb=parseFloat(cs.paddingBottom)||0;p.remove();
+  const app=navigator.standalone||matchMedia('(display-mode: standalone)').matches,vv=window.visualViewport,nv=document.getElementById('nav'),nb=nv?Math.round(nv.getBoundingClientRect().bottom):'-';
+  return `螢幕 ${screen.width}×${screen.height} · 視窗 ${innerWidth}×${innerHeight}<br>可視 ${vv?Math.round(vv.height):'-'} · 選單底 ${nb} · 安全區 上${Math.round(st)} 下${Math.round(sb)} · ${app?'App':'瀏覽器'}`}
 async function testConn(){
   const o=document.getElementById('conn');o.style.display='block';const say=h=>o.innerHTML=h;
   const u=S.local.url;

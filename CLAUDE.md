@@ -17,7 +17,9 @@
   1. `index.html` 裡 `const APP_VERSION='vX.Y'` 加一版。
   2. `sw.js` 裡 `const CACHE='parcelpay-vX.Y'` 同步改。
   3. commit 訊息用中文寫「vX.Y：做了什麼」。
-- 目前版本：**v5.9**（真正的件數核對、同事休假、單價依生效日期、固定成本項目、時間提醒、發薪日當天不標紅、輸入框多件 +1 修正）。
+- 目前版本：**v5.10**（標題列改不透明、底部選單下方補色、設定頁最下面加「螢幕資訊」排查 iPhone 顯示、小螢幕防擠版）。v5.9：真正的件數核對、同事休假、單價依生效日期、固定成本項目、時間提醒、發薪日當天不標紅、輸入框多件 +1 修正。
+- 版本號照數字加：v5.9 → v5.10 → v5.11（不是 v6.0）。
+- iPhone 主畫面模式（iOS 26）底部選單下方曾出現一段深色空白；v5.10 先用 `nav::after` 往下補色，設定頁「螢幕資訊」可看實機的視窗高、選單底、安全區數字來找根本原因。
 - 手機更新：關掉 App 重開；卡住就按「設定 → 最下面 → 強制更新」（只清程式快取，不刪資料）。
 
 ## 檔案
@@ -90,7 +92,8 @@ powershell -ExecutionPolicy Bypass -File tests\run_all.ps1
 ```
 （Linux / Mac：`pip install playwright pillow && python -m playwright install chromium`，再 `bash tests/run_all.sh`）
 - 測試會在 8765 埠起本機伺服器，用 Playwright 模擬手機（320 / 390 寬）。
-- `test_wrap.py`：掃全部畫面找**換行或被截斷的文字**、超出畫面、元素重疊 —— 使用者很在意版面整齊，輸出應該是空的。已知舊問題：320 寬時送貨模式那行「範圍 139 號 · 多件 +2 · 缺件 −1 · 退件 −1」會換行（v5.8 就有）。
+- `test_wrap.py`：掃全部畫面找**換行或被截斷的文字**、超出畫面、元素重疊 —— 使用者很在意版面整齊，輸出應該是空的（v5.10 起 320 寬也全部乾淨）。
+- 也可以用 WebKit（iPhone Safari 的引擎，`python -m playwright install webkit`）跑同樣的掃描：`p.webkit.launch()` + `p.devices['iPhone SE']` 等。注意：Windows 上字型和「主畫面模式」的安全區無法完全模擬。
 - `test_v59.py`：v5.9 的核對、同事休假、單價、固定成本、多件 +1、時間提醒、發薪日當天，每項應該印 OK。
 - `test_pk.py`：逐件清單、+1/−1、退件、照片；`test_eve.py`：前一晚領貨時間；`test_sup2.py`：支援計算（應為 106 / 130 / 129 / 373）。
 - 部分測試的「期望」文字是舊版寫的，看實際數字是否合理即可。
