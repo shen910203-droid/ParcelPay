@@ -1,5 +1,5 @@
 // ParcelPay 離線支援：每次都向 GitHub 拿最新版（略過瀏覽器快取），沒訊號才用快取
-const CACHE = 'parcelpay-v5.7';
+const CACHE = 'parcelpay-v5.8';
 const FILES = ['./', './index.html', './manifest.webmanifest', './icon.svg', './icon-192.png', './icon-512.png', './apple-touch-icon.png', './favicon-32.png'];
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES.map(f => new Request(f, { cache: 'reload' })))));
