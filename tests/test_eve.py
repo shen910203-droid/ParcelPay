@@ -1,0 +1,28 @@
+from playwright.sync_api import sync_playwright
+import datetime, json
+with sync_playwright() as p:
+    b=p.chromium.launch();ctx=b.new_context(viewport={'width':390,'height':844},is_mobile=True,has_touch=True,timezone_id='Australia/Brisbane')
+    pg=ctx.new_page();errs=[];pg.on('pageerror',lambda e:errs.append(str(e)));pg.on('dialog',lambda d:d.accept())
+    pg.clock.install(time=datetime.datetime(2026,11,24,19,0,tzinfo=datetime.timezone(datetime.timedelta(hours=10))))
+    pg.goto('http://localhost:8765/');pg.evaluate("localStorage.clear()");pg.reload()
+    print('today',pg.evaluate('today()'))
+    pg.tap('text=今晚先領明天'); print('now on',pg.evaluate('curDate'),'mode',pg.evaluate("getDay(curDate).mode"))
+    pg.tap('text=🌙 出門領貨'); pg.clock.run_for(20*60*1000)
+    pg.tap('text=📦 到倉庫，開始點貨'); print('run head:',pg.inner_text('.runtop').replace('\n',' '))
+    r=pg.locator('.card:has(h3:text("編號範圍")) input');r.nth(0).fill('130');r.nth(1).fill('269')
+    pg.locator('.card:has(h3:text("全帳號核對")) input').nth(2).fill('300')
+    pg.fill('#qno','151');pg.tap('.qbtn >> text=缺件')
+    pg.clock.run_for(45*60*1000); pg.tap('text=✓ 點完，離開倉庫'); print('after eDone run?',pg.evaluate('S.ui.run'))
+    pg.clock.run_for(25*60*1000); pg.tap('text=🏠 領完到家')
+    print('next step on 11/25 page:',pg.evaluate("nextStep(getDay(curDate))"),'buttons:',pg.locator('.nextcard .bigbtn').all_inner_texts())
+    pg.screenshot(path='/tmp/pp_eve1.png',full_page=True)
+    # jump to next morning
+    pg.clock.set_system_time(datetime.datetime(2026,11,25,6,30,tzinfo=datetime.timezone(datetime.timedelta(hours=10))))
+    pg.evaluate("setDate(today())"); print('morning date',pg.evaluate('curDate'),'buttons:',pg.locator('.nextcard .bigbtn').all_inner_texts())
+    pg.tap('text=🚗 出門送貨'); pg.clock.run_for(30*60*1000); pg.tap('text=▶ 開始送貨'); print('run head:',pg.inner_text('.runtop').replace('\n',' '))
+    pg.evaluate("pkRows(getDay(today())).filter(r=>!r.st).forEach(r=>pkTap(r.key))")
+    pg.clock.run_for(7*3600*1000); pg.tap('text=✓ 送完'); pg.clock.run_for(25*60*1000); pg.tap('text=🏠 到家（下班打卡）')
+    d=json.loads(pg.evaluate("JSON.stringify({t:getDay(today()).t,c:(({commute,sort,deliver,delivered})=>({commute,sort,deliver,delivered}))(calc(getDay(today())))})"))
+    print(d,'期望 commute 20+25+30+25=100, sort 45, deliver 420')
+    pg.screenshot(path='/tmp/pp_eve2.png',full_page=True)
+    print(errs);b.close()

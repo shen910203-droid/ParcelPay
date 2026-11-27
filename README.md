@@ -12,3 +12,6 @@
 - Frankie 送達 = 帳號總件數 − 我範圍總件數 − Frankie 範圍缺件 − Frankie 退件
 - 每日油錢 = Trip B km × 長期油耗(L/km) × 當天之前最近一次加油的油價
 - 一週 = 週一～週日，發薪日 = 週一 + 13 天
+
+
+開發交接說明請看 `CLAUDE.md`；回歸測試：`bash tests/run_all.sh`。
